@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:drift/drift.dart' hide Column;
+import 'package:uuid/uuid.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/database/database.dart';
+import '../../../../core/models/models.dart';
 
 class AddRoomPage extends StatefulWidget {
   final String? propertyId;
@@ -11,16 +15,202 @@ class AddRoomPage extends StatefulWidget {
   State<AddRoomPage> createState() => _AddRoomPageState();
 }
 
+// Simple model to hold one tenant's form data
+class _TenantForm {
+  final nameCtrl = TextEditingController();
+  final phoneCtrl = TextEditingController();
+  final cccdCtrl = TextEditingController();
+  final dateOfBirthCtrl = TextEditingController();
+  final hometownCtrl = TextEditingController();
+
+  void dispose() {
+    nameCtrl.dispose();
+    phoneCtrl.dispose();
+    cccdCtrl.dispose();
+    dateOfBirthCtrl.dispose();
+    hometownCtrl.dispose();
+  }
+}
+
 class _AddRoomPageState extends State<AddRoomPage> {
+  // ── Room fields ──
   final _roomName = TextEditingController();
-  final _tenantName = TextEditingController();
-  final _cccd = TextEditingController();
-  final _phone = TextEditingController();
-  final _rentPrice = TextEditingController(text: '0');
-  final _deposit = TextEditingController(text: '0');
+  final _rentPrice = TextEditingController();
+  final _electricOld = TextEditingController(text: '0');
+  final _waterOld = TextEditingController(text: '0');
+
+  String? _selectedPropertyId;
+  Property? _selectedProperty;
+  List<Property> _properties = [];
+  bool _propertiesLoaded = false;
+
+  DateTime _startDate = DateTime.now();
+  String? _waterMode; // 'byMeter' | 'perPerson' | 'perRoom'
+
+  // ── Tenants ──
+  final List<_TenantForm> _tenants = [];
+
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProperties();
+  }
+
+  Future<void> _loadProperties() async {
+    final props = await appDb.appDao.getAllProperties();
+    if (!mounted) return;
+    setState(() {
+      _properties = props;
+      _propertiesLoaded = true;
+      if (widget.propertyId != null) {
+        _selectedPropertyId = widget.propertyId;
+        _selectedProperty =
+            props.where((p) => p.id == widget.propertyId).firstOrNull;
+      } else if (props.isNotEmpty) {
+        _selectedPropertyId = props.first.id;
+        _selectedProperty = props.first;
+      }
+      _waterMode = _selectedProperty?.waterBillingType == BillingType.byMeter
+          ? 'byMeter'
+          : (_selectedProperty?.waterBillingType == BillingType.perPerson
+              ? 'perPerson'
+              : 'perRoom');
+    });
+  }
+
+  void _onPropertyChanged(String id) {
+    final prop = _properties.firstWhere((p) => p.id == id);
+    setState(() {
+      _selectedPropertyId = id;
+      _selectedProperty = prop;
+      _waterMode = prop.waterBillingType == BillingType.byMeter
+          ? 'byMeter'
+          : (prop.waterBillingType == BillingType.perPerson
+              ? 'perPerson'
+              : 'perRoom');
+    });
+  }
+
+  void _addTenant() => setState(() => _tenants.add(_TenantForm()));
+
+  void _removeTenant(int index) {
+    _tenants[index].dispose();
+    setState(() => _tenants.removeAt(index));
+  }
+
+  Future<void> _pickStartDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _startDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null) setState(() => _startDate = picked);
+  }
+
+  String _fmtDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+  Future<void> _save() async {
+    if (_isSaving) return;
+    if (_roomName.text.trim().isEmpty) {
+      _showSnack('Vui lòng nhập tên phòng', isError: true);
+      return;
+    }
+    if (_selectedPropertyId == null) {
+      _showSnack('Vui lòng chọn nhà trọ', isError: true);
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      final roomId = const Uuid().v4();
+      final propId = _selectedPropertyId!;
+
+      final ownerId = _selectedProperty?.ownerId ?? 'owner_1';
+      final hasTenants = _tenants.isNotEmpty &&
+          _tenants.any((t) => t.nameCtrl.text.trim().isNotEmpty);
+
+      String? firstTenantId;
+
+      // Insert tenants
+      for (int i = 0; i < _tenants.length; i++) {
+        final t = _tenants[i];
+        if (t.nameCtrl.text.trim().isEmpty) continue;
+        final tenantId = const Uuid().v4();
+        if (i == 0) firstTenantId = tenantId;
+        await appDb.appDao.insertTenant(TenantsCompanion.insert(
+          id: tenantId,
+          ownerId: ownerId,
+          name: t.nameCtrl.text.trim(),
+          phone: t.phoneCtrl.text.trim(),
+          cccd: t.cccdCtrl.text.trim(),
+          dateOfBirth: t.dateOfBirthCtrl.text.trim(),
+          hometown: t.hometownCtrl.text.trim(),
+          roomId: roomId,
+          propertyId: propId,
+          startDate: _fmtDate(_startDate),
+          deposit: 0,
+        ));
+      }
+
+      // Insert room
+      await appDb.appDao.insertRoom(RoomsCompanion.insert(
+        id: roomId,
+        ownerId: ownerId,
+        propertyId: propId,
+        name: _roomName.text.trim(),
+        status: hasTenants ? RoomStatus.rented : RoomStatus.empty,
+        rentPrice: double.tryParse(_rentPrice.text.replaceAll('.', '')) ?? 0,
+        tenantId: Value.absentIfNull(firstTenantId),
+      ));
+
+      // Insert initial meter reading
+      final electricOld = int.tryParse(_electricOld.text) ?? 0;
+      final waterOld = int.tryParse(_waterOld.text) ?? 0;
+      await appDb.appDao.insertMeterReading(MeterReadingsCompanion.insert(
+        id: const Uuid().v4(),
+        ownerId: ownerId,
+        roomId: roomId,
+        month: '${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}',
+        electricOld: electricOld,
+        waterOld: waterOld,
+      ));
+
+      if (!mounted) return;
+      _showSnack('Đã thêm phòng ${_roomName.text.trim()} thành công!');
+      context.pop();
+    } catch (e) {
+      _showSnack('Lỗi: $e', isError: true);
+      debugPrint('Error adding room: $e');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  void _showSnack(String msg, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg),
+      backgroundColor: isError ? AppColors.red : AppColors.emerald,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _roomName.dispose();
+    _rentPrice.dispose();
+    _electricOld.dispose();
+    _waterOld.dispose();
+    for (final t in _tenants) { t.dispose(); }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('Dữ liệu trong list: ${_properties.map((p) => p.id).toList()}');
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
@@ -29,124 +219,585 @@ class _AddRoomPageState extends State<AddRoomPage> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _sectionHeader('THÔNG TIN PHÒNG'),
-          const SizedBox(height: 12),
-          _labelField('Tên phòng', _roomName, 'Nhập tên hoặc số phòng'),
-          const SizedBox(height: 24),
-
-          _sectionHeader('THÔNG TIN NGƯỜI THUÊ'),
-          const SizedBox(height: 12),
-          _labelField('Tên người thuê', _tenantName, 'Nhập họ và tên'),
-          const SizedBox(height: 12),
-          _labelField('CCCD', _cccd, 'Số căn cước công dân'),
-          const SizedBox(height: 12),
-
-          // CCCD photos
-          Row(
-            children: [
-              Expanded(child: _PhotoUpload(label: 'Ảnh CCCD mặt trước')),
-              const SizedBox(width: 12),
-              Expanded(child: _PhotoUpload(label: 'Ảnh CCCD mặt sau')),
-            ],
+        actions: [
+          TextButton(
+            onPressed: _isSaving ? null : _save,
+            child: Text(
+              'Lưu',
+              style: GoogleFonts.manrope(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: _isSaving ? AppColors.textTertiary : AppColors.primary,
+              ),
+            ),
           ),
-          const SizedBox(height: 12),
-          _labelField('Số điện thoại', _phone, 'Nhập số điện thoại', type: TextInputType.phone),
-          const SizedBox(height: 24),
-
-          _sectionHeader('CHI TIẾT THUÊ PHÒNG'),
-          const SizedBox(height: 12),
-          _currencyField('Giá thuê (VND/Tháng)', _rentPrice),
-          const SizedBox(height: 12),
-          _currencyField('Tiền đặt cọc (VND)', _deposit),
-          const SizedBox(height: 12),
-          _labelField('Ngày bắt đầu thuê', TextEditingController(), 'DD/MM/YYYY'),
-          const SizedBox(height: 32),
         ],
       ),
+      body: !_propertiesLoaded
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+              children: [
+                // ── Section: Thông tin phòng ──
+                _SectionCard(
+                  icon: Icons.bed_outlined,
+                  title: 'Thông tin phòng',
+                  child: Column(
+                    children: [
+                      // Property dropdown
+                      _FieldLabel(label: 'TÊN NHÀ'),
+                      const SizedBox(height: 6),
+                      if (_properties.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Chưa có nhà trọ nào. Hãy thêm nhà trọ trước.',
+                            style: GoogleFonts.manrope(
+                                fontSize: 13, color: AppColors.textSecondary),
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _properties.any(
+                                (p) => p.id == _selectedPropertyId) 
+                                ? _selectedPropertyId : null,
+                              isExpanded: true,
+                              icon: const Icon(Icons.arrow_drop_down,
+                                  color: AppColors.textSecondary),
+                              items: _properties
+                                  .map((p) => DropdownMenuItem(
+                                        value: p.id,
+                                        child: Text(p.name,
+                                            style: GoogleFonts.manrope(
+                                                fontSize: 14)),
+                                      ))
+                                  .toList(),
+                              onChanged: (v) {
+                                if (v != null) _onPropertyChanged(v);
+                              },
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 14),
+
+                      // Room name
+                      _FieldLabel(label: 'TÊN PHÒNG'),
+                      const SizedBox(height: 6),
+                      _TextField(ctrl: _roomName, hint: '101'),
+                      const SizedBox(height: 14),
+
+                      // Start date
+                      _FieldLabel(label: 'NGÀY BẮT ĐẦU THUÊ'),
+                      const SizedBox(height: 6),
+                      GestureDetector(
+                        onTap: _pickStartDate,
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                _fmtDate(_startDate),
+                                style: GoogleFonts.manrope(
+                                    fontSize: 14,
+                                    color: AppColors.textPrimary),
+                              ),
+                              const Spacer(),
+                              const Icon(Icons.calendar_today_outlined,
+                                  size: 16, color: AppColors.textSecondary),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // ── Section: Thông tin người thuê ──
+                _SectionCard(
+                  icon: Icons.people_outline_rounded,
+                  title: 'Thông tin người thuê',
+                  action: GestureDetector(
+                    onTap: _addTenant,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.add,
+                              size: 14, color: AppColors.primary),
+                          const SizedBox(width: 4),
+                          Text('Thêm',
+                              style: GoogleFonts.manrope(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  child: _tenants.isEmpty
+                      ? Padding(
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            'Chưa có người thuê. Nhấn + Thêm để thêm.',
+                            style: GoogleFonts.manrope(
+                                fontSize: 13,
+                                color: AppColors.textSecondary),
+                          ),
+                        )
+                      : Column(
+                          children: List.generate(_tenants.length, (i) {
+                            return _TenantCard(
+                              index: i,
+                              form: _tenants[i],
+                              onRemove: () => _removeTenant(i),
+                            );
+                          }),
+                        ),
+                ),
+                const SizedBox(height: 16),
+
+                // ── Section: Chi tiết thuê phòng ──
+                _SectionCard(
+                  icon: Icons.receipt_long_outlined,
+                  title: 'Chi tiết thuê phòng',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _FieldLabel(label: 'GIÁ THUÊ PHÒNG (đ/THÁNG)'),
+                      const SizedBox(height: 6),
+                      _TextField(
+                        ctrl: _rentPrice,
+                        hint: '0',
+                        keyboardType: TextInputType.number,
+                        suffix: 'VND',
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Electric
+                      Row(
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: AppColors.amberLight,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.bolt,
+                                color: AppColors.amber, size: 16),
+                          ),
+                          const SizedBox(width: 8),
+                          Text('Điện',
+                              style: GoogleFonts.manrope(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600)),
+                          const Spacer(),
+                          if (_selectedProperty != null)
+                            Text(
+                              '${_fmtNum(_selectedProperty!.electricityPrice)}đ/kWh',
+                              style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _FieldLabel(label: 'CHỈ SỐ ĐIỆN HIỆN TẠI'),
+                      const SizedBox(height: 6),
+                      _TextField(
+                        ctrl: _electricOld,
+                        hint: '0',
+                        keyboardType: TextInputType.number,
+                        suffix: 'kWh',
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Water
+                      Row(
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryLight,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.water_drop_outlined,
+                                color: AppColors.primary, size: 16),
+                          ),
+                          const SizedBox(width: 8),
+                          Text('Nước',
+                              style: GoogleFonts.manrope(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600)),
+                          const Spacer(),
+                          if (_selectedProperty != null)
+                            Text(
+                              '${_fmtNum(_selectedProperty!.waterPrice)}đ/m³',
+                              style: GoogleFonts.manrope(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Water mode toggle
+                      Row(
+                        children: [
+                          _ModeChip(
+                            label: 'Theo khối',
+                            isActive: _waterMode == 'byMeter',
+                            onTap: () =>
+                                setState(() => _waterMode = 'byMeter'),
+                          ),
+                          const SizedBox(width: 8),
+                          _ModeChip(
+                            label: 'Theo người',
+                            isActive: _waterMode == 'perPerson',
+                            onTap: () =>
+                                setState(() => _waterMode = 'perPerson'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _FieldLabel(
+                        label: _waterMode == 'byMeter'
+                            ? 'CHỈ SỐ NƯỚC HIỆN TẠI'
+                            : 'SỐ NGƯỜI HIỆN TẠI',
+                      ),
+                      const SizedBox(height: 6),
+                      _TextField(
+                        ctrl: _waterOld,
+                        hint: '0',
+                        keyboardType: TextInputType.number,
+                        suffix: _waterMode == 'byMeter' ? 'm³' : 'người',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: ElevatedButton.icon(
-            icon: const Icon(Icons.save_outlined),
-            label: const Text('Lưu thông tin'),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Đã thêm phòng thành công!')),
-              );
-              context.pop();
-            },
-            style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 52)),
+            icon: _isSaving
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2),
+                  )
+                : const Icon(Icons.save_outlined),
+            label: const Text('Hoàn tất & Lưu phòng'),
+            onPressed: _isSaving ? null : _save,
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 52),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14)),
+            ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _sectionHeader(String label) {
-    return Text(label,
-        style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary));
-  }
-
-  Widget _labelField(String label, TextEditingController ctrl, String hint,
-      {TextInputType type = TextInputType.text}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-        const SizedBox(height: 6),
-        TextField(controller: ctrl, keyboardType: type, decoration: InputDecoration(hintText: hint)),
-      ],
-    );
-  }
-
-  Widget _currencyField(String label, TextEditingController ctrl) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-        const SizedBox(height: 6),
-        TextField(
-          controller: ctrl,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(prefixText: 'đ ', hintText: '0'),
-        ),
-      ],
     );
   }
 }
 
-class _PhotoUpload extends StatelessWidget {
+// ── Tenant card ────────────────────────────────────────────────────────────
+
+class _TenantCard extends StatelessWidget {
+  final int index;
+  final _TenantForm form;
+  final VoidCallback onRemove;
+  const _TenantCard(
+      {required this.index, required this.form, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.surfaceContainer),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Text(
+                  'Người thuê #${index + 1}',
+                  style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary),
+                ),
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: onRemove,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                      color: AppColors.redLight, shape: BoxShape.circle),
+                  child:
+                      const Icon(Icons.delete_outline, color: AppColors.red, size: 16),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          _FieldLabel(label: 'HỌ VÀ TÊN'),
+          const SizedBox(height: 6),
+          _TextField(ctrl: form.nameCtrl, hint: 'Nhập tên'),
+          const SizedBox(height: 10),
+
+          _FieldLabel(label: 'SỐ ĐIỆN THOẠI'),
+          const SizedBox(height: 6),
+          _TextField(
+              ctrl: form.phoneCtrl,
+              hint: '090...',
+              keyboardType: TextInputType.phone),
+          const SizedBox(height: 10),
+
+          _FieldLabel(label: 'CCCD / CMND'),
+          const SizedBox(height: 6),
+          _TextField(ctrl: form.cccdCtrl, hint: 'Nhập số CCCD'),
+          const SizedBox(height: 10),
+
+          // CCCD photos
+          Row(
+            children: [
+              Expanded(child: _PhotoSlot(label: 'MẶT TRƯỚC CCCD')),
+              const SizedBox(width: 10),
+              Expanded(child: _PhotoSlot(label: 'MẶT SAU CCCD')),
+            ],
+          ),
+
+          _FieldLabel(label: 'NGÀY SINH'),
+          const SizedBox(height: 6),
+          _TextField(ctrl: form.dateOfBirthCtrl, hint: 'dd/mm/yyyy'),
+          const SizedBox(height: 10),
+
+          _FieldLabel(label: 'QUÊ QUÁN'),
+          const SizedBox(height: 6),
+          _TextField(ctrl: form.hometownCtrl, hint: 'Nhập quê quán'),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Reusable widgets ───────────────────────────────────────────────────────
+
+class _SectionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final Widget child;
+  final Widget? action;
+  const _SectionCard(
+      {required this.icon,
+      required this.title,
+      required this.child,
+      this.action});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceBright,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04), blurRadius: 8)
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(title,
+                    style: GoogleFonts.manrope(
+                        fontSize: 15, fontWeight: FontWeight.w700)),
+              ),
+              if (action != null) action!,
+            ],
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _FieldLabel extends StatelessWidget {
   final String label;
-  const _PhotoUpload({required this.label});
+  const _FieldLabel({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(label,
+        style: GoogleFonts.manrope(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.4,
+            color: AppColors.textSecondary));
+  }
+}
+
+class _TextField extends StatelessWidget {
+  final TextEditingController ctrl;
+  final String hint;
+  final TextInputType keyboardType;
+  final String? suffix;
+  const _TextField({
+    required this.ctrl,
+    required this.hint,
+    this.keyboardType = TextInputType.text,
+    this.suffix,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: ctrl,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        hintText: hint,
+        fillColor: AppColors.surfaceContainer,
+        suffixText: suffix,
+        suffixStyle: GoogleFonts.manrope(
+            fontSize: 13, color: AppColors.textTertiary),
+      ),
+    );
+  }
+}
+
+class _ModeChip extends StatelessWidget {
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+  const _ModeChip(
+      {required this.label, required this.isActive, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : AppColors.surfaceContainer,
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Text(label,
+            style: GoogleFonts.manrope(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isActive ? Colors.white : AppColors.textSecondary)),
+      ),
+    );
+  }
+}
+
+class _PhotoSlot extends StatelessWidget {
+  final String label;
+  const _PhotoSlot({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        Text(label,
+            style: GoogleFonts.manrope(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textSecondary,
+                letterSpacing: 0.3)),
         const SizedBox(height: 6),
         Container(
-          height: 100,
+          height: 90,
           decoration: BoxDecoration(
-            color: AppColors.surfaceBright,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.surfaceContainer, style: BorderStyle.solid),
+            color: AppColors.surfaceContainer,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+                color: AppColors.surfaceContainer,
+                style: BorderStyle.solid),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.camera_alt_outlined, color: AppColors.textTertiary, size: 28),
+              const Icon(Icons.camera_alt_outlined,
+                  color: AppColors.textTertiary, size: 24),
               const SizedBox(height: 4),
-              Text('Tải lên', style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textTertiary)),
+              Text('Tải lên',
+                  style: GoogleFonts.manrope(
+                      fontSize: 11, color: AppColors.textTertiary)),
             ],
           ),
         ),
       ],
     );
   }
+}
+
+// ── Helper ─────────────────────────────────────────────────────────────────
+
+String _fmtNum(double value) {
+  final v = value.toInt();
+  final s = v.toString();
+  final result = StringBuffer();
+  for (int i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) result.write('.');
+    result.write(s[i]);
+  }
+  return result.toString();
 }

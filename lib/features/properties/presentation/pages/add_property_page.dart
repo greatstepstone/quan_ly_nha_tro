@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
-
+import '../../../../core/database/database.dart';
+import '../../../../core/models/models.dart';
 class AddPropertyPage extends StatefulWidget {
   const AddPropertyPage({super.key});
 
@@ -108,7 +109,66 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
           child: ElevatedButton.icon(
             icon: const Icon(Icons.save_outlined),
             label: const Text('Lưu thông tin'),
-            onPressed: () {
+            onPressed: () async {
+              if (_nameCtrl.text.isEmpty || _addressCtrl.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Vui lòng nhập tên và địa chỉ nhà trọ')),
+                );
+                return;
+              }
+
+              final propertyId = 'PROP_${DateTime.now().millisecondsSinceEpoch}';
+              
+              final newProperty = PropertiesCompanion.insert(
+                id: propertyId,
+                ownerId: 'OWNER_TEST', // Giả lập ID chủ trọ
+                name: _nameCtrl.text,
+                address: _addressCtrl.text,
+                totalRooms: 0,
+                electricityPrice: double.tryParse(_electricCtrl.text) ?? 0,
+                waterPrice: double.tryParse(_waterCtrl.text) ?? 0,
+                waterBillingType: BillingType.byMeter,
+              );
+
+              // Lưu nhà trọ vào DB
+              await appDb.appDao.insertProperty(newProperty);
+
+              // Lưu các dịch vụ (nếu có giá trị > 0)
+              final internetPrice = double.tryParse(_internetCtrl.text) ?? 0;
+              if (internetPrice > 0) {
+                await appDb.appDao.insertService(ServicesCompanion.insert(
+                  id: 'SRV_INT_${DateTime.now().millisecondsSinceEpoch}',
+                  propertyId: propertyId,
+                  name: 'Internet',
+                  type: BillingType.fixed,
+                  price: internetPrice,
+                ));
+              }
+
+              final trashPrice = double.tryParse(_trashCtrl.text) ?? 0;
+              if (trashPrice > 0) {
+                await appDb.appDao.insertService(ServicesCompanion.insert(
+                  id: 'SRV_TRASH_${DateTime.now().millisecondsSinceEpoch}',
+                  propertyId: propertyId,
+                  name: 'Rác',
+                  type: BillingType.perPerson,
+                  price: trashPrice,
+                ));
+              }
+
+              final otherPrice = double.tryParse(_otherCtrl.text) ?? 0;
+              if (otherPrice > 0) {
+                await appDb.appDao.insertService(ServicesCompanion.insert(
+                  id: 'SRV_OTH_${DateTime.now().millisecondsSinceEpoch}',
+                  propertyId: propertyId,
+                  name: _otherNameCtrl.text.isNotEmpty ? _otherNameCtrl.text : 'Phí khác',
+                  type: BillingType.fixed,
+                  price: otherPrice,
+                ));
+              }
+
+              if (!context.mounted) return;
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Đã thêm nhà trọ thành công!')),
               );

@@ -1,30 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/data/mock_data.dart';
 import '../../../../core/models/models.dart';
+import '../../../../core/providers/property_providers.dart';
+import '../../../../core/providers/room_providers.dart';
+import '../../../../core/providers/meter_reading_providers.dart';
 
-class MeterReadingsPage extends StatefulWidget {
+class MeterReadingsPage extends ConsumerStatefulWidget {
   const MeterReadingsPage({super.key});
 
   @override
-  State<MeterReadingsPage> createState() => _MeterReadingsPageState();
+  ConsumerState<MeterReadingsPage> createState() => _MeterReadingsPageState();
 }
 
-class _MeterReadingsPageState extends State<MeterReadingsPage> {
-  String _query = '';
+class _MeterReadingsPageState extends ConsumerState<MeterReadingsPage> {
+  String? _selectedPropertyId;
   int _filter = 0; // 0=all, 1=not recorded, 2=recorded
 
   @override
   Widget build(BuildContext context) {
-    final readings = MockData.meterReadings.where((r) {
-      final room = MockData.rooms.firstWhere((rm) => rm.id == r.roomId, orElse: () => MockData.rooms.first);
-      if (!room.name.toLowerCase().contains(_query.toLowerCase())) return false;
-      if (_filter == 1) return !r.isRecorded;
-      if (_filter == 2) return r.isRecorded;
-      return true;
-    }).toList();
+    final propertiesAsync = ref.watch(allPropertiesProvider);
+    final roomsAsync = ref.watch(allRoomsProvider);
+    final readingsAsync = ref.watch(allMeterReadingsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -35,53 +34,96 @@ class _MeterReadingsPageState extends State<MeterReadingsPage> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: Column(
-        children: [
-          // Search
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: TextField(
-              onChanged: (v) => setState(() => _query = v),
-              decoration: const InputDecoration(
-                hintText: 'Tìm kiếm phòng...',
-                prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
-              ),
-            ),
-          ),
+      body: propertiesAsync.when(
+        data: (properties) => roomsAsync.when(
+          data: (rooms) => readingsAsync.when(
+            data: (allReadings) {
+              final currentPropertyId = _selectedPropertyId ?? (properties.isNotEmpty ? properties.first.id : null);
+              
+              final readings = allReadings.where((MeterReading r) {
+                final room = rooms.firstWhere((Room rm) => rm.id == r.roomId, orElse: () => rooms.first);
+                if (currentPropertyId != null && room.propertyId != currentPropertyId) return false;
+                if (_filter == 1) return !r.isRecorded;
+                if (_filter == 2) return r.isRecorded;
+                return true;
+              }).toList();
 
-          // Filter chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                _FilterChip(label: 'Tất cả', isActive: _filter == 0, onTap: () => setState(() => _filter = 0)),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Chưa ghi', isActive: _filter == 1, onTap: () => setState(() => _filter = 1)),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Đã ghi', isActive: _filter == 2, onTap: () => setState(() => _filter = 2)),
-              ],
-            ),
-          ),
+              return Column(
+                children: [
+                  // Property Selection Dropdown
+                  if (properties.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceBright,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.surfaceContainer),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: currentPropertyId,
+                            isExpanded: true,
+                            icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+                            items: properties.map((Property p) => DropdownMenuItem(
+                              value: p.id,
+                              child: Text(p.name, style: GoogleFonts.manrope(fontWeight: FontWeight.w600, fontSize: 15)),
+                            )).toList(),
+                            onChanged: (v) {
+                              if (v != null) setState(() => _selectedPropertyId = v);
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
 
-          // Section header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text('DANH SÁCH PHÒNG',
-                  style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-            ),
-          ),
-          const SizedBox(height: 8),
+                  // Filter chips
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      children: [
+                        _FilterChip(label: 'Tất cả', isActive: _filter == 0, onTap: () => setState(() => _filter = 0)),
+                        const SizedBox(width: 8),
+                        _FilterChip(label: 'Chưa ghi', isActive: _filter == 1, onTap: () => setState(() => _filter = 1)),
+                        const SizedBox(width: 8),
+                        _FilterChip(label: 'Đã ghi', isActive: _filter == 2, onTap: () => setState(() => _filter = 2)),
+                      ],
+                    ),
+                  ),
 
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: readings.map((r) => _MeterReadingCard(reading: r)).toList(),
-            ),
+                  // Section header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('DANH SÁCH PHÒNG',
+                          style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: readings.map((MeterReading r) {
+                        final room = rooms.firstWhere((Room rm) => rm.id == r.roomId, orElse: () => rooms.first);
+                        return _MeterReadingCard(reading: r, room: room);
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, _) => Center(child: Text('Lỗi tải chỉ số: $err')),
           ),
-        ],
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) => Center(child: Text('Lỗi tải phòng: $err')),
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(child: Text('Lỗi tải khu trọ: $err')),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
@@ -130,7 +172,8 @@ class _FilterChip extends StatelessWidget {
 
 class _MeterReadingCard extends StatefulWidget {
   final MeterReading reading;
-  const _MeterReadingCard({required this.reading});
+  final Room room;
+  const _MeterReadingCard({required this.reading, required this.room});
 
   @override
   State<_MeterReadingCard> createState() => _MeterReadingCardState();
@@ -142,14 +185,12 @@ class _MeterReadingCardState extends State<_MeterReadingCard> {
 
   @override
   Widget build(BuildContext context) {
-    final room = MockData.rooms.firstWhere((r) => r.id == widget.reading.roomId, orElse: () => MockData.rooms.first);
-
     if (widget.reading.isRecorded) {
-      return _RecordedCard(reading: widget.reading, room: room);
+      return _RecordedCard(reading: widget.reading, room: widget.room);
     }
 
     return GestureDetector(
-      onTap: () => context.push('/meter-readings/${room.id}'),
+      onTap: () => context.push('/meter-readings/${widget.room.id}'),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
@@ -174,8 +215,8 @@ class _MeterReadingCardState extends State<_MeterReadingCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(room.name, style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
-                        Text('${room.floor} • Hợp đồng active',
+                        Text(widget.room.name, style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
+                        Text('Hợp đồng active',
                             style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
                       ],
                     ),

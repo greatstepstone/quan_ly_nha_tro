@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/data/mock_data.dart';
 import '../../../../core/models/models.dart';
+import '../../../../core/database/database.dart';
 
 class PropertiesListPage extends StatefulWidget {
   const PropertiesListPage({super.key});
@@ -18,10 +18,6 @@ class _PropertiesListPageState extends State<PropertiesListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filtered = MockData.properties
-        .where((p) => p.name.toLowerCase().contains(_query.toLowerCase()))
-        .toList();
-
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
@@ -34,32 +30,58 @@ class _PropertiesListPageState extends State<PropertiesListPage> {
           IconButton(icon: const Icon(Icons.tune_rounded), onPressed: () {}),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Search
-          TextField(
-            controller: _search,
-            onChanged: (v) => setState(() => _query = v),
-            decoration: InputDecoration(
-              hintText: 'Tìm kiếm nhà trọ...',
-              prefixIcon: const Icon(Icons.search, color: AppColors.textTertiary),
-            ),
-          ),
-          const SizedBox(height: 16),
+      body: StreamBuilder<List<Property>>(
+        stream: appDb.appDao.watchAllProperties(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Lỗi: ${snapshot.error}', style: GoogleFonts.manrope(color: Colors.red)));
+          }
 
-          // Property list
-          ...filtered.map((p) => _PropertyCard(property: p)),
+          final properties = snapshot.data ?? [];
+          final filtered = properties
+              .where((p) => p.name.toLowerCase().contains(_query.toLowerCase()))
+              .toList();
 
-          // Add new
-          const SizedBox(height: 12),
-          _AddPropertyCard(onTap: () => context.push('/properties/add')),
-          const SizedBox(height: 16),
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // Search
+              TextField(
+                controller: _search,
+                onChanged: (v) => setState(() => _query = v),
+                decoration: InputDecoration(
+                  hintText: 'Tìm kiếm nhà trọ...',
+                  prefixIcon: const Icon(Icons.search, color: AppColors.textTertiary),
+                ),
+              ),
+              const SizedBox(height: 16),
 
-          // Stats banner
-          _StatsBanner(properties: MockData.properties),
-          const SizedBox(height: 24),
-        ],
+              // Property list
+              if (filtered.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  child: Center(
+                    child: Text('Chưa có dữ liệu nhà trọ', 
+                      style: GoogleFonts.manrope(color: AppColors.textSecondary)),
+                  ),
+                )
+              else
+                ...filtered.map((p) => _PropertyCard(property: p)),
+
+              // Add new
+              const SizedBox(height: 12),
+              _AddPropertyCard(onTap: () => context.push('/properties/add')),
+              const SizedBox(height: 16),
+
+              // Stats banner
+              _StatsBanner(properties: properties),
+              const SizedBox(height: 24),
+            ],
+          );
+        },
       ),
     );
   }

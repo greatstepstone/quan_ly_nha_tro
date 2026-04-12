@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/data/mock_data.dart';
+import '../../../../core/models/models.dart';
+import '../../../../core/providers/property_providers.dart';
+import '../../../../core/providers/room_providers.dart';
+import '../../../../core/providers/invoice_providers.dart';
+import '../../../../core/providers/tenant_providers.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final formatter = NumberFormat('#,###', 'vi_VN');
+
+    // Watch data
+    final propertiesAsync = ref.watch(allPropertiesProvider);
+    final roomsAsync = ref.watch(allRoomsProvider);
+    final invoicesAsync = ref.watch(allInvoicesProvider);
+    final tenantsAsync = ref.watch(allTenantsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -22,8 +33,8 @@ class HomePage extends StatelessWidget {
             backgroundColor: AppColors.surfaceBright,
             elevation: 0,
             leadingWidth: 60,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 16),
+            leading: const Padding(
+              padding: EdgeInsets.only(left: 16),
               child: CircleAvatar(
                 backgroundColor: AppColors.primaryLight,
                 child: Icon(Icons.person, color: AppColors.primary, size: 20),
@@ -37,9 +48,9 @@ class HomePage extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            actions: [
-              const _NotificationBell(),
-              const SizedBox(width: 16),
+            actions: const [
+              _NotificationBell(),
+              SizedBox(width: 16),
             ],
           ),
           SliverToBoxAdapter(
@@ -54,7 +65,7 @@ class HomePage extends StatelessWidget {
                     style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary),
                   ),
                   Text(
-                    'Quản lý Minh Anh',
+                    'Chủ trọ',
                     style: GoogleFonts.manrope(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -64,7 +75,11 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Stats Row
-                  _StatsRow(formatter: formatter),
+                  _StatsRow(
+                    formatter: formatter,
+                    invoicesAsync: invoicesAsync,
+                    roomsAsync: roomsAsync,
+                  ),
                   const SizedBox(height: 24),
 
                   // Monthly tasks
@@ -78,7 +93,7 @@ class HomePage extends StatelessWidget {
                           iconColor: const Color(0xFFf59e0b),
                           iconBg: const Color(0xFFFEF3C7),
                           title: 'Ghi điện nước',
-                          subtitle: '12 phòng chưa ghi',
+                          subtitle: 'Cập nhật chỉ số',
                           onTap: () => context.push('/meter-readings'),
                         ),
                       ),
@@ -89,7 +104,7 @@ class HomePage extends StatelessWidget {
                           iconColor: const Color(0xFFf97316),
                           iconBg: const Color(0xFFffedd5),
                           title: 'Lập hóa đơn',
-                          subtitle: 'Kỳ tháng 10/2023',
+                          subtitle: 'Kỳ tháng hiện tại',
                           onTap: () => context.push('/invoices'),
                         ),
                       ),
@@ -119,20 +134,28 @@ class HomePage extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _ManagementCard(
-                          icon: Icons.apartment_outlined,
-                          title: 'Nhà trọ',
-                          subtitle: '03 Tòa nhà',
-                          onTap: () => context.push('/properties'),
+                        child: propertiesAsync.when(
+                          data: (props) => _ManagementCard(
+                            icon: Icons.apartment_outlined,
+                            title: 'Nhà trọ',
+                            subtitle: '${props.length.toString().padLeft(2, '0')} Tòa nhà',
+                            onTap: () => context.push('/properties'),
+                          ),
+                          loading: () => const _LoadingManagementCard(),
+                          error: (_, __) => const _ErrorManagementCard(),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _ManagementCard(
-                          icon: Icons.door_front_door_outlined,
-                          title: 'Phòng trọ',
-                          subtitle: '45 Phòng trống',
-                          onTap: () => context.push('/rooms'),
+                        child: roomsAsync.when(
+                          data: (rooms) => _ManagementCard(
+                            icon: Icons.door_front_door_outlined,
+                            title: 'Phòng trọ',
+                            subtitle: '${rooms.where((r) => r.status == RoomStatus.empty).length} Phòng trống',
+                            onTap: () => context.push('/rooms'),
+                          ),
+                          loading: () => const _LoadingManagementCard(),
+                          error: (_, __) => const _ErrorManagementCard(),
                         ),
                       ),
                     ],
@@ -141,20 +164,28 @@ class HomePage extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _ManagementCard(
-                          icon: Icons.person_outline,
-                          title: 'Khách thuê',
-                          subtitle: '128 Hợp đồng',
-                          onTap: () => context.push('/tenants'),
+                        child: tenantsAsync.when(
+                          data: (tenants) => _ManagementCard(
+                            icon: Icons.person_outline,
+                            title: 'Khách thuê',
+                            subtitle: '${tenants.length} Hợp đồng',
+                            onTap: () => context.push('/tenants'),
+                          ),
+                          loading: () => const _LoadingManagementCard(),
+                          error: (_, __) => const _ErrorManagementCard(),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _ManagementCard(
-                          icon: Icons.receipt_outlined,
-                          title: 'Hóa đơn',
-                          subtitle: 'Chưa thanh toán',
-                          onTap: () => context.push('/invoices'),
+                        child: invoicesAsync.when(
+                          data: (invs) => _ManagementCard(
+                            icon: Icons.receipt_outlined,
+                            title: 'Hóa đơn',
+                            subtitle: '${invs.where((i) => i.status != InvoiceStatus.paid).length} Chưa thanh toán',
+                            onTap: () => context.push('/invoices'),
+                          ),
+                          loading: () => const _LoadingManagementCard(),
+                          error: (_, __) => const _ErrorManagementCard(),
                         ),
                       ),
                     ],
@@ -167,26 +198,44 @@ class HomePage extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: _ReportCard(
-                          icon: Icons.trending_up,
-                          iconColor: AppColors.emerald,
-                          iconBg: AppColors.emeraldLight,
-                          title: 'Doanh thu',
-                          value: '120.000.000đ',
-                          valueColor: AppColors.emerald,
-                          onTap: () => context.push('/reports'),
+                        child: invoicesAsync.when(
+                          data: (List<Invoice> invs) {
+                            final total = invs
+                                .where((Invoice i) => i.status == InvoiceStatus.paid)
+                                .fold(0.0, (double sum, Invoice i) => sum + i.totalAmount);
+                            return _ReportCard(
+                              icon: Icons.trending_up,
+                              iconColor: AppColors.emerald,
+                              iconBg: AppColors.emeraldLight,
+                              title: 'Doanh thu',
+                              value: '${formatter.format(total)}đ',
+                              valueColor: AppColors.emerald,
+                              onTap: () => context.push('/reports'),
+                            );
+                          },
+                          loading: () => const _LoadingReportCard(),
+                          error: (_, __) => const _ErrorReportCard(),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _ReportCard(
-                          icon: Icons.warning_amber_rounded,
-                          iconColor: AppColors.red,
-                          iconBg: AppColors.redLight,
-                          title: 'Quản lý Nợ',
-                          value: '15.400.000đ',
-                          valueColor: AppColors.red,
-                          onTap: () => context.push('/invoices'),
+                        child: invoicesAsync.when(
+                          data: (List<Invoice> invs) {
+                            final debt = invs
+                                .where((Invoice i) => i.status != InvoiceStatus.paid && i.status != InvoiceStatus.notCreated)
+                                .fold(0.0, (double sum, Invoice i) => sum + i.totalAmount);
+                            return _ReportCard(
+                              icon: Icons.warning_amber_rounded,
+                              iconColor: AppColors.red,
+                              iconBg: AppColors.redLight,
+                              title: 'Quản lý Nợ',
+                              value: '${formatter.format(debt)}đ',
+                              valueColor: AppColors.red,
+                              onTap: () => context.push('/invoices'),
+                            );
+                          },
+                          loading: () => const _LoadingReportCard(),
+                          error: (_, __) => const _ErrorReportCard(),
                         ),
                       ),
                     ],
@@ -303,7 +352,14 @@ class _NotificationBell extends StatelessWidget {
 
 class _StatsRow extends StatelessWidget {
   final NumberFormat formatter;
-  const _StatsRow({required this.formatter});
+  final AsyncValue<List<Invoice>> invoicesAsync;
+  final AsyncValue<List<Room>> roomsAsync;
+
+  const _StatsRow({
+    required this.formatter,
+    required this.invoicesAsync,
+    required this.roomsAsync,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -319,26 +375,48 @@ class _StatsRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: _StatItem(
-              label: 'TỔNG THU THÁNG NÀY',
-              value: '50.000.000đ',
-              valueColor: AppColors.primary,
+            child: invoicesAsync.when(
+              data: (List<Invoice> invs) {
+                final total = invs
+                    .where((Invoice i) => i.status == InvoiceStatus.paid)
+                    .fold(0.0, (double sum, Invoice i) => sum + i.totalAmount);
+                return _StatItem(
+                  label: 'TỔNG THU THÁNG NÀY',
+                  value: '${formatter.format(total)}đ',
+                  valueColor: AppColors.primary,
+                );
+              },
+              loading: () => const _LoadingStatItem(label: 'TỔNG THU'),
+              error: (_, __) => const _ErrorStatItem(label: 'TỔNG THU'),
             ),
           ),
           Container(width: 1, height: 40, color: AppColors.surfaceContainer),
           Expanded(
-            child: _StatItem(
-              label: 'TỔNG NỢ CHƯA THU',
-              value: '5.200.000đ',
-              valueColor: AppColors.red,
+            child: invoicesAsync.when(
+              data: (List<Invoice> invs) {
+                final debt = invs
+                    .where((Invoice i) => i.status != InvoiceStatus.paid && i.status != InvoiceStatus.notCreated)
+                    .fold(0.0, (double sum, Invoice i) => sum + i.totalAmount);
+                return _StatItem(
+                  label: 'TỔNG NỢ CHƯA THU',
+                  value: '${formatter.format(debt)}đ',
+                  valueColor: AppColors.red,
+                );
+              },
+              loading: () => const _LoadingStatItem(label: 'TỔNG NỢ'),
+              error: (_, __) => const _ErrorStatItem(label: 'TỔNG NỢ'),
             ),
           ),
           Container(width: 1, height: 40, color: AppColors.surfaceContainer),
           Expanded(
-            child: _StatItem(
-              label: 'SỐ PHÒNG',
-              value: '2 phòng',
-              valueColor: AppColors.emerald,
+            child: roomsAsync.when(
+              data: (rooms) => _StatItem(
+                label: 'SỐ PHÒNG',
+                value: '${rooms.length} phòng',
+                valueColor: AppColors.emerald,
+              ),
+              loading: () => const _LoadingStatItem(label: 'SỐ PHÒNG'),
+              error: (_, __) => const _ErrorStatItem(label: 'SỐ PHÒNG'),
             ),
           ),
         ],
@@ -346,6 +424,86 @@ class _StatsRow extends StatelessWidget {
     );
   }
 }
+
+// ── Status Helpers ──────────────────────────────────────────
+
+class _LoadingStatItem extends StatelessWidget {
+  final String label;
+  const _LoadingStatItem({required this.label});
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textTertiary)),
+        const SizedBox(height: 6),
+        Container(width: 40, height: 10, decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(4))),
+      ],
+    );
+  }
+}
+
+class _ErrorStatItem extends StatelessWidget {
+  final String label;
+  const _ErrorStatItem({required this.label});
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textTertiary)),
+        Text('Lỗi', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.red)),
+      ],
+    );
+  }
+}
+
+class _LoadingManagementCard extends StatelessWidget {
+  const _LoadingManagementCard();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(12)),
+    );
+  }
+}
+
+class _ErrorManagementCard extends StatelessWidget {
+  const _ErrorManagementCard();
+  @override
+  Widget build(BuildContext context) {
+     return Container(
+      height: 72,
+      decoration: BoxDecoration(color: AppColors.redLight, borderRadius: BorderRadius.circular(12)),
+      child: const Center(child: Icon(Icons.error_outline, color: AppColors.red, size: 20)),
+    );
+  }
+}
+
+class _LoadingReportCard extends StatelessWidget {
+  const _LoadingReportCard();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 120,
+      decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(12)),
+    );
+  }
+}
+
+class _ErrorReportCard extends StatelessWidget {
+  const _ErrorReportCard();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 120,
+      decoration: BoxDecoration(color: AppColors.redLight, borderRadius: BorderRadius.circular(12)),
+    );
+  }
+}
+
+// ── Existing UI Components ────────────────────────────────
 
 class _StatItem extends StatelessWidget {
   final String label;

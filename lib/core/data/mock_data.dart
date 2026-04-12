@@ -37,14 +37,14 @@ class MockData {
 
   // Rooms
   static final List<Room> rooms = [
-    const Room(id: '101', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 101', floor: 'Tầng 1', status: RoomStatus.empty, rentPrice: 3500000),
-    const Room(id: '102', propertyId: 'p1', ownerId: 'u1', name: 'Room 102', floor: 'Tầng 1', status: RoomStatus.deposited, rentPrice: 3500000),
-    const Room(id: '103', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 103', floor: 'Tầng 1', status: RoomStatus.rented, rentPrice: 3500000, tenantId: 't3'),
-    const Room(id: '201', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 201', floor: 'Tầng 2', status: RoomStatus.rented, rentPrice: 3800000, tenantId: 't1'),
-    const Room(id: '202', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 202', floor: 'Tầng 2', status: RoomStatus.empty, rentPrice: 3800000),
-    const Room(id: '104', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 104', floor: 'Tầng 1', status: RoomStatus.rented, rentPrice: 3500000, tenantId: 't4'),
-    const Room(id: '202b', propertyId: 'p2', ownerId: 'u1', name: 'Phòng 202', floor: 'Tầng 2', status: RoomStatus.rented, rentPrice: 4500000, tenantId: 't2'),
-    const Room(id: '305', propertyId: 'p2', ownerId: 'u1', name: 'Phòng 305', floor: 'Tầng 3', status: RoomStatus.rented, rentPrice: 5000000, tenantId: 't3'),
+    const Room(id: '101', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 101', status: RoomStatus.empty, rentPrice: 3500000),
+    const Room(id: '102', propertyId: 'p1', ownerId: 'u1', name: 'Room 102', status: RoomStatus.deposited, rentPrice: 3500000),
+    const Room(id: '103', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 103', status: RoomStatus.rented, rentPrice: 3500000, tenantId: 't3'),
+    const Room(id: '201', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 201', status: RoomStatus.rented, rentPrice: 3800000, tenantId: 't1'),
+    const Room(id: '202', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 202', status: RoomStatus.empty, rentPrice: 3800000),
+    const Room(id: '104', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 104', status: RoomStatus.rented, rentPrice: 3500000, tenantId: 't4'),
+    const Room(id: '202b', propertyId: 'p2', ownerId: 'u1', name: 'Phòng 202', status: RoomStatus.rented, rentPrice: 4500000, tenantId: 't2'),
+    const Room(id: '305', propertyId: 'p2', ownerId: 'u1', name: 'Phòng 305', status: RoomStatus.rented, rentPrice: 5000000, tenantId: 't3'),
   ];
 
   // Tenants

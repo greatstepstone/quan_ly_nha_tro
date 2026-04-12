@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:drift/drift.dart' as drift;
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/data/mock_data.dart';
+import '../../../../core/database/database.dart';
+import '../../../../core/models/models.dart';
 
 class MeterReadingDetailPage extends StatefulWidget {
   final String roomId;
@@ -15,12 +17,35 @@ class MeterReadingDetailPage extends StatefulWidget {
 class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
   final _electricCtrl = TextEditingController();
   final _waterCtrl = TextEditingController();
+  bool _isLoading = true;
+  Room? _room;
+  MeterReading? _reading;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    _room = await appDb.appDao.getRoomById(widget.roomId);
+    _reading = await appDb.appDao.getMeterReadingByRoomId(widget.roomId); 
+    
+    if (_reading != null && _reading!.isRecorded) {
+      _electricCtrl.text = _reading!.electricNew.toString();
+      _waterCtrl.text = _reading!.waterNew.toString();
+    }
+    if (mounted) setState(() { _isLoading = false; });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final room = MockData.rooms.firstWhere((r) => r.id == widget.roomId, orElse: () => MockData.rooms.first);
-    final reading = MockData.meterReadings.where((r) => r.roomId == widget.roomId).firstOrNull
-        ?? MockData.meterReadings.first;
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_room == null || _reading == null) {
+      return const Scaffold(body: Center(child: Text('Không có dữ liệu')));
+    }
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -38,8 +63,8 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
         padding: const EdgeInsets.all(16),
         children: [
           // Room header
-          Text(room.name, style: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w800)),
-          Text('Kỳ ghi: ${reading.month}', style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary)),
+          Text(_room!.name, style: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w800)),
+          Text('Kỳ ghi: ${_reading!.month}', style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary)),
           const SizedBox(height: 16),
 
           // Electric section
@@ -69,7 +94,7 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                 const SizedBox(height: 16),
                 Text('CHỈ SỐ CŨ', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
                 const SizedBox(height: 4),
-                Text('${reading.electricOld}', style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800)),
+                Text('${_reading!.electricOld}', style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 12),
                 Text('CHỈ SỐ MỚI', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
                 const SizedBox(height: 6),
@@ -158,7 +183,7 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                 const SizedBox(height: 16),
                 Text('CHỈ SỐ CŨ', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
                 const SizedBox(height: 4),
-                Text('${reading.waterOld}', style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800)),
+                Text('${_reading!.waterOld}', style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 12),
                 Text('CHỈ SỐ MỚI', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
                 const SizedBox(height: 6),
@@ -243,7 +268,25 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
           child: ElevatedButton.icon(
             icon: const Icon(Icons.save_outlined),
             label: const Text('Lưu chỉ số'),
-            onPressed: () {
+            onPressed: () async {
+              final eNew = int.tryParse(_electricCtrl.text) ?? 0;
+              final wNew = int.tryParse(_waterCtrl.text) ?? 0;
+              
+              final updatedReading = MeterReadingsCompanion(
+                id: drift.Value(_reading!.id),
+                ownerId: drift.Value(_reading!.ownerId),
+                roomId: drift.Value(_reading!.roomId),
+                month: drift.Value(_reading!.month),
+                electricOld: drift.Value(_reading!.electricOld),
+                waterOld: drift.Value(_reading!.waterOld),
+                electricNew: drift.Value(eNew),
+                waterNew: drift.Value(wNew),
+                isRecorded: const drift.Value(true),
+              );
+              
+              await appDb.appDao.updateMeterReading(updatedReading);
+
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Đã lưu chỉ số thành công!')),
               );

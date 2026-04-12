@@ -1,8 +1,11 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:uuid/uuid.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/data/mock_data.dart';
+import '../../../../core/database/database.dart';
+import '../../../../core/models/models.dart';
 
 class CreateInvoicePage extends StatefulWidget {
   final String roomId;
@@ -13,26 +16,180 @@ class CreateInvoicePage extends StatefulWidget {
 }
 
 class _CreateInvoicePageState extends State<CreateInvoicePage> {
-  final _electricOld = TextEditingController(text: '1,240');
-  final _electricNew = TextEditingController(text: '1,315');
-  final _waterOld = TextEditingController(text: '450');
-  final _waterNew = TextEditingController(text: '458');
-  final _note = TextEditingController();
+  final _electricOldCtrl = TextEditingController();
+  final _electricNewCtrl = TextEditingController();
+  final _waterOldCtrl = TextEditingController();
+  final _waterNewCtrl = TextEditingController();
+  final _noteCtrl = TextEditingController();
 
-  double get electricCost => (1315 - 1240) * 3500;
-  double get waterCost => (458 - 450) * 15000;
-  double get internet => 100000;
-  double get trash => 30000;
-  double get rent => 3500000;
-  double get total => electricCost + waterCost + internet + trash + rent;
+  bool _isSaving = false;
+
+  // Loaded from DB
+  Room? _room;
+  Tenant? _tenant;
+  Property? _property;
+  List<Service> _services = [];
+  Invoice? _existingInvoice;
+
+  bool _isLoading = true;
+
+  String get _currentMonth {
+    final now = DateTime.now();
+    return '${now.month.toString().padLeft(2, '0')}/${now.year}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    try {
+      final room = await appDb.appDao.getRoomById(widget.roomId);
+      if (room == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+      _room = room;
+
+      // Load tenant if any
+      Tenant? tenant;
+      if (room.tenantId != null) {
+        final allTenants = await appDb.appDao.getAllTenants();
+        tenant = allTenants.firstWhere(
+          (t) => t.id == room.tenantId,
+          orElse: () => allTenants.first,
+        );
+      }
+      _tenant = tenant;
+
+      // Load property
+      final allProps = await appDb.appDao.getAllProperties();
+      final property = allProps.where((p) => p.id == room.propertyId).firstOrNull;
+      _property = property;
+
+      // Load services for this property
+      if (property != null) {
+        _services = await appDb.appDao.getServicesByProperty(property.id);
+      }
+
+      // Load latest meter reading for this room
+      final reading =
+          await appDb.appDao.getMeterReadingByRoomId(widget.roomId);
+      if (reading != null) {
+        _electricOldCtrl.text =
+            (reading.electricNew ?? reading.electricOld).toString();
+        _waterOldCtrl.text =
+            (reading.waterNew ?? reading.waterOld).toString();
+      }
+
+      // Load existing invoice for this room/month (to allow update)
+      _existingInvoice = await appDb.appDao
+          .getInvoiceByRoomAndMonth(widget.roomId, _currentMonth);
+      if (_existingInvoice != null) {
+        _noteCtrl.text = ''; // no note field in Invoice model, placeholder
+      }
+    } catch (e) {
+      debugPrint('Error loading invoice data: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  int get _electricOld => int.tryParse(_electricOldCtrl.text) ?? 0;
+  int get _electricNew => int.tryParse(_electricNewCtrl.text) ?? 0;
+  int get _waterOld => int.tryParse(_waterOldCtrl.text) ?? 0;
+  int get _waterNew => int.tryParse(_waterNewCtrl.text) ?? 0;
+
+  double get _electricCost =>
+      (_electricNew - _electricOld).clamp(0, 99999) *
+      (_property?.electricityPrice ?? 3500);
+
+  double get _waterCost =>
+      (_waterNew - _waterOld).clamp(0, 99999) *
+      (_property?.waterPrice ?? 15000);
+
+  double get _rentPrice => _room?.rentPrice ?? 0;
+
+  double get _servicesTotalCost =>
+      _services.fold(0.0, (sum, s) => sum + s.price);
+
+  double get _total => _electricCost + _waterCost + _rentPrice + _servicesTotalCost;
+
+  Future<void> _saveInvoice() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+
+    try {
+      final now = DateTime.now();
+      final dueDate =
+          '${now.day.toString().padLeft(2, '0')}/${(now.month + 1).clamp(1, 12).toString().padLeft(2, '0')}/${now.year}';
+
+      if (_existingInvoice != null) {
+        // Update existing invoice
+        await appDb.appDao.updateInvoice(InvoicesCompanion(
+          id: Value(_existingInvoice!.id),
+          ownerId: Value(_existingInvoice!.ownerId),
+          roomId: Value(widget.roomId),
+          month: Value(_currentMonth),
+          totalAmount: Value(_total),
+          status: const Value(InvoiceStatus.waitingPayment),
+          dueDate: Value(dueDate),
+          paidDate: Value(_existingInvoice!.paidDate),
+        ));
+      } else {
+        // Insert new invoice
+        final ownerId = _room?.ownerId ?? 'owner_1';
+        await appDb.appDao.insertInvoice(InvoicesCompanion(
+          id: Value(const Uuid().v4()),
+          ownerId: Value(ownerId),
+          roomId: Value(widget.roomId),
+          month: Value(_currentMonth),
+          totalAmount: Value(_total),
+          status: const Value(InvoiceStatus.waitingPayment),
+          dueDate: Value(dueDate),
+          paidDate: const Value(null),
+        ));
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã lưu hóa đơn ${_room?.name ?? ''} tháng $_currentMonth!'),
+            backgroundColor: AppColors.emerald,
+          ),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      debugPrint('Error saving invoice: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: $e'),
+            backgroundColor: AppColors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _electricOldCtrl.dispose();
+    _electricNewCtrl.dispose();
+    _waterOldCtrl.dispose();
+    _waterNewCtrl.dispose();
+    _noteCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final room = MockData.rooms.firstWhere((r) => r.id == widget.roomId, orElse: () => MockData.rooms.first);
-    final tenant = room.tenantId != null
-        ? MockData.tenants.where((t) => t.id == room.tenantId).firstOrNull
-        : null;
-
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
@@ -42,193 +199,313 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Room info card
-          Container(
-            decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(16)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1a2a3a),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  ),
-                  child: const Center(child: Icon(Icons.apartment_rounded, color: Colors.white24, size: 60)),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('THÔNG TIN PHÒNG',
-                          style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                      Text(room.name, style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w800)),
-                      if (tenant != null)
-                        Row(
-                          children: [
-                            const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
-                            const SizedBox(width: 4),
-                            Text('Khách thuê: ${tenant.name}',
-                                style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _room == null
+              ? Center(
+                  child: Text('Không tìm thấy phòng.',
+                      style: GoogleFonts.manrope(
+                          fontSize: 16, color: AppColors.textSecondary)),
+                )
+              : _buildBody(),
+    );
+  }
 
-          // Electric & Water
-          _Card(
-            icon: Icons.bolt,
-            iconColor: AppColors.primary,
-            title: 'Điện & Nước',
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: _InputField('Chỉ số điện cũ', _electricOld)),
-                    const SizedBox(width: 12),
-                    Expanded(child: _InputField('Chỉ số điện mới', _electricNew)),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(child: _InputField('Chỉ số nước cũ', _waterOld)),
-                    const SizedBox(width: 12),
-                    Expanded(child: _InputField('Chỉ số nước mới', _waterNew)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Fixed services
-          _Card(
-            icon: Icons.layers_outlined,
-            iconColor: AppColors.emerald,
-            title: 'Dịch vụ cố định',
-            child: Column(
-              children: [
-                _ServiceRow(icon: Icons.wifi, label: 'Phí Internet', value: internet),
-                const Divider(height: 16, color: AppColors.surface),
-                _ServiceRow(icon: Icons.delete_outline, label: 'Phí Rác', value: trash),
-                const Divider(height: 16, color: AppColors.surface),
-                _ServiceRow(icon: Icons.grid_view_outlined, label: 'Tiền phòng (Tháng 10)', value: rent, isHighlight: true),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Notes
-          _Card(
-            icon: Icons.edit_note_rounded,
-            iconColor: AppColors.textSecondary,
-            title: 'Ghi chú',
-            child: TextField(
-              controller: _note,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                hintText: 'Nhập ghi chú cho hóa đơn này...',
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-                filled: false,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Total
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
+  Widget _buildBody() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // ── Room info card ──
+        Container(
+          decoration: BoxDecoration(
               color: AppColors.surfaceBright,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.primaryLight, width: 1.5),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Tổng số tiền cần thanh toán',
-                          style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
-                      const SizedBox(height: 4),
-                      Text(_fmtDouble(total),
-                          style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.primary)),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 44, height: 44,
-                  decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(12)),
-                  child: const Icon(Icons.receipt_long_outlined, color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          Row(
+              borderRadius: BorderRadius.circular(16)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.print_outlined),
-                  label: const Text('In hóa đơn'),
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                    side: const BorderSide(color: AppColors.primary),
-                    foregroundColor: AppColors.primary,
-                  ),
+              Container(
+                height: 100,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF1a2a3a),
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(16)),
                 ),
+                child: const Center(
+                    child: Icon(Icons.apartment_rounded,
+                        color: Colors.white24, size: 60)),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.upload_outlined),
-                  label: const Text('Xuất hóa đơn'),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Đã xuất hóa đơn!')),
-                    );
-                    context.pop();
-                  },
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('THÔNG TIN PHÒNG',
+                        style: GoogleFonts.manrope(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary)),
+                    Text(_room!.name,
+                        style: GoogleFonts.manrope(
+                            fontSize: 18, fontWeight: FontWeight.w800)),
+                    if (_property != null)
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on_outlined,
+                              size: 14, color: AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(_property!.name,
+                                style: GoogleFonts.manrope(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary),
+                                overflow: TextOverflow.ellipsis),
+                          ),
+                        ],
+                      ),
+                    if (_tenant != null)
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline,
+                              size: 14, color: AppColors.textSecondary),
+                          const SizedBox(width: 4),
+                          Text('Khách thuê: ${_tenant!.name}',
+                              style: GoogleFonts.manrope(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondary)),
+                        ],
+                      ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Text(
+                        'Tháng $_currentMonth',
+                        style: GoogleFonts.manrope(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 32),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+
+        // ── Electric & Water ──
+        _Card(
+          icon: Icons.bolt,
+          iconColor: AppColors.primary,
+          title: 'Điện & Nước',
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                      child: _InputField(
+                          'Chỉ số điện cũ', _electricOldCtrl,
+                          suffix: 'kWh')),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: _InputField(
+                          'Chỉ số điện mới', _electricNewCtrl,
+                          suffix: 'kWh')),
+                ],
+              ),
+              const SizedBox(height: 8),
+              _CostRow(
+                label:
+                    'Tiền điện (${_fmtDouble(_property?.electricityPrice ?? 3500)}/kWh)',
+                value: _electricCost,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                      child: _InputField(
+                          'Chỉ số nước cũ', _waterOldCtrl,
+                          suffix: 'm³')),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: _InputField(
+                          'Chỉ số nước mới', _waterNewCtrl,
+                          suffix: 'm³')),
+                ],
+              ),
+              const SizedBox(height: 8),
+              _CostRow(
+                label:
+                    'Tiền nước (${_fmtDouble(_property?.waterPrice ?? 15000)}/m³)',
+                value: _waterCost,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // ── Rent + Services ──
+        _Card(
+          icon: Icons.layers_outlined,
+          iconColor: AppColors.emerald,
+          title: 'Tiền phòng & Dịch vụ',
+          child: Column(
+            children: [
+              _ServiceRow(
+                icon: Icons.bed_outlined,
+                label: 'Tiền phòng tháng $_currentMonth',
+                value: _rentPrice,
+                isHighlight: true,
+              ),
+              if (_services.isNotEmpty) ...[
+                const Divider(height: 16, color: AppColors.surface),
+                ..._services.map((s) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _ServiceRow(
+                        icon: _serviceIcon(s.name),
+                        label: s.name,
+                        value: s.price,
+                      ),
+                    )),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // ── Notes ──
+        _Card(
+          icon: Icons.edit_note_rounded,
+          iconColor: AppColors.textSecondary,
+          title: 'Ghi chú',
+          child: TextField(
+            controller: _noteCtrl,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              hintText: 'Nhập ghi chú cho hóa đơn này...',
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+              filled: false,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // ── Total ──
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceBright,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.primaryLight, width: 1.5),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Tổng số tiền cần thanh toán',
+                        style: GoogleFonts.manrope(
+                            fontSize: 13, color: AppColors.textSecondary)),
+                    const SizedBox(height: 4),
+                    StatefulBuilder(
+                      builder: (_, __) => Text(
+                        _fmtDouble(_total),
+                        style: GoogleFonts.manrope(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12)),
+                child:
+                    const Icon(Icons.receipt_long_outlined, color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.print_outlined),
+                label: const Text('In hóa đơn'),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Tính năng in đang phát triển...')),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50)),
+                  side: const BorderSide(color: AppColors.primary),
+                  foregroundColor: AppColors.primary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                icon: _isSaving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
+                    : const Icon(Icons.save_outlined),
+                label: Text(_existingInvoice != null
+                    ? 'Cập nhật hóa đơn'
+                    : 'Lưu hóa đơn'),
+                onPressed: _isSaving ? null : _saveInvoice,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+      ],
     );
   }
 }
+
+// ── Sub-widgets ──
 
 class _Card extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String title;
   final Widget child;
-  const _Card({required this.icon, required this.iconColor, required this.title, required this.child});
+  const _Card(
+      {required this.icon,
+      required this.iconColor,
+      required this.title,
+      required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+          color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -236,7 +513,9 @@ class _Card extends StatelessWidget {
             children: [
               Icon(icon, color: iconColor, size: 18),
               const SizedBox(width: 8),
-              Text(title, style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
+              Text(title,
+                  style: GoogleFonts.manrope(
+                      fontSize: 15, fontWeight: FontWeight.w700)),
             ],
           ),
           const SizedBox(height: 16),
@@ -247,25 +526,68 @@ class _Card extends StatelessWidget {
   }
 }
 
-class _InputField extends StatelessWidget {
+class _InputField extends StatefulWidget {
   final String label;
   final TextEditingController controller;
-  const _InputField(this.label, this.controller);
+  final String? suffix;
+  const _InputField(this.label, this.controller, {this.suffix});
+
+  @override
+  State<_InputField> createState() => _InputFieldState();
+}
+
+class _InputFieldState extends State<_InputField> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(() => setState(() {}));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
+        Text(widget.label,
+            style: GoogleFonts.manrope(
+                fontSize: 12, color: AppColors.textSecondary)),
         const SizedBox(height: 4),
         TextField(
-          controller: controller,
+          controller: widget.controller,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             hintText: '0',
             fillColor: AppColors.surface,
+            suffixText: widget.suffix,
+            suffixStyle: GoogleFonts.manrope(
+                fontSize: 12, color: AppColors.textTertiary),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CostRow extends StatelessWidget {
+  final String label;
+  final double value;
+  const _CostRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(label,
+              style: GoogleFonts.manrope(
+                  fontSize: 12, color: AppColors.textTertiary)),
+        ),
+        Text(
+          '= ${_fmtDouble(value)}',
+          style: GoogleFonts.manrope(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary),
         ),
       ],
     );
@@ -277,25 +599,45 @@ class _ServiceRow extends StatelessWidget {
   final String label;
   final double value;
   final bool isHighlight;
-  const _ServiceRow({required this.icon, required this.label, required this.value, this.isHighlight = false});
+  const _ServiceRow(
+      {required this.icon,
+      required this.label,
+      required this.value,
+      this.isHighlight = false});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
-          width: 32, height: 32,
-          decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+              color: AppColors.primaryLight, shape: BoxShape.circle),
           child: Icon(icon, color: AppColors.primary, size: 16),
         ),
         const SizedBox(width: 10),
         Expanded(child: Text(label, style: GoogleFonts.manrope(fontSize: 14))),
         Text(_fmtDouble(value),
-            style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700,
+            style: GoogleFonts.manrope(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
                 color: isHighlight ? AppColors.primary : AppColors.textPrimary)),
       ],
     );
   }
+}
+
+// ── Helpers ──
+
+IconData _serviceIcon(String name) {
+  final lower = name.toLowerCase();
+  if (lower.contains('internet') || lower.contains('wifi')) return Icons.wifi;
+  if (lower.contains('rác') || lower.contains('vệ sinh')) return Icons.delete_outline;
+  if (lower.contains('xe') || lower.contains('giữ')) return Icons.two_wheeler;
+  if (lower.contains('điện')) return Icons.bolt;
+  if (lower.contains('nước')) return Icons.water_drop_outlined;
+  return Icons.miscellaneous_services_outlined;
 }
 
 String _fmtDouble(double value) {

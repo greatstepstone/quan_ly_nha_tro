@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import '../models/models.dart';
 
+@UseRowClass(User)
 class Users extends Table {
   TextColumn get id => text()();
   TextColumn get email => text()();
@@ -12,6 +13,7 @@ class Users extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@UseRowClass(Property)
 class Properties extends Table {
   TextColumn get id => text()();
   TextColumn get ownerId => text()();
@@ -27,6 +29,7 @@ class Properties extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@UseRowClass(Service)
 class Services extends Table {
   TextColumn get id => text()();
   TextColumn get propertyId => text()();
@@ -38,12 +41,12 @@ class Services extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@UseRowClass(Room)
 class Rooms extends Table {
   TextColumn get id => text()();
   TextColumn get ownerId => text()();
   TextColumn get propertyId => text()();
   TextColumn get name => text()();
-  TextColumn get floor => text()();
   TextColumn get status => textEnum<RoomStatus>()();
   RealColumn get rentPrice => real()();
   TextColumn get tenantId => text().nullable()();
@@ -52,6 +55,7 @@ class Rooms extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@UseRowClass(Tenant)
 class Tenants extends Table {
   TextColumn get id => text()();
   TextColumn get ownerId => text()();
@@ -70,6 +74,7 @@ class Tenants extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@UseRowClass(MeterReading)
 class MeterReadings extends Table {
   TextColumn get id => text()();
   TextColumn get ownerId => text()();
@@ -85,6 +90,7 @@ class MeterReadings extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+@UseRowClass(Invoice)
 class Invoices extends Table {
   TextColumn get id => text()();
   TextColumn get ownerId => text()();

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:async';
+import 'package:drift/drift.dart' hide Column;
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/data/mock_data.dart';
+import '../../../../core/database/database.dart';
 import '../../../../core/models/models.dart';
 
 class EditTenantPage extends StatefulWidget {
@@ -22,27 +24,36 @@ class _EditTenantPageState extends State<EditTenantPage> {
   late TextEditingController _startDate;
   late TextEditingController _deposit;
 
-  late Tenant _tenant;
-  late Room? _room;
+  bool _isLoading = true;
+  Tenant? _tenant;
+  Room? _room;
 
   @override
   void initState() {
     super.initState();
-    _tenant = MockData.tenants.firstWhere(
-      (t) => t.id == widget.tenantId,
-      orElse: () => MockData.tenants.first,
-    );
-    _room = MockData.rooms.where((r) => r.id == _tenant.roomId).firstOrNull;
+    _name = TextEditingController();
+    _phone = TextEditingController();
+    _dob = TextEditingController();
+    _cccd = TextEditingController();
+    _hometown = TextEditingController();
+    _startDate = TextEditingController();
+    _deposit = TextEditingController();
+    _loadData();
+  }
 
-    _name = TextEditingController(text: _tenant.name);
-    _phone = TextEditingController(text: _tenant.phone);
-    _dob = TextEditingController(text: _tenant.dateOfBirth);
-    _cccd = TextEditingController(text: _tenant.cccd);
-    _hometown = TextEditingController(text: _tenant.hometown);
-    _startDate = TextEditingController(text: _tenant.startDate);
-    _deposit = TextEditingController(
-      text: _fmt(_tenant.deposit).replaceAll('đ', '').replaceAll('.', ','),
-    );
+  Future<void> _loadData() async {
+    _tenant = await appDb.appDao.watchTenant(widget.tenantId).first;
+    if (_tenant != null) {
+      _room = await appDb.appDao.getRoomById(_tenant!.roomId);
+      _name.text = _tenant!.name;
+      _phone.text = _tenant!.phone;
+      _dob.text = _tenant!.dateOfBirth;
+      _cccd.text = _tenant!.cccd;
+      _hometown.text = _tenant!.hometown;
+      _startDate.text = _tenant!.startDate.split('T').first;
+      _deposit.text = _fmt(_tenant!.deposit).replaceAll('đ', '').replaceAll('.', ',');
+    }
+    if (mounted) setState(() { _isLoading = false; });
   }
 
   @override
@@ -71,11 +82,15 @@ class _EditTenantPageState extends State<EditTenantPage> {
           IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
         ],
       ),
-      body: ListView(
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : _tenant == null
+        ? const Center(child: Text('Không tìm thấy thông tin'))
+        : ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         children: [
           // Avatar with edit badge
-          _AvatarSection(name: _tenant.name),
+          _AvatarSection(name: _tenant!.name),
           const SizedBox(height: 28),
 
           // Personal info
@@ -152,17 +167,45 @@ class _EditTenantPageState extends State<EditTenantPage> {
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Đã lưu thay đổi cho ${_name.text}!',
-                            style: GoogleFonts.manrope()),
-                        backgroundColor: AppColors.emerald,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    );
-                    context.pop();
+                  onPressed: _isLoading || _tenant == null ? null : () async {
+                    try {
+                      final updatedTenant = TenantsCompanion(
+                        id: Value(_tenant!.id),
+                        ownerId: Value(_tenant!.ownerId),
+                        roomId: Value(_tenant!.roomId),
+                        propertyId: Value(_tenant!.propertyId),
+                        isVerified: Value(_tenant!.isVerified),
+                        name: Value(_name.text),
+                        phone: Value(_phone.text),
+                        dateOfBirth: Value(_dob.text),
+                        cccd: Value(_cccd.text),
+                        hometown: Value(_hometown.text),
+                        startDate: Value(_startDate.text),
+                        deposit: Value(double.tryParse(_deposit.text) ?? 0.0),
+                      );
+                      
+                      await appDb.appDao.updateTenant(updatedTenant);
+                      
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Đã lưu thay đổi cho ${_name.text}!',
+                              style: GoogleFonts.manrope()),
+                          backgroundColor: AppColors.emerald,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      );
+                      context.pop();
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Lỗi: ${e.toString()}'),
+                          backgroundColor: AppColors.red,
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
@@ -409,7 +452,7 @@ class _RoomInfoTile extends StatelessWidget {
                   style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.primary),
                 ),
                 Text(
-                  '${room.name} - ${room.floor}',
+                  '${room.name}',
                   style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
                 ),
               ],

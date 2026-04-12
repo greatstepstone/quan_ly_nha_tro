@@ -1,27 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/data/mock_data.dart';
 import '../../../../core/models/models.dart';
+import '../../../../core/providers/tenant_providers.dart';
+import '../../../../core/providers/room_providers.dart';
 
-class TenantsListPage extends StatefulWidget {
+class TenantsListPage extends ConsumerWidget {
   const TenantsListPage({super.key});
 
   @override
-  State<TenantsListPage> createState() => _TenantsListPageState();
-}
-
-class _TenantsListPageState extends State<TenantsListPage> {
-  String _query = '';
-  int _filterIndex = 0; // 0=all, 1=renting, 2=left
-
-  @override
-  Widget build(BuildContext context) {
-    final tenants = MockData.tenants
-        .where((t) => t.name.toLowerCase().contains(_query.toLowerCase()) ||
-            t.phone.contains(_query))
-        .toList();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filteredTenantsAsync = ref.watch(filteredTenantsProvider);
+    final query = ref.watch(tenantSearchQueryProvider);
+    final filterIndex = ref.watch(tenantFilterIndexProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -31,50 +24,82 @@ class _TenantsListPageState extends State<TenantsListPage> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
-        actions: [
-          IconButton(icon: const Icon(Icons.search_rounded), onPressed: () {}),
-        ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Search bar
-          TextField(
-            onChanged: (v) => setState(() => _query = v),
-            decoration: const InputDecoration(
-              hintText: 'Tìm kiếm khách thuê...',
-              prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
-            ),
-          ),
-          const SizedBox(height: 12),
+      body: filteredTenantsAsync.when(
+        data: (tenants) {
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // Search bar
+              TextField(
+                onChanged: (v) => ref.read(tenantSearchQueryProvider.notifier).state = v,
+                decoration: InputDecoration(
+                  hintText: 'Tìm kiếm khách thuê...',
+                  prefixIcon: const Icon(Icons.search, color: AppColors.textTertiary),
+                  suffixIcon: query.isNotEmpty 
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 18), 
+                        onPressed: () => ref.read(tenantSearchQueryProvider.notifier).state = ''
+                      ) 
+                    : null,
+                ),
+              ),
+              const SizedBox(height: 12),
 
-          // Filter chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _FilterChip(label: 'Tất cả', isActive: _filterIndex == 0, onTap: () => setState(() => _filterIndex = 0)),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Đang thuê', isActive: _filterIndex == 1, onTap: () => setState(() => _filterIndex = 1)),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Đã trả phòng', isActive: _filterIndex == 2, onTap: () => setState(() => _filterIndex = 2)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
+              // Filter chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _FilterChip(
+                      label: 'Tất cả', 
+                      isActive: filterIndex == 0, 
+                      onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 0
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Đang thuê', 
+                      isActive: filterIndex == 1, 
+                      onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 1
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Đã trả phòng', 
+                      isActive: filterIndex == 2, 
+                      onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 2
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
 
-          // Tenant list
-          ...tenants.map((t) => _TenantCard(tenant: t)),
+              // Tenant list
+              if (tenants.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  child: Center(
+                    child: Text(
+                      query.isEmpty ? 'Chưa có khách thuê' : 'Không tìm thấy khách thuê', 
+                      style: GoogleFonts.manrope(color: AppColors.textSecondary)
+                    ),
+                  ),
+                )
+              else
+                ...tenants.map((Tenant t) => _TenantCard(tenant: t)),
 
-          // Add new card
-          const SizedBox(height: 12),
-          _AddTenantCard(onTap: () => context.push('/rooms/add')),
-          const SizedBox(height: 16),
+              // Add new card
+              const SizedBox(height: 12),
+              _AddTenantCard(onTap: () => context.push('/rooms/add')),
+              const SizedBox(height: 16),
 
-          // Stats banner
-          _TenantStatsBanner(count: tenants.length),
-          const SizedBox(height: 24),
-        ],
+              // Stats banner
+              _TenantStatsBanner(count: tenants.length),
+              const SizedBox(height: 24),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(child: Text('Lỗi tải khách thuê: $err')),
       ),
     );
   }
@@ -106,70 +131,74 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-class _TenantCard extends StatelessWidget {
+class _TenantCard extends ConsumerWidget {
   final Tenant tenant;
   const _TenantCard({required this.tenant});
 
   @override
-  Widget build(BuildContext context) {
-    final room = MockData.rooms.where((r) => r.id == tenant.roomId).firstOrNull;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final roomAsync = ref.watch(roomDetailProvider(tenant.roomId));
 
-    return GestureDetector(
-      onTap: () => context.push('/tenants/${tenant.id}'),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceBright,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 26,
-                  backgroundColor: AppColors.primaryLight,
-                  child: Text(
-                    tenant.name[0],
-                    style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primary),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(tenant.name,
-                          style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 2),
-                      Text(tenant.phone,
-                          style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
-                    ],
-                  ),
-                ),
-                _VerifiedBadge(verified: tenant.isVerified),
-              ],
-            ),
-            if (room != null) ...[
-              const SizedBox(height: 10),
-              const Divider(height: 1, color: AppColors.surface),
-              const SizedBox(height: 10),
+    return roomAsync.when(
+      data: (room) => GestureDetector(
+        onTap: () => context.push('/tenants/${tenant.id}'),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceBright,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
+          ),
+          child: Column(
+            children: [
               Row(
                 children: [
-                  const Icon(Icons.door_front_door_outlined, size: 14, color: AppColors.primary),
-                  const SizedBox(width: 6),
-                  Text(room.name,
-                      style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
-                  const Spacer(),
-                  const Icon(Icons.chevron_right, size: 16, color: AppColors.textTertiary),
+                  CircleAvatar(
+                    radius: 26,
+                    backgroundColor: AppColors.primaryLight,
+                    child: Text(
+                      tenant.name.isNotEmpty ? tenant.name[0] : '?',
+                      style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primary),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tenant.name,
+                            style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 2),
+                        Text(tenant.phone,
+                            style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  _VerifiedBadge(verified: tenant.isVerified),
                 ],
               ),
+              if (room != null) ...[
+                const SizedBox(height: 10),
+                const Divider(height: 1, color: AppColors.surface),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    const Icon(Icons.door_front_door_outlined, size: 14, color: AppColors.primary),
+                    const SizedBox(width: 6),
+                    Text(room.name,
+                        style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                    const Spacer(),
+                    const Icon(Icons.chevron_right, size: 16, color: AppColors.textTertiary),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
+      loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
+      error: (err, _) => Center(child: Text('Lỗi tải phòng: $err')),
     );
   }
 }

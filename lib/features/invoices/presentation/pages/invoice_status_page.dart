@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/data/mock_data.dart';
 import '../../../../core/models/models.dart';
+import '../../../../core/providers/property_providers.dart';
+import '../../../../core/providers/room_providers.dart';
+import '../../../../core/providers/invoice_providers.dart';
 
-class InvoiceStatusPage extends StatefulWidget {
+class InvoiceStatusPage extends ConsumerWidget {
   const InvoiceStatusPage({super.key});
 
-  @override
-  State<InvoiceStatusPage> createState() => _InvoiceStatusPageState();
-}
-
-class _InvoiceStatusPageState extends State<InvoiceStatusPage> {
-  int _filterIndex = 0;
+  String get _currentMonth {
+    final now = DateTime.now();
+    return '${now.month.toString().padLeft(2, '0')}/${now.year}';
+  }
 
   @override
-  Widget build(BuildContext context) {
-    var invoices = MockData.invoices;
-    if (_filterIndex == 1) invoices = invoices.where((i) => i.status == InvoiceStatus.notCreated).toList();
-    if (_filterIndex == 2) invoices = invoices.where((i) => i.status == InvoiceStatus.waitingPayment).toList();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final propertiesAsync = ref.watch(allPropertiesProvider);
+    final filteredInvoicesAsync = ref.watch(filteredInvoicesProvider);
+    final selectedPropId = ref.watch(invoiceSelectedPropertyIdProvider);
+    final filterStatus = ref.watch(invoiceFilterStatusProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -29,46 +31,156 @@ class _InvoiceStatusPageState extends State<InvoiceStatusPage> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
-        actions: [
-          IconButton(icon: const Icon(Icons.search_rounded), onPressed: () {}),
-        ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Filter chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _FilterChip(label: 'Tất cả', isActive: _filterIndex == 0, onTap: () => setState(() => _filterIndex = 0)),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Chưa lập', isActive: _filterIndex == 1, onTap: () => setState(() => _filterIndex = 1)),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Chờ thanh toán', isActive: _filterIndex == 2, onTap: () => setState(() => _filterIndex = 2)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
+      body: propertiesAsync.when(
+        data: (properties) {
+          final currentPropertyId = selectedPropId ?? (properties.isNotEmpty ? properties.first.id : null);
 
-          Row(
+          // Tự động set default property nếu chưa chọn
+          if (selectedPropId == null && properties.isNotEmpty) {
+            Future.microtask(() {
+              ref.read(invoiceSelectedPropertyIdProvider.notifier).state = properties.first.id;
+            });
+          }
+
+          return Column(
             children: [
-              Text('THÁNG 10/2023', style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-              const Spacer(),
-              Icon(Icons.filter_list_rounded, size: 16, color: AppColors.primary),
-              const SizedBox(width: 4),
-              Text('Bộ lọc', style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
+              // Property Selection Dropdown
+              if (properties.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceBright,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.surfaceContainer),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: currentPropertyId,
+                        isExpanded: true,
+                        icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+                        items: properties
+                            .map((p) => DropdownMenuItem(
+                                  value: p.id,
+                                  child: Text(p.name,
+                                      style: GoogleFonts.manrope(
+                                          fontWeight: FontWeight.w600, fontSize: 15)),
+                                ))
+                            .toList(),
+                        onChanged: (v) {
+                          if (v != null) {
+                            ref.read(invoiceSelectedPropertyIdProvider.notifier).state = v;
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Filter Chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    _FilterChip(
+                      label: 'Tất cả',
+                      isActive: filterStatus == null,
+                      onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = null,
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Chưa lập',
+                      isActive: filterStatus == InvoiceStatus.notCreated,
+                      onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.notCreated,
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Chờ thanh toán',
+                      isActive: filterStatus == InvoiceStatus.waitingPayment,
+                      onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.waitingPayment,
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Đã thu',
+                      isActive: filterStatus == InvoiceStatus.paid,
+                      onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.paid,
+                    ),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: 'Quá hạn',
+                      isActive: filterStatus == InvoiceStatus.overdue,
+                      onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.overdue,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Text(
+                      'THÁNG $_currentMonth',
+                      style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textTertiary),
+                    ),
+                    const Spacer(),
+                    filteredInvoicesAsync.whenData((invoices) => Text(
+                      '${invoices.length} hóa đơn',
+                      style: GoogleFonts.manrope(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary),
+                    )).value ?? const SizedBox.shrink(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Invoice List
+              Expanded(
+                child: filteredInvoicesAsync.when(
+                  data: (invoices) {
+                    if (invoices.isEmpty) {
+                      return _EmptyState(
+                        filterStatus: filterStatus,
+                        onCreateTap: () => context.push('/invoices/create'),
+                      );
+                    }
+
+                    return ref.watch(allRoomsProvider).when(
+                      data: (rooms) {
+                        final roomMap = {for (final r in rooms) r.id: r};
+                        return ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: invoices.length,
+                          itemBuilder: (context, index) {
+                            final inv = invoices[index];
+                            final room = roomMap[inv.roomId];
+                            if (room == null) return const SizedBox.shrink();
+                            return _InvoiceCard(invoice: inv, room: room);
+                          },
+                        );
+                      },
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => Center(child: Text('Lỗi tải phòng: $e')),
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Center(child: Text('Lỗi tải hóa đơn: $e')),
+                ),
+              ),
             ],
-          ),
-          const SizedBox(height: 12),
-
-          ...invoices.map((inv) => _InvoiceCard(invoice: inv)),
-          const SizedBox(height: 16),
-
-          // Add room card
-          _AddCard(onTap: () => context.push('/rooms/add')),
-          const SizedBox(height: 24),
-        ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(child: Text('Lỗi: $err')),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/invoices/create'),
@@ -79,11 +191,15 @@ class _InvoiceStatusPageState extends State<InvoiceStatusPage> {
   }
 }
 
+
+// ---------- Filter Chip ----------
+
 class _FilterChip extends StatelessWidget {
   final String label;
   final bool isActive;
   final VoidCallback onTap;
-  const _FilterChip({required this.label, required this.isActive, required this.onTap});
+  const _FilterChip(
+      {required this.label, required this.isActive, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -97,40 +213,71 @@ class _FilterChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(50),
         ),
         child: Text(label,
-            style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600,
+            style: GoogleFonts.manrope(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
                 color: isActive ? Colors.white : AppColors.textSecondary)),
       ),
     );
   }
 }
 
+// ---------- Status helpers ----------
+
 Color _invoiceColor(InvoiceStatus s) {
   switch (s) {
-    case InvoiceStatus.notCreated: return AppColors.textTertiary;
-    case InvoiceStatus.sent: return AppColors.primary;
-    case InvoiceStatus.waitingPayment: return AppColors.orange;
-    case InvoiceStatus.paid: return AppColors.emerald;
-    case InvoiceStatus.overdue: return AppColors.red;
+    case InvoiceStatus.notCreated:
+      return AppColors.textTertiary;
+    case InvoiceStatus.sent:
+      return AppColors.primary;
+    case InvoiceStatus.waitingPayment:
+      return AppColors.orange;
+    case InvoiceStatus.paid:
+      return AppColors.emerald;
+    case InvoiceStatus.overdue:
+      return AppColors.red;
   }
 }
 
 Color _invoiceBg(InvoiceStatus s) {
   switch (s) {
-    case InvoiceStatus.notCreated: return AppColors.surfaceContainer;
-    case InvoiceStatus.sent: return AppColors.primaryLight;
-    case InvoiceStatus.waitingPayment: return AppColors.orangeLight;
-    case InvoiceStatus.paid: return AppColors.emeraldLight;
-    case InvoiceStatus.overdue: return AppColors.redLight;
+    case InvoiceStatus.notCreated:
+      return AppColors.surfaceContainer;
+    case InvoiceStatus.sent:
+      return AppColors.primaryLight;
+    case InvoiceStatus.waitingPayment:
+      return AppColors.orangeLight;
+    case InvoiceStatus.paid:
+      return AppColors.emeraldLight;
+    case InvoiceStatus.overdue:
+      return AppColors.redLight;
   }
 }
 
+IconData _invoiceIcon(InvoiceStatus s) {
+  switch (s) {
+    case InvoiceStatus.paid:
+      return Icons.check_circle_outline;
+    case InvoiceStatus.overdue:
+      return Icons.warning_amber_rounded;
+    case InvoiceStatus.waitingPayment:
+      return Icons.hourglass_top_rounded;
+    case InvoiceStatus.sent:
+      return Icons.send_rounded;
+    case InvoiceStatus.notCreated:
+      return Icons.door_front_door_outlined;
+  }
+}
+
+// ---------- Invoice Card ----------
+
 class _InvoiceCard extends StatelessWidget {
   final Invoice invoice;
-  const _InvoiceCard({required this.invoice});
+  final Room room;
+  const _InvoiceCard({required this.invoice, required this.room});
 
   @override
   Widget build(BuildContext context) {
-    final room = MockData.rooms.firstWhere((r) => r.id == invoice.roomId, orElse: () => MockData.rooms.first);
     final color = _invoiceColor(invoice.status);
     final bg = _invoiceBg(invoice.status);
 
@@ -142,29 +289,41 @@ class _InvoiceCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surfaceBright,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)
+          ],
         ),
         child: Row(
           children: [
             Container(
-              width: 44, height: 44,
-              decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
-              child: invoice.status == InvoiceStatus.paid
-                  ? const Icon(Icons.check_circle_outline, color: AppColors.emerald, size: 22)
-                  : const Icon(Icons.door_front_door_outlined, color: AppColors.textSecondary, size: 22),
+              width: 44,
+              height: 44,
+              decoration:
+                  BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+              child: Icon(_invoiceIcon(invoice.status), color: color, size: 22),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(room.name, style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
+                  Text(room.name,
+                      style: GoogleFonts.manrope(
+                          fontSize: 15, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 3),
                   Row(
                     children: [
-                      Container(width: 7, height: 7, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                      Container(
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                              color: color, shape: BoxShape.circle)),
                       const SizedBox(width: 4),
-                      Text(invoice.status.label, style: GoogleFonts.manrope(fontSize: 13, color: color, fontWeight: FontWeight.w600)),
+                      Text(invoice.status.label,
+                          style: GoogleFonts.manrope(
+                              fontSize: 13,
+                              color: color,
+                              fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ],
@@ -174,19 +333,17 @@ class _InvoiceCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(_fmt(invoice.totalAmount), style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700)),
+                  Text(_fmt(invoice.totalAmount),
+                      style: GoogleFonts.manrope(
+                          fontSize: 14, fontWeight: FontWeight.w700)),
                   if (invoice.dueDate != null)
-                    Text(invoice.dueDate!, style: GoogleFonts.manrope(fontSize: 11, color: AppColors.textTertiary)),
+                    Text(invoice.dueDate!,
+                        style: GoogleFonts.manrope(
+                            fontSize: 11, color: AppColors.textTertiary)),
                 ],
               ),
               const SizedBox(width: 8),
             ],
-            if (invoice.status == InvoiceStatus.paid)
-              Container(
-                width: 28, height: 28,
-                decoration: BoxDecoration(color: AppColors.emeraldLight, shape: BoxShape.circle),
-                child: const Icon(Icons.check, color: AppColors.emerald, size: 16),
-              ),
             const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18),
           ],
         ),
@@ -195,50 +352,45 @@ class _InvoiceCard extends StatelessWidget {
   }
 }
 
-class _AddCard extends StatelessWidget {
-  final VoidCallback onTap;
-  const _AddCard({required this.onTap});
+// ---------- Empty state ----------
+
+class _EmptyState extends StatelessWidget {
+  final InvoiceStatus? filterStatus;
+  final VoidCallback onCreateTap;
+  const _EmptyState({this.filterStatus, required this.onCreateTap});
 
   @override
   Widget build(BuildContext context) {
+    final msg = filterStatus == null
+        ? 'Chưa có hóa đơn nào. Nhấn + để tạo hóa đơn.'
+        : 'Không có hóa đơn ở trạng thái "${filterStatus!.label}".';
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceBright,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.surfaceContainer),
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              Container(
-                width: 48, height: 48,
-                decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle),
-                child: const Icon(Icons.home_outlined, color: AppColors.textSecondary),
-              ),
-              Container(
-                width: 20, height: 20,
-                decoration: const BoxDecoration(color: AppColors.textTertiary, shape: BoxShape.circle),
-                child: const Icon(Icons.add, color: Colors.white, size: 14),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text('Thêm phòng mới vào hệ thống',
-              style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary)),
+          Icon(Icons.receipt_long_outlined,
+              size: 56, color: AppColors.textTertiary),
           const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: onTap,
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.textPrimary),
-            child: Text('Thêm ngay', style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: Colors.white)),
-          ),
+          Text(msg,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.manrope(
+                  fontSize: 14, color: AppColors.textSecondary)),
+          if (filterStatus == null) ...[
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: onCreateTap,
+              icon: const Icon(Icons.add),
+              label: const Text('Tạo hóa đơn'),
+            ),
+          ],
         ],
       ),
     );
   }
 }
+
+// ---------- Formatter ----------
 
 String _fmt(double value) {
   final v = value.toInt();

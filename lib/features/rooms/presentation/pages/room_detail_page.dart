@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/data/mock_data.dart';
 import '../../../../core/models/models.dart';
+import '../../../../core/providers/room_providers.dart';
+import '../../../../core/providers/property_providers.dart';
+import '../../../../core/providers/tenant_providers.dart';
+import '../../../../core/providers/database_providers.dart';
 
-class RoomDetailPage extends StatelessWidget {
+class RoomDetailPage extends ConsumerWidget {
   final String roomId;
   const RoomDetailPage({super.key, required this.roomId});
 
   @override
-  Widget build(BuildContext context) {
-    final room = MockData.rooms.firstWhere((r) => r.id == roomId, orElse: () => MockData.rooms.first);
-    final tenant = room.tenantId != null
-        ? MockData.tenants.firstWhere((t) => t.id == room.tenantId, orElse: () => MockData.tenants.first)
-        : null;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final roomAsync = ref.watch(roomDetailProvider(roomId));
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -25,142 +26,202 @@ class RoomDetailPage extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              if (value == 'delete') {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (c) => AlertDialog(
+                    title: const Text('Xóa phòng'),
+                    content: const Text('Bạn có chắc chắn muốn xóa phòng này?'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Hủy')),
+                      TextButton(
+                        onPressed: () => Navigator.pop(c, true), 
+                        child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+                      ),
+                    ]
+                  )
+                );
+                
+                if (confirm == true) {
+                  final dao = ref.read(appDaoProvider);
+                  final room = await dao.getRoomById(roomId);
+                  if (room != null) {
+                    await dao.deleteRoom(roomId);
+                    if (room.tenantId != null) {
+                      await dao.deleteTenant(room.tenantId!);
+                    }
+                  }
+                  if (context.mounted) {
+                    context.pop();
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa phòng')));
+                  }
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 'delete', child: Text('Xóa phòng', style: TextStyle(color: Colors.red))),
+            ],
+            icon: const Icon(Icons.more_vert),
+          ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Room header
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(16)),
-            child: Column(
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: room.status == RoomStatus.rented ? AppColors.redLight : AppColors.primaryLight,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(
-                    Icons.door_front_door_outlined,
-                    color: room.status == RoomStatus.rented ? AppColors.red : AppColors.primary,
-                    size: 32,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(room.name, style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w800)),
-                Text(room.floor, style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary)),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: room.status == RoomStatus.rented ? AppColors.redLight : AppColors.emeraldLight,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(room.status.label,
-                      style: GoogleFonts.manrope(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: room.status == RoomStatus.rented ? AppColors.red : AppColors.emerald,
-                      )),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
+      body: roomAsync.when(
+        data: (room) {
+          if (room == null) {
+            return Center(child: Text('Không tìm thấy phòng', style: GoogleFonts.manrope(color: AppColors.textSecondary)));
+          }
 
-          // Room info section
-          _Section(
-            title: 'THÔNG TIN PHÒNG',
-            child: Column(
-              children: [
-                _InfoRow(icon: Icons.payments_outlined, label: 'Giá thuê', value: '${_fmt(room.rentPrice)}/tháng', valueColor: AppColors.primary),
-                const Divider(height: 1, color: AppColors.surface),
-                _InfoRow(icon: Icons.home_outlined, label: 'Tòa nhà', value: MockData.properties.firstWhere((p) => p.id == room.propertyId, orElse: () => MockData.properties.first).name),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
+          final propertyAsync = ref.watch(propertyDetailProvider(room.propertyId));
+          final tenantAsync = room.tenantId != null 
+              ? ref.watch(tenantDetailProvider(room.tenantId!))
+              : const AsyncValue<Tenant?>.data(null);
 
-          if (tenant != null) ...[
-            _Section(
-              title: 'KHÁCH THUÊ HIỆN TẠI',
-              child: GestureDetector(
-                onTap: () => context.push('/tenants/${tenant.id}'),
-                child: Column(
-                  children: [
-                    _InfoRow(icon: Icons.person_outline, label: 'Họ tên', value: tenant.name),
-                    const Divider(height: 1, color: AppColors.surface),
-                    _InfoRow(icon: Icons.phone_outlined, label: 'Điện thoại', value: tenant.phone),
-                    const Divider(height: 1, color: AppColors.surface),
-                    _InfoRow(icon: Icons.calendar_today_outlined, label: 'Ngày bắt đầu', value: tenant.startDate),
-                    const Divider(height: 1, color: AppColors.surface),
-                    _InfoRow(icon: Icons.savings_outlined, label: 'Tiền cọc', value: _fmt(tenant.deposit), valueColor: AppColors.primary),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-
-          // Meter readings shortcut
-          _Section(
-            title: 'ĐIỆN NƯỚC',
-            child: GestureDetector(
-              onTap: () => context.push('/meter-readings/$roomId'),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-                      child: const Icon(Icons.bolt, color: AppColors.primary, size: 20),
+          return propertyAsync.when(
+            data: (property) => tenantAsync.when(
+              data: (tenant) => ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // Room header
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(16)),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            color: room.status == RoomStatus.rented ? AppColors.redLight : AppColors.primaryLight,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(
+                            Icons.door_front_door_outlined,
+                            color: room.status == RoomStatus.rented ? AppColors.red : AppColors.primary,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(room.name, style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w800)),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: room.status == RoomStatus.rented ? AppColors.redLight : AppColors.emeraldLight,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(room.status.label,
+                              style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: room.status == RoomStatus.rented ? AppColors.red : AppColors.emerald,
+                              )),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text('Ghi chỉ số điện nước tháng này',
-                          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600)),
-                    ),
-                    const Icon(Icons.chevron_right, color: AppColors.textTertiary),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.edit_outlined),
-                  label: const Text('Chỉnh sửa'),
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                    side: const BorderSide(color: AppColors.primary),
-                    foregroundColor: AppColors.primary,
                   ),
-                ),
+                  const SizedBox(height: 16),
+
+                  // Room info section
+                  _Section(
+                    title: 'THÔNG TIN PHÒNG',
+                    child: Column(
+                      children: [
+                        _InfoRow(icon: Icons.payments_outlined, label: 'Giá thuê', value: '${_fmt(room.rentPrice)}/tháng', valueColor: AppColors.primary),
+                        const Divider(height: 1, color: AppColors.surface),
+                        _InfoRow(icon: Icons.home_outlined, label: 'Tòa nhà', value: property?.name ?? 'Đang tải...'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  if (tenant != null) ...[
+                    _Section(
+                      title: 'KHÁCH THUÊ HIỆN TẠI',
+                      child: GestureDetector(
+                        onTap: () => context.push('/tenants/${tenant.id}'),
+                        child: Column(
+                          children: [
+                            _InfoRow(icon: Icons.person_outline, label: 'Họ tên', value: tenant.name),
+                            const Divider(height: 1, color: AppColors.surface),
+                            _InfoRow(icon: Icons.phone_outlined, label: 'Điện thoại', value: tenant.phone),
+                            const Divider(height: 1, color: AppColors.surface),
+                            _InfoRow(icon: Icons.calendar_today_outlined, label: 'Ngày bắt đầu', value: tenant.startDate),
+                            const Divider(height: 1, color: AppColors.surface),
+                            _InfoRow(icon: Icons.savings_outlined, label: 'Tiền cọc', value: _fmt(tenant.deposit), valueColor: AppColors.primary),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Meter readings shortcut
+                  _Section(
+                    title: 'ĐIỆN NƯỚC',
+                    child: GestureDetector(
+                      onTap: () => context.push('/meter-readings/$roomId'),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: const BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
+                              child: const Icon(Icons.bolt, color: AppColors.primary, size: 20),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text('Ghi chỉ số điện nước tháng này',
+                                  style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600)),
+                            ),
+                            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.edit_outlined),
+                          label: const Text('Chỉnh sửa'),
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                            side: const BorderSide(color: AppColors.primary),
+                            foregroundColor: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.receipt_long_outlined),
+                          label: const Text('Lập hóa đơn'),
+                          onPressed: () => context.push('/invoices/create?roomId=$roomId'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.receipt_long_outlined),
-                  label: const Text('Lập hóa đơn'),
-                  onPressed: () => context.push('/invoices/create?roomId=$roomId'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-        ],
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, _) => Center(child: Text('Lỗi tải khách thuê: $err')),
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, _) => Center(child: Text('Lỗi tải khu trọ: $err')),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(child: Text('Lỗi tải phòng: $err')),
       ),
     );
   }

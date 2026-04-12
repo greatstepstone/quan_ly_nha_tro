@@ -1,35 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/data/mock_data.dart';
 import '../../../../core/models/models.dart';
+import '../../../../core/providers/room_providers.dart';
 
-class RoomsListPage extends StatefulWidget {
+class RoomsListPage extends ConsumerStatefulWidget {
   final String? propertyId;
   const RoomsListPage({super.key, this.propertyId});
 
   @override
-  State<RoomsListPage> createState() => _RoomsListPageState();
+  ConsumerState<RoomsListPage> createState() => _RoomsListPageState();
 }
 
-class _RoomsListPageState extends State<RoomsListPage> {
+class _RoomsListPageState extends ConsumerState<RoomsListPage> {
   RoomStatus? _filter;
   String _query = '';
 
   @override
   Widget build(BuildContext context) {
-    var rooms = widget.propertyId != null
-        ? MockData.rooms.where((r) => r.propertyId == widget.propertyId).toList()
-        : MockData.rooms;
-
-    if (_filter != null) rooms = rooms.where((r) => r.status == _filter).toList();
-    if (_query.isNotEmpty) {
-      rooms = rooms.where((r) => r.name.toLowerCase().contains(_query.toLowerCase())).toList();
-    }
-
-    final occupied = MockData.rooms.where((r) => r.status == RoomStatus.rented).length;
-    final total = MockData.rooms.length;
+    final roomsAsync = widget.propertyId != null 
+        ? ref.watch(roomsByPropertyProvider(widget.propertyId!)) 
+        : ref.watch(allRoomsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -40,53 +33,81 @@ class _RoomsListPageState extends State<RoomsListPage> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: Column(
-        children: [
-          // Filter chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                _FilterChip(label: 'Tất cả', isActive: _filter == null, onTap: () => setState(() => _filter = null)),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Đang trống', isActive: _filter == RoomStatus.empty, onTap: () => setState(() => _filter = RoomStatus.empty)),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Đã thuê', isActive: _filter == RoomStatus.rented, onTap: () => setState(() => _filter = RoomStatus.rented)),
-                const SizedBox(width: 8),
-                _FilterChip(label: 'Đang sửa', isActive: _filter == RoomStatus.maintenance, onTap: () => setState(() => _filter = RoomStatus.maintenance)),
-              ],
-            ),
-          ),
+      body: roomsAsync.when(
+        data: (List<Room> dbRooms) {
+          List<Room> rooms = dbRooms;
 
-          // Search
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
-              onChanged: (v) => setState(() => _query = v),
-              decoration: const InputDecoration(
-                hintText: 'Tìm kiếm phòng theo tên hoặc số phòng...',
-                prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
+          if (_filter != null) rooms = rooms.where((Room r) => r.status == _filter).toList();
+          if (_query.isNotEmpty) {
+            rooms = rooms.where((Room r) => r.name.toLowerCase().contains(_query.toLowerCase())).toList();
+          }
+
+          final occupied = dbRooms.where((Room r) => r.status == RoomStatus.rented).length;
+          final total = dbRooms.length;
+
+          return Column(
+            children: [
+              // Filter chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    _FilterChip(label: 'Tất cả', isActive: _filter == null, onTap: () => setState(() => _filter = null)),
+                    const SizedBox(width: 8),
+                    _FilterChip(label: 'Đang trống', isActive: _filter == RoomStatus.empty, onTap: () => setState(() => _filter = RoomStatus.empty)),
+                    const SizedBox(width: 8),
+                    _FilterChip(label: 'Đã thuê', isActive: _filter == RoomStatus.rented, onTap: () => setState(() => _filter = RoomStatus.rented)),
+                    const SizedBox(width: 8),
+                    _FilterChip(label: 'Đang sửa', isActive: _filter == RoomStatus.maintenance, onTap: () => setState(() => _filter = RoomStatus.maintenance)),
+                  ],
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 12),
 
-          // List
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                ...rooms.map((r) => _RoomCard(room: r)),
-                const SizedBox(height: 12),
-                _AddRoomCard(onTap: () => context.push('/rooms/add?propertyId=${widget.propertyId ?? 'p1'}')),
-                const SizedBox(height: 16),
-                _QuickStatsBanner(occupied: occupied, total: total),
-                const SizedBox(height: 24),
-              ],
-            ),
-          ),
-        ],
+              // Search
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  onChanged: (v) => setState(() => _query = v),
+                  decoration: const InputDecoration(
+                    hintText: 'Tìm kiếm phòng theo tên hoặc số phòng...',
+                    prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // List
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    if (rooms.isEmpty && dbRooms.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Center(child: Text('Không tìm thấy phòng phù hợp', style: GoogleFonts.manrope(color: AppColors.textSecondary))),
+                      )
+                    else if (dbRooms.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Center(child: Text('Chưa có phòng nào', style: GoogleFonts.manrope(color: AppColors.textSecondary))),
+                      )
+                    else
+                      ...rooms.map((r) => _RoomCard(room: r)),
+                    
+                    const SizedBox(height: 12),
+                    _AddRoomCard(onTap: () => context.push('/rooms/add?propertyId=${widget.propertyId ?? 'p1'}')),
+                    const SizedBox(height: 16),
+                    _QuickStatsBanner(occupied: occupied, total: total),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Lỗi: $err', style: GoogleFonts.manrope(color: Colors.red))),
       ),
     );
   }

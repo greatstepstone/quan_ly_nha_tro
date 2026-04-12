@@ -143,121 +143,6 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   }
 }
 
-class User extends DataClass implements Insertable<User> {
-  final String id;
-  final String email;
-  final String name;
-  final String? phone;
-  final String? avatarUrl;
-  const User({
-    required this.id,
-    required this.email,
-    required this.name,
-    this.phone,
-    this.avatarUrl,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['email'] = Variable<String>(email);
-    map['name'] = Variable<String>(name);
-    if (!nullToAbsent || phone != null) {
-      map['phone'] = Variable<String>(phone);
-    }
-    if (!nullToAbsent || avatarUrl != null) {
-      map['avatar_url'] = Variable<String>(avatarUrl);
-    }
-    return map;
-  }
-
-  UsersCompanion toCompanion(bool nullToAbsent) {
-    return UsersCompanion(
-      id: Value(id),
-      email: Value(email),
-      name: Value(name),
-      phone:
-          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
-      avatarUrl:
-          avatarUrl == null && nullToAbsent
-              ? const Value.absent()
-              : Value(avatarUrl),
-    );
-  }
-
-  factory User.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return User(
-      id: serializer.fromJson<String>(json['id']),
-      email: serializer.fromJson<String>(json['email']),
-      name: serializer.fromJson<String>(json['name']),
-      phone: serializer.fromJson<String?>(json['phone']),
-      avatarUrl: serializer.fromJson<String?>(json['avatarUrl']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'email': serializer.toJson<String>(email),
-      'name': serializer.toJson<String>(name),
-      'phone': serializer.toJson<String?>(phone),
-      'avatarUrl': serializer.toJson<String?>(avatarUrl),
-    };
-  }
-
-  User copyWith({
-    String? id,
-    String? email,
-    String? name,
-    Value<String?> phone = const Value.absent(),
-    Value<String?> avatarUrl = const Value.absent(),
-  }) => User(
-    id: id ?? this.id,
-    email: email ?? this.email,
-    name: name ?? this.name,
-    phone: phone.present ? phone.value : this.phone,
-    avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
-  );
-  User copyWithCompanion(UsersCompanion data) {
-    return User(
-      id: data.id.present ? data.id.value : this.id,
-      email: data.email.present ? data.email.value : this.email,
-      name: data.name.present ? data.name.value : this.name,
-      phone: data.phone.present ? data.phone.value : this.phone,
-      avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('User(')
-          ..write('id: $id, ')
-          ..write('email: $email, ')
-          ..write('name: $name, ')
-          ..write('phone: $phone, ')
-          ..write('avatarUrl: $avatarUrl')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, email, name, phone, avatarUrl);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is User &&
-          other.id == this.id &&
-          other.email == this.email &&
-          other.name == this.name &&
-          other.phone == this.phone &&
-          other.avatarUrl == this.avatarUrl);
-}
-
 class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> id;
   final Value<String> email;
@@ -610,183 +495,6 @@ class $PropertiesTable extends Properties
   );
 }
 
-class Property extends DataClass implements Insertable<Property> {
-  final String id;
-  final String ownerId;
-  final String name;
-  final String address;
-  final int totalRooms;
-  final double electricityPrice;
-  final double waterPrice;
-  final BillingType waterBillingType;
-  final String status;
-  const Property({
-    required this.id,
-    required this.ownerId,
-    required this.name,
-    required this.address,
-    required this.totalRooms,
-    required this.electricityPrice,
-    required this.waterPrice,
-    required this.waterBillingType,
-    required this.status,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['owner_id'] = Variable<String>(ownerId);
-    map['name'] = Variable<String>(name);
-    map['address'] = Variable<String>(address);
-    map['total_rooms'] = Variable<int>(totalRooms);
-    map['electricity_price'] = Variable<double>(electricityPrice);
-    map['water_price'] = Variable<double>(waterPrice);
-    {
-      map['water_billing_type'] = Variable<String>(
-        $PropertiesTable.$converterwaterBillingType.toSql(waterBillingType),
-      );
-    }
-    map['status'] = Variable<String>(status);
-    return map;
-  }
-
-  PropertiesCompanion toCompanion(bool nullToAbsent) {
-    return PropertiesCompanion(
-      id: Value(id),
-      ownerId: Value(ownerId),
-      name: Value(name),
-      address: Value(address),
-      totalRooms: Value(totalRooms),
-      electricityPrice: Value(electricityPrice),
-      waterPrice: Value(waterPrice),
-      waterBillingType: Value(waterBillingType),
-      status: Value(status),
-    );
-  }
-
-  factory Property.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Property(
-      id: serializer.fromJson<String>(json['id']),
-      ownerId: serializer.fromJson<String>(json['ownerId']),
-      name: serializer.fromJson<String>(json['name']),
-      address: serializer.fromJson<String>(json['address']),
-      totalRooms: serializer.fromJson<int>(json['totalRooms']),
-      electricityPrice: serializer.fromJson<double>(json['electricityPrice']),
-      waterPrice: serializer.fromJson<double>(json['waterPrice']),
-      waterBillingType: $PropertiesTable.$converterwaterBillingType.fromJson(
-        serializer.fromJson<String>(json['waterBillingType']),
-      ),
-      status: serializer.fromJson<String>(json['status']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'ownerId': serializer.toJson<String>(ownerId),
-      'name': serializer.toJson<String>(name),
-      'address': serializer.toJson<String>(address),
-      'totalRooms': serializer.toJson<int>(totalRooms),
-      'electricityPrice': serializer.toJson<double>(electricityPrice),
-      'waterPrice': serializer.toJson<double>(waterPrice),
-      'waterBillingType': serializer.toJson<String>(
-        $PropertiesTable.$converterwaterBillingType.toJson(waterBillingType),
-      ),
-      'status': serializer.toJson<String>(status),
-    };
-  }
-
-  Property copyWith({
-    String? id,
-    String? ownerId,
-    String? name,
-    String? address,
-    int? totalRooms,
-    double? electricityPrice,
-    double? waterPrice,
-    BillingType? waterBillingType,
-    String? status,
-  }) => Property(
-    id: id ?? this.id,
-    ownerId: ownerId ?? this.ownerId,
-    name: name ?? this.name,
-    address: address ?? this.address,
-    totalRooms: totalRooms ?? this.totalRooms,
-    electricityPrice: electricityPrice ?? this.electricityPrice,
-    waterPrice: waterPrice ?? this.waterPrice,
-    waterBillingType: waterBillingType ?? this.waterBillingType,
-    status: status ?? this.status,
-  );
-  Property copyWithCompanion(PropertiesCompanion data) {
-    return Property(
-      id: data.id.present ? data.id.value : this.id,
-      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
-      name: data.name.present ? data.name.value : this.name,
-      address: data.address.present ? data.address.value : this.address,
-      totalRooms:
-          data.totalRooms.present ? data.totalRooms.value : this.totalRooms,
-      electricityPrice:
-          data.electricityPrice.present
-              ? data.electricityPrice.value
-              : this.electricityPrice,
-      waterPrice:
-          data.waterPrice.present ? data.waterPrice.value : this.waterPrice,
-      waterBillingType:
-          data.waterBillingType.present
-              ? data.waterBillingType.value
-              : this.waterBillingType,
-      status: data.status.present ? data.status.value : this.status,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Property(')
-          ..write('id: $id, ')
-          ..write('ownerId: $ownerId, ')
-          ..write('name: $name, ')
-          ..write('address: $address, ')
-          ..write('totalRooms: $totalRooms, ')
-          ..write('electricityPrice: $electricityPrice, ')
-          ..write('waterPrice: $waterPrice, ')
-          ..write('waterBillingType: $waterBillingType, ')
-          ..write('status: $status')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    ownerId,
-    name,
-    address,
-    totalRooms,
-    electricityPrice,
-    waterPrice,
-    waterBillingType,
-    status,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Property &&
-          other.id == this.id &&
-          other.ownerId == this.ownerId &&
-          other.name == this.name &&
-          other.address == this.address &&
-          other.totalRooms == this.totalRooms &&
-          other.electricityPrice == this.electricityPrice &&
-          other.waterPrice == this.waterPrice &&
-          other.waterBillingType == this.waterBillingType &&
-          other.status == this.status);
-}
-
 class PropertiesCompanion extends UpdateCompanion<Property> {
   final Value<String> id;
   final Value<String> ownerId;
@@ -1081,120 +789,6 @@ class $ServicesTable extends Services with TableInfo<$ServicesTable, Service> {
       const EnumNameConverter<BillingType>(BillingType.values);
 }
 
-class Service extends DataClass implements Insertable<Service> {
-  final String id;
-  final String propertyId;
-  final String name;
-  final BillingType type;
-  final double price;
-  const Service({
-    required this.id,
-    required this.propertyId,
-    required this.name,
-    required this.type,
-    required this.price,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['property_id'] = Variable<String>(propertyId);
-    map['name'] = Variable<String>(name);
-    {
-      map['type'] = Variable<String>($ServicesTable.$convertertype.toSql(type));
-    }
-    map['price'] = Variable<double>(price);
-    return map;
-  }
-
-  ServicesCompanion toCompanion(bool nullToAbsent) {
-    return ServicesCompanion(
-      id: Value(id),
-      propertyId: Value(propertyId),
-      name: Value(name),
-      type: Value(type),
-      price: Value(price),
-    );
-  }
-
-  factory Service.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Service(
-      id: serializer.fromJson<String>(json['id']),
-      propertyId: serializer.fromJson<String>(json['propertyId']),
-      name: serializer.fromJson<String>(json['name']),
-      type: $ServicesTable.$convertertype.fromJson(
-        serializer.fromJson<String>(json['type']),
-      ),
-      price: serializer.fromJson<double>(json['price']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'propertyId': serializer.toJson<String>(propertyId),
-      'name': serializer.toJson<String>(name),
-      'type': serializer.toJson<String>(
-        $ServicesTable.$convertertype.toJson(type),
-      ),
-      'price': serializer.toJson<double>(price),
-    };
-  }
-
-  Service copyWith({
-    String? id,
-    String? propertyId,
-    String? name,
-    BillingType? type,
-    double? price,
-  }) => Service(
-    id: id ?? this.id,
-    propertyId: propertyId ?? this.propertyId,
-    name: name ?? this.name,
-    type: type ?? this.type,
-    price: price ?? this.price,
-  );
-  Service copyWithCompanion(ServicesCompanion data) {
-    return Service(
-      id: data.id.present ? data.id.value : this.id,
-      propertyId:
-          data.propertyId.present ? data.propertyId.value : this.propertyId,
-      name: data.name.present ? data.name.value : this.name,
-      type: data.type.present ? data.type.value : this.type,
-      price: data.price.present ? data.price.value : this.price,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Service(')
-          ..write('id: $id, ')
-          ..write('propertyId: $propertyId, ')
-          ..write('name: $name, ')
-          ..write('type: $type, ')
-          ..write('price: $price')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, propertyId, name, type, price);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Service &&
-          other.id == this.id &&
-          other.propertyId == this.propertyId &&
-          other.name == this.name &&
-          other.type == this.type &&
-          other.price == this.price);
-}
-
 class ServicesCompanion extends UpdateCompanion<Service> {
   final Value<String> id;
   final Value<String> propertyId;
@@ -1343,15 +937,6 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _floorMeta = const VerificationMeta('floor');
-  @override
-  late final GeneratedColumn<String> floor = GeneratedColumn<String>(
-    'floor',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   @override
   late final GeneratedColumnWithTypeConverter<RoomStatus, String> status =
       GeneratedColumn<String>(
@@ -1389,7 +974,6 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
     ownerId,
     propertyId,
     name,
-    floor,
     status,
     rentPrice,
     tenantId,
@@ -1435,14 +1019,6 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('floor')) {
-      context.handle(
-        _floorMeta,
-        floor.isAcceptableOrUnknown(data['floor']!, _floorMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_floorMeta);
-    }
     if (data.containsKey('rent_price')) {
       context.handle(
         _rentPriceMeta,
@@ -1486,11 +1062,6 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
             DriftSqlType.string,
             data['${effectivePrefix}name'],
           )!,
-      floor:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}floor'],
-          )!,
       status: $RoomsTable.$converterstatus.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -1518,175 +1089,11 @@ class $RoomsTable extends Rooms with TableInfo<$RoomsTable, Room> {
       const EnumNameConverter<RoomStatus>(RoomStatus.values);
 }
 
-class Room extends DataClass implements Insertable<Room> {
-  final String id;
-  final String ownerId;
-  final String propertyId;
-  final String name;
-  final String floor;
-  final RoomStatus status;
-  final double rentPrice;
-  final String? tenantId;
-  const Room({
-    required this.id,
-    required this.ownerId,
-    required this.propertyId,
-    required this.name,
-    required this.floor,
-    required this.status,
-    required this.rentPrice,
-    this.tenantId,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['owner_id'] = Variable<String>(ownerId);
-    map['property_id'] = Variable<String>(propertyId);
-    map['name'] = Variable<String>(name);
-    map['floor'] = Variable<String>(floor);
-    {
-      map['status'] = Variable<String>(
-        $RoomsTable.$converterstatus.toSql(status),
-      );
-    }
-    map['rent_price'] = Variable<double>(rentPrice);
-    if (!nullToAbsent || tenantId != null) {
-      map['tenant_id'] = Variable<String>(tenantId);
-    }
-    return map;
-  }
-
-  RoomsCompanion toCompanion(bool nullToAbsent) {
-    return RoomsCompanion(
-      id: Value(id),
-      ownerId: Value(ownerId),
-      propertyId: Value(propertyId),
-      name: Value(name),
-      floor: Value(floor),
-      status: Value(status),
-      rentPrice: Value(rentPrice),
-      tenantId:
-          tenantId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(tenantId),
-    );
-  }
-
-  factory Room.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Room(
-      id: serializer.fromJson<String>(json['id']),
-      ownerId: serializer.fromJson<String>(json['ownerId']),
-      propertyId: serializer.fromJson<String>(json['propertyId']),
-      name: serializer.fromJson<String>(json['name']),
-      floor: serializer.fromJson<String>(json['floor']),
-      status: $RoomsTable.$converterstatus.fromJson(
-        serializer.fromJson<String>(json['status']),
-      ),
-      rentPrice: serializer.fromJson<double>(json['rentPrice']),
-      tenantId: serializer.fromJson<String?>(json['tenantId']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'ownerId': serializer.toJson<String>(ownerId),
-      'propertyId': serializer.toJson<String>(propertyId),
-      'name': serializer.toJson<String>(name),
-      'floor': serializer.toJson<String>(floor),
-      'status': serializer.toJson<String>(
-        $RoomsTable.$converterstatus.toJson(status),
-      ),
-      'rentPrice': serializer.toJson<double>(rentPrice),
-      'tenantId': serializer.toJson<String?>(tenantId),
-    };
-  }
-
-  Room copyWith({
-    String? id,
-    String? ownerId,
-    String? propertyId,
-    String? name,
-    String? floor,
-    RoomStatus? status,
-    double? rentPrice,
-    Value<String?> tenantId = const Value.absent(),
-  }) => Room(
-    id: id ?? this.id,
-    ownerId: ownerId ?? this.ownerId,
-    propertyId: propertyId ?? this.propertyId,
-    name: name ?? this.name,
-    floor: floor ?? this.floor,
-    status: status ?? this.status,
-    rentPrice: rentPrice ?? this.rentPrice,
-    tenantId: tenantId.present ? tenantId.value : this.tenantId,
-  );
-  Room copyWithCompanion(RoomsCompanion data) {
-    return Room(
-      id: data.id.present ? data.id.value : this.id,
-      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
-      propertyId:
-          data.propertyId.present ? data.propertyId.value : this.propertyId,
-      name: data.name.present ? data.name.value : this.name,
-      floor: data.floor.present ? data.floor.value : this.floor,
-      status: data.status.present ? data.status.value : this.status,
-      rentPrice: data.rentPrice.present ? data.rentPrice.value : this.rentPrice,
-      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Room(')
-          ..write('id: $id, ')
-          ..write('ownerId: $ownerId, ')
-          ..write('propertyId: $propertyId, ')
-          ..write('name: $name, ')
-          ..write('floor: $floor, ')
-          ..write('status: $status, ')
-          ..write('rentPrice: $rentPrice, ')
-          ..write('tenantId: $tenantId')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    ownerId,
-    propertyId,
-    name,
-    floor,
-    status,
-    rentPrice,
-    tenantId,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Room &&
-          other.id == this.id &&
-          other.ownerId == this.ownerId &&
-          other.propertyId == this.propertyId &&
-          other.name == this.name &&
-          other.floor == this.floor &&
-          other.status == this.status &&
-          other.rentPrice == this.rentPrice &&
-          other.tenantId == this.tenantId);
-}
-
 class RoomsCompanion extends UpdateCompanion<Room> {
   final Value<String> id;
   final Value<String> ownerId;
   final Value<String> propertyId;
   final Value<String> name;
-  final Value<String> floor;
   final Value<RoomStatus> status;
   final Value<double> rentPrice;
   final Value<String?> tenantId;
@@ -1696,7 +1103,6 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     this.ownerId = const Value.absent(),
     this.propertyId = const Value.absent(),
     this.name = const Value.absent(),
-    this.floor = const Value.absent(),
     this.status = const Value.absent(),
     this.rentPrice = const Value.absent(),
     this.tenantId = const Value.absent(),
@@ -1707,7 +1113,6 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     required String ownerId,
     required String propertyId,
     required String name,
-    required String floor,
     required RoomStatus status,
     required double rentPrice,
     this.tenantId = const Value.absent(),
@@ -1716,7 +1121,6 @@ class RoomsCompanion extends UpdateCompanion<Room> {
        ownerId = Value(ownerId),
        propertyId = Value(propertyId),
        name = Value(name),
-       floor = Value(floor),
        status = Value(status),
        rentPrice = Value(rentPrice);
   static Insertable<Room> custom({
@@ -1724,7 +1128,6 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     Expression<String>? ownerId,
     Expression<String>? propertyId,
     Expression<String>? name,
-    Expression<String>? floor,
     Expression<String>? status,
     Expression<double>? rentPrice,
     Expression<String>? tenantId,
@@ -1735,7 +1138,6 @@ class RoomsCompanion extends UpdateCompanion<Room> {
       if (ownerId != null) 'owner_id': ownerId,
       if (propertyId != null) 'property_id': propertyId,
       if (name != null) 'name': name,
-      if (floor != null) 'floor': floor,
       if (status != null) 'status': status,
       if (rentPrice != null) 'rent_price': rentPrice,
       if (tenantId != null) 'tenant_id': tenantId,
@@ -1748,7 +1150,6 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     Value<String>? ownerId,
     Value<String>? propertyId,
     Value<String>? name,
-    Value<String>? floor,
     Value<RoomStatus>? status,
     Value<double>? rentPrice,
     Value<String?>? tenantId,
@@ -1759,7 +1160,6 @@ class RoomsCompanion extends UpdateCompanion<Room> {
       ownerId: ownerId ?? this.ownerId,
       propertyId: propertyId ?? this.propertyId,
       name: name ?? this.name,
-      floor: floor ?? this.floor,
       status: status ?? this.status,
       rentPrice: rentPrice ?? this.rentPrice,
       tenantId: tenantId ?? this.tenantId,
@@ -1781,9 +1181,6 @@ class RoomsCompanion extends UpdateCompanion<Room> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
-    }
-    if (floor.present) {
-      map['floor'] = Variable<String>(floor.value);
     }
     if (status.present) {
       map['status'] = Variable<String>(
@@ -1809,7 +1206,6 @@ class RoomsCompanion extends UpdateCompanion<Room> {
           ..write('ownerId: $ownerId, ')
           ..write('propertyId: $propertyId, ')
           ..write('name: $name, ')
-          ..write('floor: $floor, ')
           ..write('status: $status, ')
           ..write('rentPrice: $rentPrice, ')
           ..write('tenantId: $tenantId, ')
@@ -2147,206 +1543,6 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, Tenant> {
   $TenantsTable createAlias(String alias) {
     return $TenantsTable(attachedDatabase, alias);
   }
-}
-
-class Tenant extends DataClass implements Insertable<Tenant> {
-  final String id;
-  final String ownerId;
-  final String name;
-  final String phone;
-  final String cccd;
-  final String dateOfBirth;
-  final String hometown;
-  final String roomId;
-  final String propertyId;
-  final String startDate;
-  final double deposit;
-  final bool isVerified;
-  const Tenant({
-    required this.id,
-    required this.ownerId,
-    required this.name,
-    required this.phone,
-    required this.cccd,
-    required this.dateOfBirth,
-    required this.hometown,
-    required this.roomId,
-    required this.propertyId,
-    required this.startDate,
-    required this.deposit,
-    required this.isVerified,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['owner_id'] = Variable<String>(ownerId);
-    map['name'] = Variable<String>(name);
-    map['phone'] = Variable<String>(phone);
-    map['cccd'] = Variable<String>(cccd);
-    map['date_of_birth'] = Variable<String>(dateOfBirth);
-    map['hometown'] = Variable<String>(hometown);
-    map['room_id'] = Variable<String>(roomId);
-    map['property_id'] = Variable<String>(propertyId);
-    map['start_date'] = Variable<String>(startDate);
-    map['deposit'] = Variable<double>(deposit);
-    map['is_verified'] = Variable<bool>(isVerified);
-    return map;
-  }
-
-  TenantsCompanion toCompanion(bool nullToAbsent) {
-    return TenantsCompanion(
-      id: Value(id),
-      ownerId: Value(ownerId),
-      name: Value(name),
-      phone: Value(phone),
-      cccd: Value(cccd),
-      dateOfBirth: Value(dateOfBirth),
-      hometown: Value(hometown),
-      roomId: Value(roomId),
-      propertyId: Value(propertyId),
-      startDate: Value(startDate),
-      deposit: Value(deposit),
-      isVerified: Value(isVerified),
-    );
-  }
-
-  factory Tenant.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Tenant(
-      id: serializer.fromJson<String>(json['id']),
-      ownerId: serializer.fromJson<String>(json['ownerId']),
-      name: serializer.fromJson<String>(json['name']),
-      phone: serializer.fromJson<String>(json['phone']),
-      cccd: serializer.fromJson<String>(json['cccd']),
-      dateOfBirth: serializer.fromJson<String>(json['dateOfBirth']),
-      hometown: serializer.fromJson<String>(json['hometown']),
-      roomId: serializer.fromJson<String>(json['roomId']),
-      propertyId: serializer.fromJson<String>(json['propertyId']),
-      startDate: serializer.fromJson<String>(json['startDate']),
-      deposit: serializer.fromJson<double>(json['deposit']),
-      isVerified: serializer.fromJson<bool>(json['isVerified']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'ownerId': serializer.toJson<String>(ownerId),
-      'name': serializer.toJson<String>(name),
-      'phone': serializer.toJson<String>(phone),
-      'cccd': serializer.toJson<String>(cccd),
-      'dateOfBirth': serializer.toJson<String>(dateOfBirth),
-      'hometown': serializer.toJson<String>(hometown),
-      'roomId': serializer.toJson<String>(roomId),
-      'propertyId': serializer.toJson<String>(propertyId),
-      'startDate': serializer.toJson<String>(startDate),
-      'deposit': serializer.toJson<double>(deposit),
-      'isVerified': serializer.toJson<bool>(isVerified),
-    };
-  }
-
-  Tenant copyWith({
-    String? id,
-    String? ownerId,
-    String? name,
-    String? phone,
-    String? cccd,
-    String? dateOfBirth,
-    String? hometown,
-    String? roomId,
-    String? propertyId,
-    String? startDate,
-    double? deposit,
-    bool? isVerified,
-  }) => Tenant(
-    id: id ?? this.id,
-    ownerId: ownerId ?? this.ownerId,
-    name: name ?? this.name,
-    phone: phone ?? this.phone,
-    cccd: cccd ?? this.cccd,
-    dateOfBirth: dateOfBirth ?? this.dateOfBirth,
-    hometown: hometown ?? this.hometown,
-    roomId: roomId ?? this.roomId,
-    propertyId: propertyId ?? this.propertyId,
-    startDate: startDate ?? this.startDate,
-    deposit: deposit ?? this.deposit,
-    isVerified: isVerified ?? this.isVerified,
-  );
-  Tenant copyWithCompanion(TenantsCompanion data) {
-    return Tenant(
-      id: data.id.present ? data.id.value : this.id,
-      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
-      name: data.name.present ? data.name.value : this.name,
-      phone: data.phone.present ? data.phone.value : this.phone,
-      cccd: data.cccd.present ? data.cccd.value : this.cccd,
-      dateOfBirth:
-          data.dateOfBirth.present ? data.dateOfBirth.value : this.dateOfBirth,
-      hometown: data.hometown.present ? data.hometown.value : this.hometown,
-      roomId: data.roomId.present ? data.roomId.value : this.roomId,
-      propertyId:
-          data.propertyId.present ? data.propertyId.value : this.propertyId,
-      startDate: data.startDate.present ? data.startDate.value : this.startDate,
-      deposit: data.deposit.present ? data.deposit.value : this.deposit,
-      isVerified:
-          data.isVerified.present ? data.isVerified.value : this.isVerified,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Tenant(')
-          ..write('id: $id, ')
-          ..write('ownerId: $ownerId, ')
-          ..write('name: $name, ')
-          ..write('phone: $phone, ')
-          ..write('cccd: $cccd, ')
-          ..write('dateOfBirth: $dateOfBirth, ')
-          ..write('hometown: $hometown, ')
-          ..write('roomId: $roomId, ')
-          ..write('propertyId: $propertyId, ')
-          ..write('startDate: $startDate, ')
-          ..write('deposit: $deposit, ')
-          ..write('isVerified: $isVerified')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    ownerId,
-    name,
-    phone,
-    cccd,
-    dateOfBirth,
-    hometown,
-    roomId,
-    propertyId,
-    startDate,
-    deposit,
-    isVerified,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Tenant &&
-          other.id == this.id &&
-          other.ownerId == this.ownerId &&
-          other.name == this.name &&
-          other.phone == this.phone &&
-          other.cccd == this.cccd &&
-          other.dateOfBirth == this.dateOfBirth &&
-          other.hometown == this.hometown &&
-          other.roomId == this.roomId &&
-          other.propertyId == this.propertyId &&
-          other.startDate == this.startDate &&
-          other.deposit == this.deposit &&
-          other.isVerified == this.isVerified);
 }
 
 class TenantsCompanion extends UpdateCompanion<Tenant> {
@@ -2790,180 +1986,6 @@ class $MeterReadingsTable extends MeterReadings
   }
 }
 
-class MeterReading extends DataClass implements Insertable<MeterReading> {
-  final String id;
-  final String ownerId;
-  final String roomId;
-  final String month;
-  final int electricOld;
-  final int? electricNew;
-  final int waterOld;
-  final int? waterNew;
-  final bool isRecorded;
-  const MeterReading({
-    required this.id,
-    required this.ownerId,
-    required this.roomId,
-    required this.month,
-    required this.electricOld,
-    this.electricNew,
-    required this.waterOld,
-    this.waterNew,
-    required this.isRecorded,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['owner_id'] = Variable<String>(ownerId);
-    map['room_id'] = Variable<String>(roomId);
-    map['month'] = Variable<String>(month);
-    map['electric_old'] = Variable<int>(electricOld);
-    if (!nullToAbsent || electricNew != null) {
-      map['electric_new'] = Variable<int>(electricNew);
-    }
-    map['water_old'] = Variable<int>(waterOld);
-    if (!nullToAbsent || waterNew != null) {
-      map['water_new'] = Variable<int>(waterNew);
-    }
-    map['is_recorded'] = Variable<bool>(isRecorded);
-    return map;
-  }
-
-  MeterReadingsCompanion toCompanion(bool nullToAbsent) {
-    return MeterReadingsCompanion(
-      id: Value(id),
-      ownerId: Value(ownerId),
-      roomId: Value(roomId),
-      month: Value(month),
-      electricOld: Value(electricOld),
-      electricNew:
-          electricNew == null && nullToAbsent
-              ? const Value.absent()
-              : Value(electricNew),
-      waterOld: Value(waterOld),
-      waterNew:
-          waterNew == null && nullToAbsent
-              ? const Value.absent()
-              : Value(waterNew),
-      isRecorded: Value(isRecorded),
-    );
-  }
-
-  factory MeterReading.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return MeterReading(
-      id: serializer.fromJson<String>(json['id']),
-      ownerId: serializer.fromJson<String>(json['ownerId']),
-      roomId: serializer.fromJson<String>(json['roomId']),
-      month: serializer.fromJson<String>(json['month']),
-      electricOld: serializer.fromJson<int>(json['electricOld']),
-      electricNew: serializer.fromJson<int?>(json['electricNew']),
-      waterOld: serializer.fromJson<int>(json['waterOld']),
-      waterNew: serializer.fromJson<int?>(json['waterNew']),
-      isRecorded: serializer.fromJson<bool>(json['isRecorded']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'ownerId': serializer.toJson<String>(ownerId),
-      'roomId': serializer.toJson<String>(roomId),
-      'month': serializer.toJson<String>(month),
-      'electricOld': serializer.toJson<int>(electricOld),
-      'electricNew': serializer.toJson<int?>(electricNew),
-      'waterOld': serializer.toJson<int>(waterOld),
-      'waterNew': serializer.toJson<int?>(waterNew),
-      'isRecorded': serializer.toJson<bool>(isRecorded),
-    };
-  }
-
-  MeterReading copyWith({
-    String? id,
-    String? ownerId,
-    String? roomId,
-    String? month,
-    int? electricOld,
-    Value<int?> electricNew = const Value.absent(),
-    int? waterOld,
-    Value<int?> waterNew = const Value.absent(),
-    bool? isRecorded,
-  }) => MeterReading(
-    id: id ?? this.id,
-    ownerId: ownerId ?? this.ownerId,
-    roomId: roomId ?? this.roomId,
-    month: month ?? this.month,
-    electricOld: electricOld ?? this.electricOld,
-    electricNew: electricNew.present ? electricNew.value : this.electricNew,
-    waterOld: waterOld ?? this.waterOld,
-    waterNew: waterNew.present ? waterNew.value : this.waterNew,
-    isRecorded: isRecorded ?? this.isRecorded,
-  );
-  MeterReading copyWithCompanion(MeterReadingsCompanion data) {
-    return MeterReading(
-      id: data.id.present ? data.id.value : this.id,
-      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
-      roomId: data.roomId.present ? data.roomId.value : this.roomId,
-      month: data.month.present ? data.month.value : this.month,
-      electricOld:
-          data.electricOld.present ? data.electricOld.value : this.electricOld,
-      electricNew:
-          data.electricNew.present ? data.electricNew.value : this.electricNew,
-      waterOld: data.waterOld.present ? data.waterOld.value : this.waterOld,
-      waterNew: data.waterNew.present ? data.waterNew.value : this.waterNew,
-      isRecorded:
-          data.isRecorded.present ? data.isRecorded.value : this.isRecorded,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('MeterReading(')
-          ..write('id: $id, ')
-          ..write('ownerId: $ownerId, ')
-          ..write('roomId: $roomId, ')
-          ..write('month: $month, ')
-          ..write('electricOld: $electricOld, ')
-          ..write('electricNew: $electricNew, ')
-          ..write('waterOld: $waterOld, ')
-          ..write('waterNew: $waterNew, ')
-          ..write('isRecorded: $isRecorded')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    ownerId,
-    roomId,
-    month,
-    electricOld,
-    electricNew,
-    waterOld,
-    waterNew,
-    isRecorded,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is MeterReading &&
-          other.id == this.id &&
-          other.ownerId == this.ownerId &&
-          other.roomId == this.roomId &&
-          other.month == this.month &&
-          other.electricOld == this.electricOld &&
-          other.electricNew == this.electricNew &&
-          other.waterOld == this.waterOld &&
-          other.waterNew == this.waterNew &&
-          other.isRecorded == this.isRecorded);
-}
-
 class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
   final Value<String> id;
   final Value<String> ownerId;
@@ -3330,174 +2352,6 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
       const EnumNameConverter<InvoiceStatus>(InvoiceStatus.values);
 }
 
-class Invoice extends DataClass implements Insertable<Invoice> {
-  final String id;
-  final String ownerId;
-  final String roomId;
-  final String month;
-  final double totalAmount;
-  final InvoiceStatus status;
-  final String? dueDate;
-  final String? paidDate;
-  const Invoice({
-    required this.id,
-    required this.ownerId,
-    required this.roomId,
-    required this.month,
-    required this.totalAmount,
-    required this.status,
-    this.dueDate,
-    this.paidDate,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    map['owner_id'] = Variable<String>(ownerId);
-    map['room_id'] = Variable<String>(roomId);
-    map['month'] = Variable<String>(month);
-    map['total_amount'] = Variable<double>(totalAmount);
-    {
-      map['status'] = Variable<String>(
-        $InvoicesTable.$converterstatus.toSql(status),
-      );
-    }
-    if (!nullToAbsent || dueDate != null) {
-      map['due_date'] = Variable<String>(dueDate);
-    }
-    if (!nullToAbsent || paidDate != null) {
-      map['paid_date'] = Variable<String>(paidDate);
-    }
-    return map;
-  }
-
-  InvoicesCompanion toCompanion(bool nullToAbsent) {
-    return InvoicesCompanion(
-      id: Value(id),
-      ownerId: Value(ownerId),
-      roomId: Value(roomId),
-      month: Value(month),
-      totalAmount: Value(totalAmount),
-      status: Value(status),
-      dueDate:
-          dueDate == null && nullToAbsent
-              ? const Value.absent()
-              : Value(dueDate),
-      paidDate:
-          paidDate == null && nullToAbsent
-              ? const Value.absent()
-              : Value(paidDate),
-    );
-  }
-
-  factory Invoice.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Invoice(
-      id: serializer.fromJson<String>(json['id']),
-      ownerId: serializer.fromJson<String>(json['ownerId']),
-      roomId: serializer.fromJson<String>(json['roomId']),
-      month: serializer.fromJson<String>(json['month']),
-      totalAmount: serializer.fromJson<double>(json['totalAmount']),
-      status: $InvoicesTable.$converterstatus.fromJson(
-        serializer.fromJson<String>(json['status']),
-      ),
-      dueDate: serializer.fromJson<String?>(json['dueDate']),
-      paidDate: serializer.fromJson<String?>(json['paidDate']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'ownerId': serializer.toJson<String>(ownerId),
-      'roomId': serializer.toJson<String>(roomId),
-      'month': serializer.toJson<String>(month),
-      'totalAmount': serializer.toJson<double>(totalAmount),
-      'status': serializer.toJson<String>(
-        $InvoicesTable.$converterstatus.toJson(status),
-      ),
-      'dueDate': serializer.toJson<String?>(dueDate),
-      'paidDate': serializer.toJson<String?>(paidDate),
-    };
-  }
-
-  Invoice copyWith({
-    String? id,
-    String? ownerId,
-    String? roomId,
-    String? month,
-    double? totalAmount,
-    InvoiceStatus? status,
-    Value<String?> dueDate = const Value.absent(),
-    Value<String?> paidDate = const Value.absent(),
-  }) => Invoice(
-    id: id ?? this.id,
-    ownerId: ownerId ?? this.ownerId,
-    roomId: roomId ?? this.roomId,
-    month: month ?? this.month,
-    totalAmount: totalAmount ?? this.totalAmount,
-    status: status ?? this.status,
-    dueDate: dueDate.present ? dueDate.value : this.dueDate,
-    paidDate: paidDate.present ? paidDate.value : this.paidDate,
-  );
-  Invoice copyWithCompanion(InvoicesCompanion data) {
-    return Invoice(
-      id: data.id.present ? data.id.value : this.id,
-      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
-      roomId: data.roomId.present ? data.roomId.value : this.roomId,
-      month: data.month.present ? data.month.value : this.month,
-      totalAmount:
-          data.totalAmount.present ? data.totalAmount.value : this.totalAmount,
-      status: data.status.present ? data.status.value : this.status,
-      dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
-      paidDate: data.paidDate.present ? data.paidDate.value : this.paidDate,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Invoice(')
-          ..write('id: $id, ')
-          ..write('ownerId: $ownerId, ')
-          ..write('roomId: $roomId, ')
-          ..write('month: $month, ')
-          ..write('totalAmount: $totalAmount, ')
-          ..write('status: $status, ')
-          ..write('dueDate: $dueDate, ')
-          ..write('paidDate: $paidDate')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    ownerId,
-    roomId,
-    month,
-    totalAmount,
-    status,
-    dueDate,
-    paidDate,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Invoice &&
-          other.id == this.id &&
-          other.ownerId == this.ownerId &&
-          other.roomId == this.roomId &&
-          other.month == this.month &&
-          other.totalAmount == this.totalAmount &&
-          other.status == this.status &&
-          other.dueDate == this.dueDate &&
-          other.paidDate == this.paidDate);
-}
-
 class InvoicesCompanion extends UpdateCompanion<Invoice> {
   final Value<String> id;
   final Value<String> ownerId;
@@ -3645,6 +2499,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TenantsTable tenants = $TenantsTable(this);
   late final $MeterReadingsTable meterReadings = $MeterReadingsTable(this);
   late final $InvoicesTable invoices = $InvoicesTable(this);
+  late final AppDao appDao = AppDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4357,7 +3212,6 @@ typedef $$RoomsTableCreateCompanionBuilder =
       required String ownerId,
       required String propertyId,
       required String name,
-      required String floor,
       required RoomStatus status,
       required double rentPrice,
       Value<String?> tenantId,
@@ -4369,7 +3223,6 @@ typedef $$RoomsTableUpdateCompanionBuilder =
       Value<String> ownerId,
       Value<String> propertyId,
       Value<String> name,
-      Value<String> floor,
       Value<RoomStatus> status,
       Value<double> rentPrice,
       Value<String?> tenantId,
@@ -4401,11 +3254,6 @@ class $$RoomsTableFilterComposer extends Composer<_$AppDatabase, $RoomsTable> {
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get floor => $composableBuilder(
-    column: $table.floor,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4455,11 +3303,6 @@ class $$RoomsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get floor => $composableBuilder(
-    column: $table.floor,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -4498,9 +3341,6 @@ class $$RoomsTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
-
-  GeneratedColumn<String> get floor =>
-      $composableBuilder(column: $table.floor, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<RoomStatus, String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
@@ -4544,7 +3384,6 @@ class $$RoomsTableTableManager
                 Value<String> ownerId = const Value.absent(),
                 Value<String> propertyId = const Value.absent(),
                 Value<String> name = const Value.absent(),
-                Value<String> floor = const Value.absent(),
                 Value<RoomStatus> status = const Value.absent(),
                 Value<double> rentPrice = const Value.absent(),
                 Value<String?> tenantId = const Value.absent(),
@@ -4554,7 +3393,6 @@ class $$RoomsTableTableManager
                 ownerId: ownerId,
                 propertyId: propertyId,
                 name: name,
-                floor: floor,
                 status: status,
                 rentPrice: rentPrice,
                 tenantId: tenantId,
@@ -4566,7 +3404,6 @@ class $$RoomsTableTableManager
                 required String ownerId,
                 required String propertyId,
                 required String name,
-                required String floor,
                 required RoomStatus status,
                 required double rentPrice,
                 Value<String?> tenantId = const Value.absent(),
@@ -4576,7 +3413,6 @@ class $$RoomsTableTableManager
                 ownerId: ownerId,
                 propertyId: propertyId,
                 name: name,
-                floor: floor,
                 status: status,
                 rentPrice: rentPrice,
                 tenantId: tenantId,

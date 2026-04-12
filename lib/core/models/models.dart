@@ -16,13 +16,14 @@ class User {
 }
 
 // Property (Nhà trọ) model
-enum BillingType { byMeter, perPerson, fixed }
+enum BillingType { byMeter, perPerson, perRoom, fixed }
 
 extension BillingTypeExt on BillingType {
   String get label {
     switch (this) {
       case BillingType.byMeter: return 'Theo đồng hồ';
       case BillingType.perPerson: return 'Theo người';
+      case BillingType.perRoom: return 'Theo phòng';
       case BillingType.fixed: return 'Cố định';
     }
   }
@@ -75,7 +76,6 @@ class Room {
   final String ownerId;
   final String propertyId;
   final String name;
-  final String floor;
   final RoomStatus status;
   final double rentPrice;
   final String? tenantId;
@@ -85,7 +85,6 @@ class Room {
     required this.ownerId,
     required this.propertyId,
     required this.name,
-    required this.floor,
     required this.status,
     required this.rentPrice,
     this.tenantId,
