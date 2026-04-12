@@ -1,0 +1,138 @@
+import '../models/models.dart';
+
+class MockData {
+  // Properties
+  static final List<Property> properties = [
+    const Property(
+      id: 'p1',
+      ownerId: 'u1',
+      name: 'Nhà trọ Thanh Xuân',
+      address: '123 Nguyễn Trãi, Thanh Xuân, Hà Nội',
+      totalRooms: 15,
+      electricityPrice: 3500,
+      waterPrice: 15000,
+      waterBillingType: BillingType.perPerson,
+    ),
+    const Property(
+      id: 'p2',
+      ownerId: 'u1',
+      name: 'Căn hộ dịch vụ Cầu Giấy',
+      address: '45 Trần Thái Tông, Cầu Giấy, Hà Nội',
+      totalRooms: 20,
+      electricityPrice: 3500,
+      waterPrice: 15000,
+      waterBillingType: BillingType.byMeter,
+    ),
+    const Property(
+      id: 'p3',
+      ownerId: 'u1',
+      name: 'Nhà trọ Minh Khai',
+      address: '88 Minh Khai, Hai Bà Trưng, Hà Nội',
+      totalRooms: 10,
+      electricityPrice: 3000,
+      waterPrice: 12000,
+      waterBillingType: BillingType.perPerson,
+    ),
+  ];
+
+  // Rooms
+  static final List<Room> rooms = [
+    const Room(id: '101', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 101', floor: 'Tầng 1', status: RoomStatus.empty, rentPrice: 3500000),
+    const Room(id: '102', propertyId: 'p1', ownerId: 'u1', name: 'Room 102', floor: 'Tầng 1', status: RoomStatus.deposited, rentPrice: 3500000),
+    const Room(id: '103', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 103', floor: 'Tầng 1', status: RoomStatus.rented, rentPrice: 3500000, tenantId: 't3'),
+    const Room(id: '201', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 201', floor: 'Tầng 2', status: RoomStatus.rented, rentPrice: 3800000, tenantId: 't1'),
+    const Room(id: '202', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 202', floor: 'Tầng 2', status: RoomStatus.empty, rentPrice: 3800000),
+    const Room(id: '104', propertyId: 'p1', ownerId: 'u1', name: 'Phòng 104', floor: 'Tầng 1', status: RoomStatus.rented, rentPrice: 3500000, tenantId: 't4'),
+    const Room(id: '202b', propertyId: 'p2', ownerId: 'u1', name: 'Phòng 202', floor: 'Tầng 2', status: RoomStatus.rented, rentPrice: 4500000, tenantId: 't2'),
+    const Room(id: '305', propertyId: 'p2', ownerId: 'u1', name: 'Phòng 305', floor: 'Tầng 3', status: RoomStatus.rented, rentPrice: 5000000, tenantId: 't3'),
+  ];
+
+  // Tenants
+  static final List<Tenant> tenants = [
+    const Tenant(
+      id: 't1',
+      name: 'Nguyễn Văn A',
+      ownerId: 'u1',
+      phone: '0901 234 567',
+      cccd: '012345678901',
+      dateOfBirth: '15/05/1995',
+      hometown: 'Hà Nội, Việt Nam',
+      roomId: '201',
+      propertyId: 'p1',
+      startDate: '01/01/2024',
+      deposit: 5000000,
+      isVerified: true,
+    ),
+    const Tenant(
+      id: 't2',
+      name: 'Lê Thị Hoa',
+      ownerId: 'u1',
+      phone: '0932 987 654',
+      cccd: '098765432109',
+      dateOfBirth: '22/08/1998',
+      hometown: 'Nam Định, Việt Nam',
+      roomId: '202b',
+      propertyId: 'p2',
+      startDate: '15/03/2023',
+      deposit: 4500000,
+      isVerified: false,
+    ),
+    const Tenant(
+      id: 't3',
+      name: 'Trần Minh Quân',
+      ownerId: 'u1',
+      phone: '0888 111 222',
+      cccd: '111222333444',
+      dateOfBirth: '10/11/1996',
+      hometown: 'Hải Phòng, Việt Nam',
+      roomId: '305',
+      propertyId: 'p2',
+      startDate: '01/06/2023',
+      deposit: 5000000,
+      isVerified: true,
+    ),
+    const Tenant(
+      id: 't4',
+      name: 'Phạm Văn Nam',
+      ownerId: 'u1',
+      phone: '0905 555 666',
+      cccd: '555666777888',
+      dateOfBirth: '05/07/1993',
+      hometown: 'Nghệ An, Việt Nam',
+      roomId: '104',
+      propertyId: 'p1',
+      startDate: '10/09/2023',
+      deposit: 3500000,
+      isVerified: true,
+    ),
+  ];
+
+  // Meter readings
+  static final List<MeterReading> meterReadings = [
+    const MeterReading(id: 'mr1', roomId: '101', ownerId: 'u1', month: 'Tháng 10/2023', electricOld: 1205, electricNew: null, waterOld: 450, waterNew: null, isRecorded: false),
+    const MeterReading(id: 'mr2', roomId: '102', ownerId: 'u1', month: 'Tháng 10/2023', electricOld: 3421, electricNew: null, waterOld: 892, waterNew: null, isRecorded: false),
+    const MeterReading(id: 'mr3', roomId: '103', ownerId: 'u1', month: 'Tháng 10/2023', electricOld: 2000, electricNew: 2110, waterOld: 500, waterNew: 541, isRecorded: true),
+    const MeterReading(id: 'mr4', roomId: '201', ownerId: 'u1', month: 'Tháng 10/2023', electricOld: 1240, electricNew: 1315, waterOld: 450, waterNew: 458, isRecorded: true),
+  ];
+
+  // Invoices
+  static final List<Invoice> invoices = [
+    const Invoice(id: 'inv1', roomId: '101', ownerId: 'u1', month: 'Tháng 10/2023', totalAmount: 0, status: InvoiceStatus.notCreated),
+    const Invoice(id: 'inv2', roomId: '102', ownerId: 'u1', month: 'Tháng 10/2023', totalAmount: 400, status: InvoiceStatus.sent),
+    const Invoice(id: 'inv3', roomId: '201', ownerId: 'u1', month: 'Tháng 10/2023', totalAmount: 2450000, status: InvoiceStatus.waitingPayment, dueDate: 'Oct 15, 2023'),
+    const Invoice(id: 'inv4', roomId: '202', ownerId: 'u1', month: 'Tháng 10/2023', totalAmount: 600, status: InvoiceStatus.paid, paidDate: 'Oct 10, 2023'),
+    const Invoice(id: 'inv5', roomId: '104', ownerId: 'u1', month: 'Tháng 10/2023', totalAmount: 550, status: InvoiceStatus.overdue, dueDate: 'Oct 05, 2023'),
+  ];
+
+  // Services
+  static final List<Service> services = [
+    const Service(id: 's1', propertyId: 'p1', name: 'Internet', type: BillingType.fixed, price: 100000),
+    const Service(id: 's2', propertyId: 'p1', name: 'Vệ sinh', type: BillingType.perPerson, price: 30000),
+    const Service(id: 's3', propertyId: 'p1', name: 'Thang máy', type: BillingType.fixed, price: 50000),
+    const Service(id: 's4', propertyId: 'p2', name: 'Internet', type: BillingType.fixed, price: 150000),
+    const Service(id: 's5', propertyId: 'p2', name: 'Vệ sinh', type: BillingType.perPerson, price: 30000),
+    const Service(id: 's6', propertyId: 'p3', name: 'Internet', type: BillingType.fixed, price: 100000),
+    const Service(id: 's7', propertyId: 'p3', name: 'Vệ sinh', type: BillingType.perPerson, price: 25000),
+    const Service(id: 's8', propertyId: 'p3', name: 'Giữ xe', type: BillingType.fixed, price: 20000),
+  ];
+}
