@@ -202,6 +202,8 @@ class _RoomCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(room.name, style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
+                  Text('ID: ${room.id}', style: GoogleFonts.manrope(fontSize: 10, color: AppColors.textTertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text('OID: ${room.ownerId}', style: GoogleFonts.manrope(fontSize: 10, color: AppColors.textTertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 3),
                   Row(
                     children: [

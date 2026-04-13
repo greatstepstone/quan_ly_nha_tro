@@ -16,14 +16,13 @@ class User {
 }
 
 // Property (Nhà trọ) model
-enum BillingType { byMeter, perPerson, perRoom, fixed }
+enum BillingType { byMeter, perPerson, fixed }
 
 extension BillingTypeExt on BillingType {
   String get label {
     switch (this) {
       case BillingType.byMeter: return 'Theo đồng hồ';
       case BillingType.perPerson: return 'Theo người';
-      case BillingType.perRoom: return 'Theo phòng';
       case BillingType.fixed: return 'Cố định';
     }
   }
@@ -170,6 +169,7 @@ class Invoice {
   final InvoiceStatus status;
   final String? dueDate;
   final String? paidDate;
+  final String? createdAt; // Thêm trường này để lọc theo ngày tạo
 
   const Invoice({
     required this.id,
@@ -180,6 +180,7 @@ class Invoice {
     required this.status,
     this.dueDate,
     this.paidDate,
+    this.createdAt,
   });
 }
 

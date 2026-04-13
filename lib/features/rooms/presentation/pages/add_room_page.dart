@@ -7,12 +7,18 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/database/database.dart';
 import '../../../../core/models/models.dart';
 
-class AddRoomPage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/room_providers.dart';
+import '../../../../core/providers/tenant_providers.dart';
+import '../../../../core/providers/meter_reading_providers.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+
+class AddRoomPage extends ConsumerStatefulWidget {
   final String? propertyId;
   const AddRoomPage({super.key, this.propertyId});
 
   @override
-  State<AddRoomPage> createState() => _AddRoomPageState();
+  ConsumerState<AddRoomPage> createState() => _AddRoomPageState();
 }
 
 // Simple model to hold one tenant's form data
@@ -22,6 +28,8 @@ class _TenantForm {
   final cccdCtrl = TextEditingController();
   final dateOfBirthCtrl = TextEditingController();
   final hometownCtrl = TextEditingController();
+  final depositCtrl = TextEditingController(text: '0');
+  final startDateCtrl = TextEditingController(text: '${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}');
 
   void dispose() {
     nameCtrl.dispose();
@@ -29,10 +37,12 @@ class _TenantForm {
     cccdCtrl.dispose();
     dateOfBirthCtrl.dispose();
     hometownCtrl.dispose();
+    depositCtrl.dispose();
+    startDateCtrl.dispose();
   }
 }
 
-class _AddRoomPageState extends State<AddRoomPage> {
+class _AddRoomPageState extends ConsumerState<AddRoomPage> {
   // ── Room fields ──
   final _roomName = TextEditingController();
   final _rentPrice = TextEditingController();
@@ -45,7 +55,7 @@ class _AddRoomPageState extends State<AddRoomPage> {
   bool _propertiesLoaded = false;
 
   DateTime _startDate = DateTime.now();
-  String? _waterMode; // 'byMeter' | 'perPerson' | 'perRoom'
+  String? _waterMode; // 'byMeter' | 'perPerson' | 'fixed'
 
   // ── Tenants ──
   final List<_TenantForm> _tenants = [];
@@ -76,7 +86,7 @@ class _AddRoomPageState extends State<AddRoomPage> {
           ? 'byMeter'
           : (_selectedProperty?.waterBillingType == BillingType.perPerson
               ? 'perPerson'
-              : 'perRoom');
+              : 'fixed');
     });
   }
 
@@ -89,7 +99,7 @@ class _AddRoomPageState extends State<AddRoomPage> {
           ? 'byMeter'
           : (prop.waterBillingType == BillingType.perPerson
               ? 'perPerson'
-              : 'perRoom');
+              : 'fixed');
     });
   }
 
@@ -129,20 +139,39 @@ class _AddRoomPageState extends State<AddRoomPage> {
     try {
       final roomId = const Uuid().v4();
       final propId = _selectedPropertyId!;
-
-      final ownerId = _selectedProperty?.ownerId ?? 'owner_1';
+      final ownerId = ref.read(currentUserProvider)?.id ?? 'owner_1';
+      
       final hasTenants = _tenants.isNotEmpty &&
           _tenants.any((t) => t.nameCtrl.text.trim().isNotEmpty);
 
       String? firstTenantId;
+      if (hasTenants) {
+        // Dự đoán ID của tenant đầu tiên để gán vào Room
+        firstTenantId = const Uuid().v4();
+      }
 
-      // Insert tenants
+      // 1. Insert Room trước để các bảng khác tham chiếu (FK)
+      final room = Room(
+        id: roomId,
+        ownerId: ownerId,
+        propertyId: propId,
+        name: _roomName.text.trim(),
+        status: hasTenants ? RoomStatus.rented : RoomStatus.empty,
+        rentPrice: double.tryParse(_rentPrice.text.replaceAll('.', '')) ?? 0,
+        tenantId: firstTenantId,
+      );
+      await ref.read(roomRepositoryProvider).addRoom(room);
+
+      // 2. Insert tenants
       for (int i = 0; i < _tenants.length; i++) {
         final t = _tenants[i];
         if (t.nameCtrl.text.trim().isEmpty) continue;
-        final tenantId = const Uuid().v4();
-        if (i == 0) firstTenantId = tenantId;
-        await appDb.appDao.insertTenant(TenantsCompanion.insert(
+        
+        // Sử dụng ID đã dự đoán ở bước 1 cho tenant đầu tiên, 
+        // hoặc tạo ID mới cho các tenant sau.
+        final tenantId = (i == 0 && firstTenantId != null) ? firstTenantId : const Uuid().v4();
+        
+        final tenant = Tenant(
           id: tenantId,
           ownerId: ownerId,
           name: t.nameCtrl.text.trim(),
@@ -152,33 +181,27 @@ class _AddRoomPageState extends State<AddRoomPage> {
           hometown: t.hometownCtrl.text.trim(),
           roomId: roomId,
           propertyId: propId,
-          startDate: _fmtDate(_startDate),
-          deposit: 0,
-        ));
+          startDate: t.startDateCtrl.text.trim(),
+          deposit: double.tryParse(t.depositCtrl.text.replaceAll('.', '')) ?? 0,
+        );
+        await ref.read(tenantRepositoryProvider).addTenant(tenant);
       }
 
-      // Insert room
-      await appDb.appDao.insertRoom(RoomsCompanion.insert(
-        id: roomId,
-        ownerId: ownerId,
-        propertyId: propId,
-        name: _roomName.text.trim(),
-        status: hasTenants ? RoomStatus.rented : RoomStatus.empty,
-        rentPrice: double.tryParse(_rentPrice.text.replaceAll('.', '')) ?? 0,
-        tenantId: Value.absentIfNull(firstTenantId),
-      ));
-
-      // Insert initial meter reading
+      // 3. Insert initial meter reading
       final electricOld = int.tryParse(_electricOld.text) ?? 0;
       final waterOld = int.tryParse(_waterOld.text) ?? 0;
-      await appDb.appDao.insertMeterReading(MeterReadingsCompanion.insert(
+      final reading = MeterReading(
         id: const Uuid().v4(),
         ownerId: ownerId,
         roomId: roomId,
         month: '${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}',
         electricOld: electricOld,
+        electricNew: electricOld,
         waterOld: waterOld,
-      ));
+        waterNew: waterOld,
+        isRecorded: true,
+      );
+      await ref.read(meterReadingRepositoryProvider).addReading(reading);
 
       if (!mounted) return;
       _showSnack('Đã thêm phòng ${_roomName.text.trim()} thành công!');
@@ -620,6 +643,20 @@ class _TenantCard extends StatelessWidget {
           _FieldLabel(label: 'QUÊ QUÁN'),
           const SizedBox(height: 6),
           _TextField(ctrl: form.hometownCtrl, hint: 'Nhập quê quán'),
+          const SizedBox(height: 10),
+
+          _FieldLabel(label: 'NGÀY BẮT ĐẦU THUÊ (dd/mm/yyyy)'),
+          const SizedBox(height: 6),
+          _TextField(ctrl: form.startDateCtrl, hint: 'dd/mm/yyyy'),
+          const SizedBox(height: 10),
+
+          _FieldLabel(label: 'TIỀN CỌC (VND)'),
+          const SizedBox(height: 6),
+          _TextField(
+              ctrl: form.depositCtrl,
+              hint: '0',
+              keyboardType: TextInputType.number,
+              suffix: 'đ'),
           const SizedBox(height: 10),
         ],
       ),

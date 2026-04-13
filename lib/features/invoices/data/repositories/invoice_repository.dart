@@ -1,0 +1,12 @@
+import '../../../../core/models/models.dart';
+
+abstract class InvoiceRepository {
+  Stream<List<Invoice>> watchAllInvoices();
+  Stream<List<Invoice>> watchInvoicesByRoom(String roomId);
+  Future<List<Invoice>> getInvoicesByRoom(String roomId);
+  Future<List<Invoice>> getAllInvoices();
+  Future<void> addInvoice(Invoice invoice);
+  Future<void> saveInvoice(Invoice invoice);
+  Future<void> deleteInvoice(String id);
+  Future<void> syncInvoices(String roomId);
+}

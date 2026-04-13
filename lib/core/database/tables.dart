@@ -100,6 +100,7 @@ class Invoices extends Table {
   TextColumn get status => textEnum<InvoiceStatus>()();
   TextColumn get dueDate => text().nullable()();
   TextColumn get paidDate => text().nullable()();
+  TextColumn get createdAt => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

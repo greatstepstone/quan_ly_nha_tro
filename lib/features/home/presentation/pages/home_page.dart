@@ -198,42 +198,32 @@ class HomePage extends ConsumerWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: invoicesAsync.when(
-                          data: (List<Invoice> invs) {
-                            final total = invs
-                                .where((Invoice i) => i.status == InvoiceStatus.paid)
-                                .fold(0.0, (double sum, Invoice i) => sum + i.totalAmount);
-                            return _ReportCard(
-                              icon: Icons.trending_up,
-                              iconColor: AppColors.emerald,
-                              iconBg: AppColors.emeraldLight,
-                              title: 'Doanh thu',
-                              value: '${formatter.format(total)}đ',
-                              valueColor: AppColors.emerald,
-                              onTap: () => context.push('/reports'),
-                            );
-                          },
+                        child: ref.watch(totalMonthlyRevenueProvider).when(
+                          data: (total) => _ReportCard(
+                            icon: Icons.trending_up,
+                            iconColor: AppColors.emerald,
+                            iconBg: AppColors.emeraldLight,
+                            title: 'Doanh thu',
+                            value: '${formatter.format(total)}đ',
+                            valueColor: AppColors.emerald,
+                            onTap: () => context.push('/reports'),
+                          ),
                           loading: () => const _LoadingReportCard(),
                           error: (_, __) => const _ErrorReportCard(),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: invoicesAsync.when(
-                          data: (List<Invoice> invs) {
-                            final debt = invs
-                                .where((Invoice i) => i.status != InvoiceStatus.paid && i.status != InvoiceStatus.notCreated)
-                                .fold(0.0, (double sum, Invoice i) => sum + i.totalAmount);
-                            return _ReportCard(
-                              icon: Icons.warning_amber_rounded,
-                              iconColor: AppColors.red,
-                              iconBg: AppColors.redLight,
-                              title: 'Quản lý Nợ',
-                              value: '${formatter.format(debt)}đ',
-                              valueColor: AppColors.red,
-                              onTap: () => context.push('/invoices'),
-                            );
-                          },
+                        child: ref.watch(totalOutstandingDebtProvider).when(
+                          data: (debt) => _ReportCard(
+                            icon: Icons.warning_amber_rounded,
+                            iconColor: AppColors.red,
+                            iconBg: AppColors.redLight,
+                            title: 'Quản lý Nợ',
+                            value: '${formatter.format(debt)}đ',
+                            valueColor: AppColors.red,
+                            onTap: () => context.push('/invoices'),
+                          ),
                           loading: () => const _LoadingReportCard(),
                           error: (_, __) => const _ErrorReportCard(),
                         ),
@@ -350,7 +340,7 @@ class _NotificationBell extends StatelessWidget {
   }
 }
 
-class _StatsRow extends StatelessWidget {
+class _StatsRow extends ConsumerWidget {
   final NumberFormat formatter;
   final AsyncValue<List<Invoice>> invoicesAsync;
   final AsyncValue<List<Room>> roomsAsync;
@@ -362,7 +352,7 @@ class _StatsRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -375,34 +365,24 @@ class _StatsRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: invoicesAsync.when(
-              data: (List<Invoice> invs) {
-                final total = invs
-                    .where((Invoice i) => i.status == InvoiceStatus.paid)
-                    .fold(0.0, (double sum, Invoice i) => sum + i.totalAmount);
-                return _StatItem(
-                  label: 'TỔNG THU THÁNG NÀY',
-                  value: '${formatter.format(total)}đ',
-                  valueColor: AppColors.primary,
-                );
-              },
+            child: ref.watch(totalMonthlyRevenueProvider).when(
+              data: (total) => _StatItem(
+                label: 'TỔNG THU THÁNG NÀY',
+                value: '${formatter.format(total)}đ',
+                valueColor: AppColors.primary,
+              ),
               loading: () => const _LoadingStatItem(label: 'TỔNG THU'),
               error: (_, __) => const _ErrorStatItem(label: 'TỔNG THU'),
             ),
           ),
           Container(width: 1, height: 40, color: AppColors.surfaceContainer),
           Expanded(
-            child: invoicesAsync.when(
-              data: (List<Invoice> invs) {
-                final debt = invs
-                    .where((Invoice i) => i.status != InvoiceStatus.paid && i.status != InvoiceStatus.notCreated)
-                    .fold(0.0, (double sum, Invoice i) => sum + i.totalAmount);
-                return _StatItem(
-                  label: 'TỔNG NỢ CHƯA THU',
-                  value: '${formatter.format(debt)}đ',
-                  valueColor: AppColors.red,
-                );
-              },
+            child: ref.watch(totalOutstandingDebtProvider).when(
+              data: (debt) => _StatItem(
+                label: 'TỔNG NỢ CHƯA THU',
+                value: '${formatter.format(debt)}đ',
+                valueColor: AppColors.red,
+              ),
               loading: () => const _LoadingStatItem(label: 'TỔNG NỢ'),
               error: (_, __) => const _ErrorStatItem(label: 'TỔNG NỢ'),
             ),

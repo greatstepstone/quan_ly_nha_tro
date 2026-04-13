@@ -1,21 +1,27 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/database/database.dart';
 import '../../../../core/models/models.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../../core/providers/room_providers.dart';
+import '../../../../core/providers/tenant_providers.dart';
+import '../../../../core/providers/property_providers.dart';
+import '../../../../core/providers/service_providers.dart';
+import '../../../../core/providers/meter_reading_providers.dart';
+import '../../../../core/providers/invoice_providers.dart';
 
-class CreateInvoicePage extends StatefulWidget {
+class CreateInvoicePage extends ConsumerStatefulWidget {
   final String roomId;
   const CreateInvoicePage({super.key, required this.roomId});
 
   @override
-  State<CreateInvoicePage> createState() => _CreateInvoicePageState();
+  ConsumerState<CreateInvoicePage> createState() => _CreateInvoicePageState();
 }
 
-class _CreateInvoicePageState extends State<CreateInvoicePage> {
+class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
   final _electricOldCtrl = TextEditingController();
   final _electricNewCtrl = TextEditingController();
   final _waterOldCtrl = TextEditingController();
@@ -41,13 +47,20 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    Future.microtask(() => _loadData());
   }
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      final room = await appDb.appDao.getRoomById(widget.roomId);
+      final roomRepo = ref.read(roomRepositoryProvider);
+      final tenantRepo = ref.read(tenantRepositoryProvider);
+      final propertyRepo = ref.read(propertyRepositoryProvider);
+      final serviceRepo = ref.read(serviceRepositoryProvider);
+      final meterReadingRepo = ref.read(meterReadingRepositoryProvider);
+      final invoiceRepo = ref.read(invoiceRepositoryProvider);
+
+      final room = await roomRepo.getRoomById(widget.roomId);
       if (room == null) {
         setState(() => _isLoading = false);
         return;
@@ -55,46 +68,48 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
       _room = room;
 
       // Load tenant if any
-      Tenant? tenant;
       if (room.tenantId != null) {
-        final allTenants = await appDb.appDao.getAllTenants();
-        tenant = allTenants.firstWhere(
-          (t) => t.id == room.tenantId,
-          orElse: () => allTenants.first,
-        );
+        _tenant = await tenantRepo.getTenantById(room.tenantId!);
       }
-      _tenant = tenant;
 
       // Load property
-      final allProps = await appDb.appDao.getAllProperties();
-      final property = allProps.where((p) => p.id == room.propertyId).firstOrNull;
-      _property = property;
+      _property = await propertyRepo.getPropertyById(room.propertyId);
 
       // Load services for this property
-      if (property != null) {
-        _services = await appDb.appDao.getServicesByProperty(property.id);
-      }
+      _services = await serviceRepo.getServicesByProperty(room.propertyId);
 
       // Load latest meter reading for this room
-      final reading =
-          await appDb.appDao.getMeterReadingByRoomId(widget.roomId);
-      if (reading != null) {
-        _electricOldCtrl.text =
-            (reading.electricNew ?? reading.electricOld).toString();
-        _waterOldCtrl.text =
-            (reading.waterNew ?? reading.waterOld).toString();
+      final readings = await meterReadingRepo.getMeterReadingsByRoom(widget.roomId);
+      if (readings.isNotEmpty) {
+        final reading = readings.first; // Assuming first is latest or we need a specific month
+        // In the original, it was looking for a specific month or just the latest?
+        // Let's try to find for the CURRENT month or latest.
+        final currentMonthReading = readings.where((r) => r.month == _currentMonth).firstOrNull;
+        if (currentMonthReading != null) {
+          _electricOldCtrl.text = currentMonthReading.electricOld.toString();
+          _electricNewCtrl.text = (currentMonthReading.electricNew ?? 0).toString();
+          _waterOldCtrl.text = currentMonthReading.waterOld.toString();
+          _waterNewCtrl.text = (currentMonthReading.waterNew ?? 0).toString();
+        } else {
+          // Fallback to latest reading's "new" as "old"
+          final latest = readings.first;
+          _electricOldCtrl.text = (latest.electricNew ?? latest.electricOld).toString();
+          _waterOldCtrl.text = (latest.waterNew ?? latest.waterOld).toString();
+        }
       }
 
       // Load existing invoice for this room/month (to allow update)
-      _existingInvoice = await appDb.appDao
-          .getInvoiceByRoomAndMonth(widget.roomId, _currentMonth);
+      final invoices = await invoiceRepo.getInvoicesByRoom(widget.roomId);
+      _existingInvoice = invoices.where((i) => i.month == _currentMonth).firstOrNull;
+      
       if (_existingInvoice != null) {
-        _noteCtrl.text = ''; // no note field in Invoice model, placeholder
+        // Fill data if editing
+        // (Note: Invoice model doesn't store individual costs, we recalculate or we should have stored them)
       }
     } catch (e) {
       debugPrint('Error loading invoice data: $e');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -120,39 +135,49 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
 
   Future<void> _saveInvoice() async {
     if (_isSaving) return;
+    
+    final ownerId = ref.watch(currentUserProvider)?.id;
+    if (ownerId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng đăng nhập lại')));
+      return;
+    }
+
     setState(() => _isSaving = true);
 
     try {
+      final invoiceRepo = ref.read(invoiceRepositoryProvider);
+      final meterReadingRepo = ref.read(meterReadingRepositoryProvider);
+      
       final now = DateTime.now();
       final dueDate =
           '${now.day.toString().padLeft(2, '0')}/${(now.month + 1).clamp(1, 12).toString().padLeft(2, '0')}/${now.year}';
 
-      if (_existingInvoice != null) {
-        // Update existing invoice
-        await appDb.appDao.updateInvoice(InvoicesCompanion(
-          id: Value(_existingInvoice!.id),
-          ownerId: Value(_existingInvoice!.ownerId),
-          roomId: Value(widget.roomId),
-          month: Value(_currentMonth),
-          totalAmount: Value(_total),
-          status: const Value(InvoiceStatus.waitingPayment),
-          dueDate: Value(dueDate),
-          paidDate: Value(_existingInvoice!.paidDate),
-        ));
-      } else {
-        // Insert new invoice
-        final ownerId = _room?.ownerId ?? 'owner_1';
-        await appDb.appDao.insertInvoice(InvoicesCompanion(
-          id: Value(const Uuid().v4()),
-          ownerId: Value(ownerId),
-          roomId: Value(widget.roomId),
-          month: Value(_currentMonth),
-          totalAmount: Value(_total),
-          status: const Value(InvoiceStatus.waitingPayment),
-          dueDate: Value(dueDate),
-          paidDate: const Value(null),
-        ));
-      }
+      // 1. Save or Update Meter Reading first
+      final readingId = const Uuid().v4();
+      await meterReadingRepo.saveMeterReading(MeterReading(
+        id: readingId,
+        ownerId: ownerId,
+        roomId: widget.roomId,
+        month: _currentMonth,
+        electricOld: _electricOld,
+        electricNew: _electricNew,
+        waterOld: _waterOld,
+        waterNew: _waterNew,
+        isRecorded: true,
+      ));
+
+      // 2. Save or Update Invoice
+      final invoice = Invoice(
+        id: _existingInvoice?.id ?? const Uuid().v4(),
+        ownerId: ownerId,
+        roomId: widget.roomId,
+        month: _currentMonth,
+        totalAmount: _total,
+        status: InvoiceStatus.waitingPayment,
+        dueDate: dueDate,
+      );
+      
+      await invoiceRepo.saveInvoice(invoice);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -417,7 +442,7 @@ class _CreateInvoicePageState extends State<CreateInvoicePage> {
                             fontSize: 13, color: AppColors.textSecondary)),
                     const SizedBox(height: 4),
                     StatefulBuilder(
-                      builder: (_, __) => Text(
+                      builder: (context, setState) => Text(
                         _fmtDouble(_total),
                         style: GoogleFonts.manrope(
                             fontSize: 22,

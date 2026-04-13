@@ -123,12 +123,30 @@ class InvoiceStatusPage extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Text(
-                      'THÁNG $_currentMonth',
-                      style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textTertiary),
+                    GestureDetector(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: ref.read(invoiceSelectedMonthProvider),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          ref.read(invoiceSelectedMonthProvider.notifier).state = picked;
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            'THÁNG ${ref.watch(invoiceSelectedMonthProvider).month.toString().padLeft(2, '0')}/${ref.watch(invoiceSelectedMonthProvider).year}',
+                            style: GoogleFonts.manrope(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textTertiary),
+                          ),
+                          const Icon(Icons.arrow_drop_down, color: AppColors.textTertiary, size: 16),
+                        ],
+                      ),
                     ),
                     const Spacer(),
                     filteredInvoicesAsync.whenData((invoices) => Text(

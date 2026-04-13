@@ -2217,6 +2217,17 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2227,6 +2238,7 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
     status,
     dueDate,
     paidDate,
+    createdAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2292,6 +2304,12 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
         paidDate.isAcceptableOrUnknown(data['paid_date']!, _paidDateMeta),
       );
     }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
     return context;
   }
 
@@ -2340,6 +2358,10 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
         DriftSqlType.string,
         data['${effectivePrefix}paid_date'],
       ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      ),
     );
   }
 
@@ -2361,6 +2383,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
   final Value<InvoiceStatus> status;
   final Value<String?> dueDate;
   final Value<String?> paidDate;
+  final Value<String?> createdAt;
   final Value<int> rowid;
   const InvoicesCompanion({
     this.id = const Value.absent(),
@@ -2371,6 +2394,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     this.status = const Value.absent(),
     this.dueDate = const Value.absent(),
     this.paidDate = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   InvoicesCompanion.insert({
@@ -2382,6 +2406,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     required InvoiceStatus status,
     this.dueDate = const Value.absent(),
     this.paidDate = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        ownerId = Value(ownerId),
@@ -2398,6 +2423,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     Expression<String>? status,
     Expression<String>? dueDate,
     Expression<String>? paidDate,
+    Expression<String>? createdAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2409,6 +2435,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
       if (status != null) 'status': status,
       if (dueDate != null) 'due_date': dueDate,
       if (paidDate != null) 'paid_date': paidDate,
+      if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2422,6 +2449,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     Value<InvoiceStatus>? status,
     Value<String?>? dueDate,
     Value<String?>? paidDate,
+    Value<String?>? createdAt,
     Value<int>? rowid,
   }) {
     return InvoicesCompanion(
@@ -2433,6 +2461,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
       status: status ?? this.status,
       dueDate: dueDate ?? this.dueDate,
       paidDate: paidDate ?? this.paidDate,
+      createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2466,6 +2495,9 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     if (paidDate.present) {
       map['paid_date'] = Variable<String>(paidDate.value);
     }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2483,6 +2515,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
           ..write('status: $status, ')
           ..write('dueDate: $dueDate, ')
           ..write('paidDate: $paidDate, ')
+          ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4090,6 +4123,7 @@ typedef $$InvoicesTableCreateCompanionBuilder =
       required InvoiceStatus status,
       Value<String?> dueDate,
       Value<String?> paidDate,
+      Value<String?> createdAt,
       Value<int> rowid,
     });
 typedef $$InvoicesTableUpdateCompanionBuilder =
@@ -4102,6 +4136,7 @@ typedef $$InvoicesTableUpdateCompanionBuilder =
       Value<InvoiceStatus> status,
       Value<String?> dueDate,
       Value<String?> paidDate,
+      Value<String?> createdAt,
       Value<int> rowid,
     });
 
@@ -4154,6 +4189,11 @@ class $$InvoicesTableFilterComposer
     column: $table.paidDate,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$InvoicesTableOrderingComposer
@@ -4204,6 +4244,11 @@ class $$InvoicesTableOrderingComposer
     column: $table.paidDate,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$InvoicesTableAnnotationComposer
@@ -4240,6 +4285,9 @@ class $$InvoicesTableAnnotationComposer
 
   GeneratedColumn<String> get paidDate =>
       $composableBuilder(column: $table.paidDate, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
 class $$InvoicesTableTableManager
@@ -4278,6 +4326,7 @@ class $$InvoicesTableTableManager
                 Value<InvoiceStatus> status = const Value.absent(),
                 Value<String?> dueDate = const Value.absent(),
                 Value<String?> paidDate = const Value.absent(),
+                Value<String?> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => InvoicesCompanion(
                 id: id,
@@ -4288,6 +4337,7 @@ class $$InvoicesTableTableManager
                 status: status,
                 dueDate: dueDate,
                 paidDate: paidDate,
+                createdAt: createdAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4300,6 +4350,7 @@ class $$InvoicesTableTableManager
                 required InvoiceStatus status,
                 Value<String?> dueDate = const Value.absent(),
                 Value<String?> paidDate = const Value.absent(),
+                Value<String?> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => InvoicesCompanion.insert(
                 id: id,
@@ -4310,6 +4361,7 @@ class $$InvoicesTableTableManager
                 status: status,
                 dueDate: dueDate,
                 paidDate: paidDate,
+                createdAt: createdAt,
                 rowid: rowid,
               ),
           withReferenceMapper:

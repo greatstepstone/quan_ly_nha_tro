@@ -184,6 +184,20 @@ class _TenantCard extends ConsumerWidget {
                 const SizedBox(height: 10),
                 Row(
                   children: [
+                    const Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.textTertiary),
+                    const SizedBox(width: 4),
+                    Text('Từ: ${tenant.startDate}',
+                        style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
+                    const Spacer(),
+                    const Icon(Icons.account_balance_wallet_outlined, size: 13, color: AppColors.textTertiary),
+                    const SizedBox(width: 4),
+                    Text('Cọc: ${_fmt(tenant.deposit)}',
+                        style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
                     const Icon(Icons.door_front_door_outlined, size: 14, color: AppColors.primary),
                     const SizedBox(width: 6),
                     Text(room.name,
@@ -330,4 +344,15 @@ class _TenantStatsBanner extends StatelessWidget {
       ),
     );
   }
+}
+
+String _fmt(double value) {
+  final v = value.toInt();
+  final s = v.toString();
+  final result = StringBuffer();
+  for (int i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) result.write('.');
+    result.write(s[i]);
+  }
+  return '${result.toString()}đ';
 }

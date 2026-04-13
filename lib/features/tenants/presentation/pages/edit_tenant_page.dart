@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:async';
-import 'package:drift/drift.dart' hide Column;
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/database/database.dart';
 import '../../../../core/models/models.dart';
+import '../../../../core/providers/room_providers.dart';
+import '../../../../core/providers/tenant_providers.dart';
 
-class EditTenantPage extends StatefulWidget {
+class EditTenantPage extends ConsumerStatefulWidget {
   final String tenantId;
   const EditTenantPage({super.key, required this.tenantId});
 
   @override
-  State<EditTenantPage> createState() => _EditTenantPageState();
+  ConsumerState<EditTenantPage> createState() => _EditTenantPageState();
 }
 
-class _EditTenantPageState extends State<EditTenantPage> {
+class _EditTenantPageState extends ConsumerState<EditTenantPage> {
   late TextEditingController _name;
   late TextEditingController _phone;
   late TextEditingController _dob;
@@ -38,13 +38,16 @@ class _EditTenantPageState extends State<EditTenantPage> {
     _hometown = TextEditingController();
     _startDate = TextEditingController();
     _deposit = TextEditingController();
-    _loadData();
+    Future.microtask(() => _loadData());
   }
 
   Future<void> _loadData() async {
-    _tenant = await appDb.appDao.watchTenant(widget.tenantId).first;
+    final tenantRepo = ref.read(tenantRepositoryProvider);
+    final roomRepo = ref.read(roomRepositoryProvider);
+
+    _tenant = await tenantRepo.getTenantById(widget.tenantId);
     if (_tenant != null) {
-      _room = await appDb.appDao.getRoomById(_tenant!.roomId);
+      _room = await roomRepo.getRoomById(_tenant!.roomId);
       _name.text = _tenant!.name;
       _phone.text = _tenant!.phone;
       _dob.text = _tenant!.dateOfBirth;
@@ -169,22 +172,24 @@ class _EditTenantPageState extends State<EditTenantPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading || _tenant == null ? null : () async {
                     try {
-                      final updatedTenant = TenantsCompanion(
-                        id: Value(_tenant!.id),
-                        ownerId: Value(_tenant!.ownerId),
-                        roomId: Value(_tenant!.roomId),
-                        propertyId: Value(_tenant!.propertyId),
-                        isVerified: Value(_tenant!.isVerified),
-                        name: Value(_name.text),
-                        phone: Value(_phone.text),
-                        dateOfBirth: Value(_dob.text),
-                        cccd: Value(_cccd.text),
-                        hometown: Value(_hometown.text),
-                        startDate: Value(_startDate.text),
-                        deposit: Value(double.tryParse(_deposit.text) ?? 0.0),
+                      final tenantRepo = ref.read(tenantRepositoryProvider);
+                      
+                      final updatedTenant = Tenant(
+                        id: _tenant!.id,
+                        ownerId: _tenant!.ownerId,
+                        roomId: _tenant!.roomId,
+                        propertyId: _tenant!.propertyId,
+                        isVerified: _tenant!.isVerified,
+                        name: _name.text,
+                        phone: _phone.text,
+                        dateOfBirth: _dob.text,
+                        cccd: _cccd.text,
+                        hometown: _hometown.text,
+                        startDate: _startDate.text,
+                        deposit: double.tryParse(_deposit.text.replaceAll(',', '')) ?? 0.0,
                       );
                       
-                      await appDb.appDao.updateTenant(updatedTenant);
+                      await tenantRepo.saveTenant(updatedTenant);
                       
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(

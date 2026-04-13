@@ -17,15 +17,41 @@ import '../../features/reports/presentation/pages/reports_page.dart';
 import '../../features/reports/presentation/pages/property_report_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/pages/owner_profile_page.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/register_page.dart';
 import '../widgets/main_scaffold.dart';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/',
+  initialLocation: '/login',
+  redirect: (context, state) {
+    final session = Supabase.instance.client.auth.currentSession;
+    final isLoggingIn = state.matchedLocation == '/login' || state.matchedLocation == '/register';
+
+    if (session == null) {
+      // Chưa đăng nhập: Chỉ cho phép ở trang login/register
+      return isLoggingIn ? null : '/login';
+    }
+
+    // Đã đăng nhập: Nếu đang ở trang login/register thì đẩy về Home
+    if (isLoggingIn) return '/';
+
+    return null;
+  },
   routes: [
+    GoRoute(
+      path: '/login',
+      builder: (c, s) => const LoginPage(),
+    ),
+    GoRoute(
+      path: '/register',
+      builder: (c, s) => const RegisterPage(),
+    ),
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) => MainScaffold(child: child),

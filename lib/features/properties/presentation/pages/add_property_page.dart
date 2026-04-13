@@ -4,14 +4,18 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/database/database.dart';
 import '../../../../core/models/models.dart';
-class AddPropertyPage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/property_providers.dart';
+import '../../../../features/auth/presentation/providers/auth_providers.dart';
+
+class AddPropertyPage extends ConsumerStatefulWidget {
   const AddPropertyPage({super.key});
 
   @override
-  State<AddPropertyPage> createState() => _AddPropertyPageState();
+  ConsumerState<AddPropertyPage> createState() => _AddPropertyPageState();
 }
 
-class _AddPropertyPageState extends State<AddPropertyPage> {
+class _AddPropertyPageState extends ConsumerState<AddPropertyPage> {
   final _nameCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
   final _electricCtrl = TextEditingController(text: '0');
@@ -117,11 +121,13 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                 return;
               }
 
+              final ownerId = ref.read(currentUserProvider)?.id ?? 'UNKNOWN';
+
               final propertyId = 'PROP_${DateTime.now().millisecondsSinceEpoch}';
               
-              final newProperty = PropertiesCompanion.insert(
+              final property = Property(
                 id: propertyId,
-                ownerId: 'OWNER_TEST', // Giả lập ID chủ trọ
+                ownerId: ownerId,
                 name: _nameCtrl.text,
                 address: _addressCtrl.text,
                 totalRooms: 0,
@@ -130,8 +136,8 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                 waterBillingType: BillingType.byMeter,
               );
 
-              // Lưu nhà trọ vào DB
-              await appDb.appDao.insertProperty(newProperty);
+              // Lưu nhà trọ qua Repository (tự động sync)
+              await ref.read(propertyRepositoryProvider).addProperty(property);
 
               // Lưu các dịch vụ (nếu có giá trị > 0)
               final internetPrice = double.tryParse(_internetCtrl.text) ?? 0;

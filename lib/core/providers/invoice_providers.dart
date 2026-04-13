@@ -1,53 +1,77 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../models/models.dart';
+import '../../features/invoices/data/data_sources/invoice_remote_data_source.dart';
+import '../../features/invoices/data/repositories/invoice_repository.dart';
+import '../../features/invoices/data/repositories/invoice_repository_impl.dart';
 import 'database_providers.dart';
-import 'room_providers.dart';
+import 'property_providers.dart';
 
-/// Provider watch toàn bộ danh sách hóa đơn
+final invoiceRemoteDataSourceProvider = Provider<InvoiceRemoteDataSource>((ref) {
+  final client = ref.watch(supabaseClientProvider);
+  return InvoiceRemoteDataSource(client);
+});
+
+final invoiceRepositoryProvider = Provider<InvoiceRepository>((ref) {
+  final local = ref.watch(appDaoProvider);
+  final remote = ref.watch(invoiceRemoteDataSourceProvider);
+  return InvoiceRepositoryImpl(localDataSource: local, remoteDataSource: remote);
+});
 final allInvoicesProvider = StreamProvider<List<Invoice>>((ref) {
-  final dao = ref.watch(appDaoProvider);
-  return dao.watchAllInvoices();
+  return ref.watch(invoiceRepositoryProvider).watchAllInvoices();
 });
 
-/// Provider lưu trạng thái lọc hóa đơn (null: Tất cả, hoặc InvoiceStatus)
-final invoiceFilterStatusProvider = StateProvider<InvoiceStatus?>((ref) => null);
 
-/// Provider lưu Property ID đang được chọn lọc (null = mặc định cái đầu tiên)
+final roomInvoicesProvider = StreamProvider.family<List<Invoice>, String>((ref, roomId) {
+  return ref.watch(invoiceRepositoryProvider).watchInvoicesByRoom(roomId);
+});
+
+// UI State Providers for Invoice Status Page
 final invoiceSelectedPropertyIdProvider = StateProvider<String?>((ref) => null);
+final invoiceFilterStatusProvider = StateProvider<InvoiceStatus?>((ref) => null);
+final invoiceSelectedMonthProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
-/// Provider lọc danh sách hóa đơn dựa trên trạng thái và nhà trọ
-final filteredInvoicesProvider = Provider<AsyncValue<List<Invoice>>>((ref) {
-  final allInvoicesAsync = ref.watch(allInvoicesProvider);
-  final allRoomsAsync = ref.watch(allRoomsProvider);
-  final filterStatus = ref.watch(invoiceFilterStatusProvider);
-  final selectedPropId = ref.watch(invoiceSelectedPropertyIdProvider);
+final filteredInvoicesProvider = FutureProvider<List<Invoice>>((ref) async {
+  final repo = ref.watch(invoiceRepositoryProvider);
+  final propertyId = ref.watch(invoiceSelectedPropertyIdProvider);
+  final status = ref.watch(invoiceFilterStatusProvider);
+  final selectedMonth = ref.watch(invoiceSelectedMonthProvider);
+  
+  if (propertyId == null) return [];
+  
+  final allInvoices = await repo.getAllInvoices();
+  final allRooms = await ref.watch(appDaoProvider).getAllRooms();
+  final propertyRoomIds = allRooms.where((r) => r.propertyId == propertyId).map((r) => r.id).toSet();
 
-  // Kết hợp AsyncValue từ Invoices và Rooms
-  return allInvoicesAsync.when(
-    data: (invoices) => allRoomsAsync.when(
-      data: (rooms) {
-        final roomMap = {for (final r in rooms) r.id: r};
-        
-        return invoices.where((inv) {
-          final room = roomMap[inv.roomId];
-          if (room == null) return false;
-
-          final matchesStatus = filterStatus == null || inv.status == filterStatus;
-          final matchesProp = selectedPropId == null || room.propertyId == selectedPropId;
-          
-          return matchesStatus && matchesProp;
-        }).toList();
-      },
-      loading: () => const AsyncValue.loading(),
-      error: (e, s) => AsyncValue.error(e, s),
-    ),
-    loading: () => const AsyncValue.loading(),
-    error: (e, s) => AsyncValue.error(e, s),
-  );
+  return allInvoices.where((inv) {
+    bool matchesMonth = true;
+    if (inv.createdAt != null) {
+      final date = DateTime.parse(inv.createdAt!);
+      matchesMonth = date.month == selectedMonth.month && date.year == selectedMonth.year;
+    }
+    
+    final matchesProperty = propertyRoomIds.contains(inv.roomId);
+    final matchesStatus = status == null || inv.status == status;
+    return matchesProperty && matchesStatus && matchesMonth;
+  }).toList();
 });
 
-/// Provider watch danh sách hóa đơn theo Room ID
-final invoicesByRoomProvider = StreamProvider.family<List<Invoice>, String>((ref, roomId) {
-  final dao = ref.watch(appDaoProvider);
-  return dao.watchInvoicesByRoom(roomId);
+// Thống kê doanh thu tháng hiện tại (đã thanh toán)
+final totalMonthlyRevenueProvider = Provider<AsyncValue<double>>((ref) {
+  final invoicesAsync = ref.watch(allInvoicesProvider);
+  return invoicesAsync.whenData((invs) {
+    return invs
+        .where((i) => i.status == InvoiceStatus.paid)
+        .fold(0.0, (sum, i) => sum + i.totalAmount);
+  });
+});
+
+// Thống kê nợ (chưa thanh toán & không phải 'chưa lập')
+final totalOutstandingDebtProvider = Provider<AsyncValue<double>>((ref) {
+  final invoicesAsync = ref.watch(allInvoicesProvider);
+  return invoicesAsync.whenData((invs) {
+    return invs
+        .where((i) => i.status != InvoiceStatus.paid && i.status != InvoiceStatus.notCreated)
+        .fold(0.0, (sum, i) => sum + i.totalAmount);
+  });
 });

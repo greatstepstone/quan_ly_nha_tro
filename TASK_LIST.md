@@ -20,7 +20,7 @@ Dựa trên quá trình phát triển ứng dụng và những thay đổi kiế
 - [x] **Tích hợp Database cục bộ (Local Storage):** Setup SQLite (hoặc `drift`/`isar`) để lưu trữ dữ liệu các model offline trên thiết bị.
 - [x] **Kết nối UI với Database:** Thay thế toàn bộ `MockData` trên các màn hình bằng dữ liệu thật đọc ra từ Local Database (tạo kho chứa dữ liệu - Repositories/Data Providers). Chi tiết tại [SUB_TASKS_UI_CONNECT_LOCAL_DB.md](SUB_TASKS_UI_CONNECT_LOCAL_DB.md).
 - [ ] **Quản lý trạng thái (State Management):** Tích hợp Riverpod để theo dõi và cập nhật state. Chi tiết tại [SUB_TASKS_UI_STATE_MANAGEMENT.md](SUB_TASKS_UI_STATE_MANAGEMENT.md).
-- [ ] **Tích hợp Supabase (Backend as a Service):** Cơ sở hạ tầng cloud để đồng bộ hóa dữ liệu trực tuyến.
+- [ ] **Tích hợp Supabase (Backend as a Service):** Cơ sở hạ tầng cloud để đồng bộ hóa dữ liệu trực tuyến. Chi tiết tại [SUB_TASKS_CONNECT_SUPABASE.md](SUB_TASKS_CONNECT_SUPABASE.md).
 - [ ] **Xác thực người dùng (Authentication):** Hoàn thiện luồng Đăng nhập/Đăng ký dành cho chủ trọ, kết nối với Supabase Auth.
 
 ---
