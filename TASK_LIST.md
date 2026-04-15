@@ -19,8 +19,8 @@ Dựa trên quá trình phát triển ứng dụng và những thay đổi kiế
 
 - [x] **Tích hợp Database cục bộ (Local Storage):** Setup SQLite (hoặc `drift`/`isar`) để lưu trữ dữ liệu các model offline trên thiết bị.
 - [x] **Kết nối UI với Database:** Thay thế toàn bộ `MockData` trên các màn hình bằng dữ liệu thật đọc ra từ Local Database (tạo kho chứa dữ liệu - Repositories/Data Providers). Chi tiết tại [SUB_TASKS_UI_CONNECT_LOCAL_DB.md](SUB_TASKS_UI_CONNECT_LOCAL_DB.md).
-- [ ] **Quản lý trạng thái (State Management):** Tích hợp Riverpod để theo dõi và cập nhật state. Chi tiết tại [SUB_TASKS_UI_STATE_MANAGEMENT.md](SUB_TASKS_UI_STATE_MANAGEMENT.md).
-- [ ] **Tích hợp Supabase (Backend as a Service):** Cơ sở hạ tầng cloud để đồng bộ hóa dữ liệu trực tuyến. Chi tiết tại [SUB_TASKS_CONNECT_SUPABASE.md](SUB_TASKS_CONNECT_SUPABASE.md).
+- [x] **Quản lý trạng thái (State Management):** Tích hợp Riverpod để theo dõi và cập nhật state. Chi tiết tại [SUB_TASKS_UI_STATE_MANAGEMENT.md](SUB_TASKS_UI_STATE_MANAGEMENT.md).
+- [x] **Tích hợp Supabase (Backend as a Service):** Cơ sở hạ tầng cloud để đồng bộ hóa dữ liệu trực tuyến. Chi tiết tại [SUB_TASKS_CONNECT_SUPABASE.md](SUB_TASKS_CONNECT_SUPABASE.md).
 - [ ] **Xác thực người dùng (Authentication):** Hoàn thiện luồng Đăng nhập/Đăng ký dành cho chủ trọ, kết nối với Supabase Auth.
 
 ---
@@ -28,17 +28,20 @@ Dựa trên quá trình phát triển ứng dụng và những thay đổi kiế
 ## 🔶 Cần Làm (Need to Do)
 *Những tính năng quan trọng để ứng dụng có thể xử lý đúng nghiệp vụ quản lý nhà trọ.*
 
-- [ ] **Logic tính Hóa đơn (Invoice Calculation):** Tự động tính chốt tiền phòng mỗi tháng = Tiền phòng + Phí điện + Phí nước (tùy theo `waterBillingType`) + Dịch vụ động (`Services`).
-- [ ] **Nghiệp vụ chốt điện nước (Meter Readings):** Luồng nhập số điện/nước hàng tháng tự động lưu "Chỉ số mới" của tháng này thành "Chỉ số cũ" của tháng sau.
-- [ ] **Chức năng thêm/sửa/xóa (CRUD):** Các form nhập liệu để Chủ trọ thực sự tạo được Phòng, Thêm Khách thuê, Thiết lập Dịch vụ.
-- [ ] **Chế độ Tối (Dark Mode) & Ngôn ngữ:** Code logic cho các nút cài đặt hệ thống trên trang `settings_page`.
+- [x] **Logic tính Hóa đơn (Invoice Calculation):** Tự động tính chốt tiền phòng mỗi tháng = Tiền phòng + Phí điện + Phí nước (tùy theo `waterBillingType`) + Dịch vụ động (`Services`).
+- [x] **Nghiệp vụ chốt điện nước (Meter Readings):** Luồng nhập số điện/nước hàng tháng tự động lưu "Chỉ số mới" của tháng này thành "Chỉ số cũ" của tháng sau.
+- [x] **Chức năng sửa phòng / thêm khách:** Các form nhập liệu để Chủ trọ thực sự Sửa thông tin Phòng và Thêm Khách thuê vào phòng trống.
+- [x] **Chế độ Tối (Dark Mode):** Cơ chế đổi theme và Code logic cho nút Cài đặt Hệ thống trên trang `settings_page`.
+- [x] **Tái cấu trúc Resources (MVVM/Clean Architecture):** Tách AppColors, AppStrings, AppValues vào `lib/core/resources/` chuẩn bị cho đa ngôn ngữ.
+- [x] **Đa Ngôn ngữ (Localization):** Code logic đổi ngôn ngữ trên trang `settings_page` (Tiếng Việt / Tiếng Anh).
 
 ---
 
 ## 🌟 Có Thể Làm (Can Do - Nice to haves)
 *Những tính năng nâng cao giúp ứng dụng của bạn trở nên chuyên nghiệp và khác biệt.*
 
-- [ ] **Xuất & Chia sẻ Hóa Đơn:** Export hóa đơn dưới dạng Ảnh (Image) hoặc PDF format để gửi trực tiếp qua Zalo/Messenger cho khách thuê.
-- [ ] **Dashboard Thống kê:** Thêm biểu đồ trực quan xem tổng doanh thu hàng tháng, tỷ lệ lấp đầy phòng trống.
+- [x] **Xuất & Chia sẻ Hóa Đơn:** Export hóa đơn dưới dạng Ảnh (Image) hoặc PDF format để gửi trực tiếp qua Zalo/Messenger cho khách thuê.
+- [x] **Dashboard Thống kê:** Thêm biểu đồ trực quan xem tổng doanh thu hàng tháng, tỷ lệ lấp đầy phòng trống.
 - [ ] **Thông báo (Push Notifications/Reminders):** Nhắc nhở local trên điện thoại các ngày tới hạn thu tiền phòng hoặc hóa đơn đã quá hạn (Overdue).
 - [ ] **Phân quyền Khách thuê (Tenant Portal):** Dựa vào `ownerId` và `tenantId`, cho phép app có chế độ đăng nhập dành riêng cho khách để họ tự theo dõi hóa đơn phòng mình.
+- [x] **Thiết lập & Quản lý Dịch vụ:** Giao diện cho phép chủ trọ chỉnh sửa lại giá điện, giá nước, và cấu hình thêm/bớt các dịch vụ (rác, wifi...) sau khi đã tạo nhà trọ.

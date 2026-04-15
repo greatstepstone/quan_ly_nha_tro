@@ -81,6 +81,72 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
+  Future<Invoice> calculateInvoice(String roomId, String month) async {
+    final room = await localDataSource.getRoomById(roomId);
+    if (room == null) throw Exception('Room not found');
+
+    final property = await localDataSource.getPropertyById(room.propertyId);
+    if (property == null) throw Exception('Property not found');
+
+    final meter = await localDataSource.getMeterReadingByRoomAndMonth(roomId, month);
+    if (meter == null) throw Exception('Meter reading not found for this month');
+
+    final tenants = await localDataSource.getTenantsByRoom(roomId);
+    final tenantCount = tenants.length;
+
+    double electricFee = 0;
+    if (meter.electricNew != null) {
+      electricFee = (meter.electricNew! - meter.electricOld) * property.electricityPrice;
+    }
+
+    double waterFee = 0;
+    switch (property.waterBillingType) {
+      case BillingType.byMeter:
+        if (meter.waterNew != null) {
+          waterFee = (meter.waterNew! - meter.waterOld) * property.waterPrice;
+        }
+        break;
+      case BillingType.perPerson:
+        waterFee = tenantCount * property.waterPrice;
+        break;
+      case BillingType.fixed:
+        waterFee = property.waterPrice;
+        break;
+    }
+
+    final services = await localDataSource.getServicesByProperty(property.id);
+    double serviceFee = 0;
+    for (var service in services) {
+      switch (service.type) {
+        case BillingType.perPerson:
+          serviceFee += tenantCount * service.price;
+          break;
+        case BillingType.fixed:
+          serviceFee += service.price;
+          break;
+        case BillingType.byMeter:
+          break;
+      }
+    }
+
+    final totalAmount = room.rentPrice + electricFee + waterFee + serviceFee;
+
+    final existingInvoice = await localDataSource.getInvoiceByRoomAndMonth(roomId, month);
+    
+    return Invoice(
+      id: existingInvoice?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      ownerId: room.ownerId,
+      roomId: roomId,
+      month: month,
+      totalAmount: totalAmount,
+      status: existingInvoice?.status ?? InvoiceStatus.notCreated,
+      dueDate: existingInvoice?.dueDate,
+      paidDate: existingInvoice?.paidDate,
+      createdAt: existingInvoice?.createdAt ?? DateTime.now().toIso8601String(),
+    );
+  }
+
+  @override
   Future<void> deleteInvoice(String id) async {
     await localDataSource.deleteInvoice(id);
     try {

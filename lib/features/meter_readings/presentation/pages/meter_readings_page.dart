@@ -30,7 +30,7 @@ class _MeterReadingsPageState extends ConsumerState<MeterReadingsPage> {
       appBar: AppBar(
         title: const Text('Meter Readings'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
       ),
@@ -65,7 +65,7 @@ class _MeterReadingsPageState extends ConsumerState<MeterReadingsPage> {
                           child: DropdownButton<String>(
                             value: currentPropertyId,
                             isExpanded: true,
-                            icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+                            icon: Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
                             items: properties.map((Property p) => DropdownMenuItem(
                               value: p.id,
                               child: Text(p.name, style: GoogleFonts.manrope(fontWeight: FontWeight.w600, fontSize: 15)),
@@ -85,9 +85,9 @@ class _MeterReadingsPageState extends ConsumerState<MeterReadingsPage> {
                     child: Row(
                       children: [
                         _FilterChip(label: 'Tất cả', isActive: _filter == 0, onTap: () => setState(() => _filter = 0)),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         _FilterChip(label: 'Chưa ghi', isActive: _filter == 1, onTap: () => setState(() => _filter = 1)),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         _FilterChip(label: 'Đã ghi', isActive: _filter == 2, onTap: () => setState(() => _filter = 2)),
                       ],
                     ),
@@ -102,7 +102,7 @@ class _MeterReadingsPageState extends ConsumerState<MeterReadingsPage> {
                           style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
 
                   Expanded(
                     child: ListView(
@@ -129,11 +129,11 @@ class _MeterReadingsPageState extends ConsumerState<MeterReadingsPage> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: ElevatedButton.icon(
-            icon: const Icon(Icons.save_outlined),
+            icon: Icon(Icons.save_outlined),
             label: const Text('Lưu tất cả'),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Đã lưu chỉ số!')),
+                SnackBar(content: Text('Đã lưu chỉ số!')),
               );
             },
             style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 52)),
@@ -208,9 +208,9 @@ class _MeterReadingCardState extends State<_MeterReadingCard> {
                   Container(
                     width: 44, height: 44,
                     decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(10)),
-                    child: const Icon(Icons.door_front_door_outlined, color: AppColors.primary, size: 22),
+                    child: Icon(Icons.door_front_door_outlined, color: AppColors.primary, size: 22),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,8 +226,8 @@ class _MeterReadingCardState extends State<_MeterReadingCard> {
                     decoration: BoxDecoration(color: AppColors.redLight, borderRadius: BorderRadius.circular(20)),
                     child: Row(
                       children: [
-                        Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.red, shape: BoxShape.circle)),
-                        const SizedBox(width: 4),
+                        Container(width: 6, height: 6, decoration: BoxDecoration(color: AppColors.red, shape: BoxShape.circle)),
+                        SizedBox(width: 4),
                         Text('Chưa ghi', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.red)),
                       ],
                     ),
@@ -235,7 +235,7 @@ class _MeterReadingCardState extends State<_MeterReadingCard> {
                 ],
               ),
             ),
-            const Divider(height: 0, color: AppColors.surface),
+            Divider(height: 0, color: AppColors.surface),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -245,7 +245,7 @@ class _MeterReadingCardState extends State<_MeterReadingCard> {
                     oldValue: widget.reading.electricOld.toString(),
                     controller: _electricCtrl,
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   _ReadingRow(
                     icon: Icons.water_drop, iconColor: AppColors.primary, label: 'NƯỚC (M³)',
                     oldValue: widget.reading.waterOld.toString(),
@@ -280,9 +280,9 @@ class _RecordedCard extends StatelessWidget {
           Container(
             width: 44, height: 44,
             decoration: BoxDecoration(color: AppColors.surfaceContainer, borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.door_front_door_outlined, color: AppColors.textTertiary, size: 22),
+            child: Icon(Icons.door_front_door_outlined, color: AppColors.textTertiary, size: 22),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,29 +295,29 @@ class _RecordedCard extends StatelessWidget {
                       decoration: BoxDecoration(color: AppColors.emeraldLight, borderRadius: BorderRadius.circular(20)),
                       child: Row(
                         children: [
-                          Container(width: 6, height: 6, decoration: const BoxDecoration(color: AppColors.emerald, shape: BoxShape.circle)),
-                          const SizedBox(width: 4),
+                          Container(width: 6, height: 6, decoration: BoxDecoration(color: AppColors.emerald, shape: BoxShape.circle)),
+                          SizedBox(width: 4),
                           Text('Đã ghi', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.emerald)),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.bolt, size: 14, color: AppColors.textTertiary),
-                    const SizedBox(width: 4),
+                    Icon(Icons.bolt, size: 14, color: AppColors.textTertiary),
+                    SizedBox(width: 4),
                     Text('ĐIỆN', style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textTertiary)),
                     const Spacer(),
                     Text('${reading.electricNew} kWh', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                   ],
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.water_drop, size: 14, color: AppColors.textTertiary),
-                    const SizedBox(width: 4),
+                    Icon(Icons.water_drop, size: 14, color: AppColors.textTertiary),
+                    SizedBox(width: 4),
                     Text('NƯỚC', style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textTertiary)),
                     const Spacer(),
                     Text('${reading.waterNew} m³', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
@@ -345,11 +345,11 @@ class _ReadingRow extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, color: iconColor, size: 16),
-        const SizedBox(width: 6),
+        SizedBox(width: 6),
         Text(label, style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: iconColor)),
         const Spacer(),
         Text('Cũ: $oldValue', style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         SizedBox(
           width: 100,
           child: TextField(
@@ -364,7 +364,7 @@ class _ReadingRow extends StatelessWidget {
             ),
           ),
         ),
-        IconButton(icon: const Icon(Icons.camera_alt_outlined, size: 18, color: AppColors.textTertiary), onPressed: () {}),
+        IconButton(icon: Icon(Icons.camera_alt_outlined, size: 18, color: AppColors.textTertiary), onPressed: () {}),
       ],
     );
   }

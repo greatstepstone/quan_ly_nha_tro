@@ -239,7 +239,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       appBar: AppBar(
         title: const Text('Thêm phòng mới'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -269,7 +269,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                     children: [
                       // Property dropdown
                       _FieldLabel(label: 'TÊN NHÀ'),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       if (_properties.isEmpty)
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -296,7 +296,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                                 (p) => p.id == _selectedPropertyId) 
                                 ? _selectedPropertyId : null,
                               isExpanded: true,
-                              icon: const Icon(Icons.arrow_drop_down,
+                              icon: Icon(Icons.arrow_drop_down,
                                   color: AppColors.textSecondary),
                               items: _properties
                                   .map((p) => DropdownMenuItem(
@@ -312,17 +312,17 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                             ),
                           ),
                         ),
-                      const SizedBox(height: 14),
+                      SizedBox(height: 14),
 
                       // Room name
                       _FieldLabel(label: 'TÊN PHÒNG'),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       _TextField(ctrl: _roomName, hint: '101'),
-                      const SizedBox(height: 14),
+                      SizedBox(height: 14),
 
                       // Start date
                       _FieldLabel(label: 'NGÀY BẮT ĐẦU THUÊ'),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       GestureDetector(
                         onTap: _pickStartDate,
                         child: Container(
@@ -342,7 +342,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                                     color: AppColors.textPrimary),
                               ),
                               const Spacer(),
-                              const Icon(Icons.calendar_today_outlined,
+                              Icon(Icons.calendar_today_outlined,
                                   size: 16, color: AppColors.textSecondary),
                             ],
                           ),
@@ -351,7 +351,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // ── Section: Thông tin người thuê ──
                 _SectionCard(
@@ -369,9 +369,9 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.add,
+                          Icon(Icons.add,
                               size: 14, color: AppColors.primary),
-                          const SizedBox(width: 4),
+                          SizedBox(width: 4),
                           Text('Thêm',
                               style: GoogleFonts.manrope(
                                   fontSize: 13,
@@ -402,7 +402,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                           }),
                         ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // ── Section: Chi tiết thuê phòng ──
                 _SectionCard(
@@ -412,14 +412,14 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _FieldLabel(label: 'GIÁ THUÊ PHÒNG (đ/THÁNG)'),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       _TextField(
                         ctrl: _rentPrice,
                         hint: '0',
                         keyboardType: TextInputType.number,
                         suffix: 'VND',
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
 
                       // Electric
                       Row(
@@ -431,10 +431,10 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                               color: AppColors.amberLight,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.bolt,
+                            child: Icon(Icons.bolt,
                                 color: AppColors.amber, size: 16),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Text('Điện',
                               style: GoogleFonts.manrope(
                                   fontSize: 14,
@@ -449,16 +449,16 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       _FieldLabel(label: 'CHỈ SỐ ĐIỆN HIỆN TẠI'),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       _TextField(
                         ctrl: _electricOld,
                         hint: '0',
                         keyboardType: TextInputType.number,
                         suffix: 'kWh',
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
 
                       // Water
                       Row(
@@ -470,10 +470,10 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                               color: AppColors.primaryLight,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.water_drop_outlined,
+                            child: Icon(Icons.water_drop_outlined,
                                 color: AppColors.primary, size: 16),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Text('Nước',
                               style: GoogleFonts.manrope(
                                   fontSize: 14,
@@ -488,7 +488,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
 
                       // Water mode toggle
                       Row(
@@ -499,7 +499,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                             onTap: () =>
                                 setState(() => _waterMode = 'byMeter'),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           _ModeChip(
                             label: 'Theo người',
                             isActive: _waterMode == 'perPerson',
@@ -508,13 +508,13 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       _FieldLabel(
                         label: _waterMode == 'byMeter'
                             ? 'CHỈ SỐ NƯỚC HIỆN TẠI'
                             : 'SỐ NGƯỜI HIỆN TẠI',
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6),
                       _TextField(
                         ctrl: _waterOld,
                         hint: '0',
@@ -531,13 +531,13 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: ElevatedButton.icon(
             icon: _isSaving
-                ? const SizedBox(
+                ? SizedBox(
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
                         color: Colors.white, strokeWidth: 2),
                   )
-                : const Icon(Icons.save_outlined),
+                : Icon(Icons.save_outlined),
             label: const Text('Hoàn tất & Lưu phòng'),
             onPressed: _isSaving ? null : _save,
             style: ElevatedButton.styleFrom(
@@ -601,63 +601,63 @@ class _TenantCard extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: AppColors.redLight, shape: BoxShape.circle),
                   child:
-                      const Icon(Icons.delete_outline, color: AppColors.red, size: 16),
+                      Icon(Icons.delete_outline, color: AppColors.red, size: 16),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
 
           _FieldLabel(label: 'HỌ VÀ TÊN'),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           _TextField(ctrl: form.nameCtrl, hint: 'Nhập tên'),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
 
           _FieldLabel(label: 'SỐ ĐIỆN THOẠI'),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           _TextField(
               ctrl: form.phoneCtrl,
               hint: '090...',
               keyboardType: TextInputType.phone),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
 
           _FieldLabel(label: 'CCCD / CMND'),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           _TextField(ctrl: form.cccdCtrl, hint: 'Nhập số CCCD'),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
 
           // CCCD photos
           Row(
             children: [
               Expanded(child: _PhotoSlot(label: 'MẶT TRƯỚC CCCD')),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Expanded(child: _PhotoSlot(label: 'MẶT SAU CCCD')),
             ],
           ),
 
           _FieldLabel(label: 'NGÀY SINH'),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           _TextField(ctrl: form.dateOfBirthCtrl, hint: 'dd/mm/yyyy'),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
 
           _FieldLabel(label: 'QUÊ QUÁN'),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           _TextField(ctrl: form.hometownCtrl, hint: 'Nhập quê quán'),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
 
           _FieldLabel(label: 'NGÀY BẮT ĐẦU THUÊ (dd/mm/yyyy)'),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           _TextField(ctrl: form.startDateCtrl, hint: 'dd/mm/yyyy'),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
 
           _FieldLabel(label: 'TIỀN CỌC (VND)'),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           _TextField(
               ctrl: form.depositCtrl,
               hint: '0',
               keyboardType: TextInputType.number,
               suffix: 'đ'),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
         ],
       ),
     );
@@ -695,7 +695,7 @@ class _SectionCard extends StatelessWidget {
           Row(
             children: [
               Icon(icon, size: 18, color: AppColors.primary),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(title,
                     style: GoogleFonts.manrope(
@@ -704,7 +704,7 @@ class _SectionCard extends StatelessWidget {
               if (action != null) action!,
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           child,
         ],
       ),
@@ -799,7 +799,7 @@ class _PhotoSlot extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 color: AppColors.textSecondary,
                 letterSpacing: 0.3)),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Container(
           height: 90,
           decoration: BoxDecoration(
@@ -812,9 +812,9 @@ class _PhotoSlot extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.camera_alt_outlined,
+              Icon(Icons.camera_alt_outlined,
                   color: AppColors.textTertiary, size: 24),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text('Tải lên',
                   style: GoogleFonts.manrope(
                       fontSize: 11, color: AppColors.textTertiary)),

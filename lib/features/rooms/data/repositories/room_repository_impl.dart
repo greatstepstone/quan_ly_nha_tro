@@ -58,6 +58,25 @@ class RoomRepositoryImpl implements RoomRepository {
   }
 
   @override
+  Future<void> saveRoom(Room room) async {
+    final companion = RoomsCompanion(
+      id: Value(room.id),
+      ownerId: Value(room.ownerId),
+      propertyId: Value(room.propertyId),
+      name: Value(room.name),
+      status: Value(room.status),
+      rentPrice: Value(room.rentPrice),
+      tenantId: Value(room.tenantId),
+    );
+    await localDataSource.updateRoom(companion);
+    try {
+      await remoteDataSource.upsertRoom(room);
+    } catch (e) {
+      print('Sync error (save room): $e');
+    }
+  }
+
+  @override
   Future<void> deleteRoom(String id) async {
     await localDataSource.deleteRoom(id);
     try {

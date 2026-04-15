@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/providers/theme_provider.dart';
+import 'core/providers/locale_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,14 +22,20 @@ void main() async {
   );
 }
 
-class QuanLyNhaTroApp extends StatelessWidget {
+class QuanLyNhaTroApp extends ConsumerWidget {
   const QuanLyNhaTroApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch ThemeProvider to trigger rebuild
+    final themeMode = ref.watch(themeProvider);
+    final localeCode = ref.watch(localeProvider);
+
     return MaterialApp.router(
       title: 'Quản Lý Nhà Trọ',
-      theme: AppTheme.lightTheme,
+      theme: AppTheme.lightTheme, // This now reacts dynamically to AppColors.isDark via themeMode trigger
+      themeMode: themeMode,
+      locale: Locale(localeCode), // Trigger app-wide locale updates
       routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
     );

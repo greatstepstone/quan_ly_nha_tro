@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/resources/string_manager.dart';
+import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/models/models.dart';
 import '../../../../core/providers/room_providers.dart';
 
@@ -20,6 +22,8 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(localeProvider); // Watch language change
+
     final roomsAsync = widget.propertyId != null 
         ? ref.watch(roomsByPropertyProvider(widget.propertyId!)) 
         : ref.watch(allRoomsProvider);
@@ -27,9 +31,9 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('Danh sách phòng'),
+        title: Text(AppStrings.roomsListTitle),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
       ),
@@ -53,13 +57,13 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
-                    _FilterChip(label: 'Tất cả', isActive: _filter == null, onTap: () => setState(() => _filter = null)),
-                    const SizedBox(width: 8),
-                    _FilterChip(label: 'Đang trống', isActive: _filter == RoomStatus.empty, onTap: () => setState(() => _filter = RoomStatus.empty)),
-                    const SizedBox(width: 8),
-                    _FilterChip(label: 'Đã thuê', isActive: _filter == RoomStatus.rented, onTap: () => setState(() => _filter = RoomStatus.rented)),
-                    const SizedBox(width: 8),
-                    _FilterChip(label: 'Đang sửa', isActive: _filter == RoomStatus.maintenance, onTap: () => setState(() => _filter = RoomStatus.maintenance)),
+                    _FilterChip(label: AppStrings.filterAll, isActive: _filter == null, onTap: () => setState(() => _filter = null)),
+                    SizedBox(width: 8),
+                    _FilterChip(label: AppStrings.filterEmpty, isActive: _filter == RoomStatus.empty, onTap: () => setState(() => _filter = RoomStatus.empty)),
+                    SizedBox(width: 8),
+                    _FilterChip(label: AppStrings.filterRented, isActive: _filter == RoomStatus.rented, onTap: () => setState(() => _filter = RoomStatus.rented)),
+                    SizedBox(width: 8),
+                    _FilterChip(label: AppStrings.filterMaintenance, isActive: _filter == RoomStatus.maintenance, onTap: () => setState(() => _filter = RoomStatus.maintenance)),
                   ],
                 ),
               ),
@@ -69,13 +73,13 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
                   onChanged: (v) => setState(() => _query = v),
-                  decoration: const InputDecoration(
-                    hintText: 'Tìm kiếm phòng theo tên hoặc số phòng...',
+                  decoration: InputDecoration(
+                    hintText: AppStrings.searchRoomHint,
                     prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
 
               // List
               Expanded(
@@ -85,21 +89,21 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
                     if (rooms.isEmpty && dbRooms.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 32),
-                        child: Center(child: Text('Không tìm thấy phòng phù hợp', style: GoogleFonts.manrope(color: AppColors.textSecondary))),
+                        child: Center(child: Text(AppStrings.noRoomFound, style: GoogleFonts.manrope(color: AppColors.textSecondary))),
                       )
                     else if (dbRooms.isEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 32),
-                        child: Center(child: Text('Chưa có phòng nào', style: GoogleFonts.manrope(color: AppColors.textSecondary))),
+                        child: Center(child: Text(AppStrings.noRoomYet, style: GoogleFonts.manrope(color: AppColors.textSecondary))),
                       )
                     else
                       ...rooms.map((r) => _RoomCard(room: r)),
                     
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     _AddRoomCard(onTap: () => context.push('/rooms/add?propertyId=${widget.propertyId ?? 'p1'}')),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     _QuickStatsBanner(occupied: occupied, total: total),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -107,7 +111,7 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Lỗi: $err', style: GoogleFonts.manrope(color: Colors.red))),
+        error: (err, stack) => Center(child: Text('${AppStrings.error}: $err', style: GoogleFonts.manrope(color: Colors.red))),
       ),
     );
   }
@@ -196,7 +200,7 @@ class _RoomCard extends StatelessWidget {
               decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
               child: Icon(_statusIcon(room.status), color: color, size: 24),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,19 +208,19 @@ class _RoomCard extends StatelessWidget {
                   Text(room.name, style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
                   Text('ID: ${room.id}', style: GoogleFonts.manrope(fontSize: 10, color: AppColors.textTertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
                   Text('OID: ${room.ownerId}', style: GoogleFonts.manrope(fontSize: 10, color: AppColors.textTertiary), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 3),
+                  SizedBox(height: 3),
                   Row(
                     children: [
                       Container(width: 7, height: 7, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-                      const SizedBox(width: 4),
-                      Text('Trạng thái: ${room.status.label}',
+                      SizedBox(width: 4),
+                      Text('${AppStrings.statusString}: ${room.status.label}',
                           style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
                     ],
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+            Icon(Icons.chevron_right, color: AppColors.textTertiary),
           ],
         ),
       ),
@@ -248,31 +252,31 @@ class _AddRoomCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-                  child: const Icon(Icons.home_outlined, color: AppColors.primary),
+                  child: Icon(Icons.home_outlined, color: AppColors.primary),
                 ),
                 Container(
                   width: 20,
                   height: 20,
-                  decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                  child: const Icon(Icons.add, color: Colors.white, size: 14),
+                  decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                  child: Icon(Icons.add, color: Colors.white, size: 14),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Text('Thêm phòng mới vào hệ thống',
+            SizedBox(height: 10),
+            Text(AppStrings.addNewRoomTitle,
                 style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 4),
-            Text('Bắt đầu quản lý phòng mới với đầy đủ thông tin hợp đồng và khách thuê.',
+            SizedBox(height: 4),
+            Text(AppStrings.addNewRoomDesc,
                 style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary),
                 textAlign: TextAlign.center),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             ElevatedButton(
               onPressed: onTap,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.textPrimary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               ),
-              child: Text('Thêm ngay', style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: Colors.white)),
+              child: Text(AppStrings.addNowBtn, style: GoogleFonts.manrope(fontWeight: FontWeight.w700, color: Colors.white)),
             ),
           ],
         ),
@@ -301,12 +305,12 @@ class _QuickStatsBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('THÔNG SỐ NHANH',
+                Text(AppStrings.quickStats,
                     style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary)),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text('$occupied/$total',
                     style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white)),
-                Text('Phòng đã có người ở',
+                Text(AppStrings.occupiedRoomsLabel,
                     style: GoogleFonts.manrope(fontSize: 12, color: Colors.white60)),
               ],
             ),
@@ -315,10 +319,10 @@ class _QuickStatsBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 18),
+                SizedBox(height: 18),
                 Text('$pct%',
                     style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white)),
-                Text('Công suất lấp đầy',
+                Text(AppStrings.occupancyRate,
                     style: GoogleFonts.manrope(fontSize: 12, color: Colors.white60)),
               ],
             ),

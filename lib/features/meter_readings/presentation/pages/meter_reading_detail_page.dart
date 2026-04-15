@@ -52,11 +52,11 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
       appBar: AppBar(
         title: const Text('Ghi chỉ số chi tiết'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.history_rounded), onPressed: () {}),
+          IconButton(icon: Icon(Icons.history_rounded), onPressed: () {}),
         ],
       ),
       body: ListView(
@@ -65,7 +65,7 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
           // Room header
           Text(_room!.name, style: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w800)),
           Text('Kỳ ghi: ${_reading!.month}', style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary)),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
           // Electric section
           Container(
@@ -78,10 +78,10 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                   children: [
                     Container(
                       width: 40, height: 40,
-                      decoration: const BoxDecoration(color: AppColors.amberLight, shape: BoxShape.circle),
-                      child: const Icon(Icons.bolt, color: AppColors.amber, size: 20),
+                      decoration: BoxDecoration(color: AppColors.amberLight, shape: BoxShape.circle),
+                      child: Icon(Icons.bolt, color: AppColors.amber, size: 20),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -91,19 +91,19 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Text('CHỈ SỐ CŨ', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text('${_reading!.electricOld}', style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 Text('CHỈ SỐ MỚI', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 TextField(
                   controller: _electricCtrl,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(hintText: 'Nhập số điện mới...'),
+                  decoration: InputDecoration(hintText: 'Nhập số điện mới...'),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
@@ -111,7 +111,7 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('ẢNH CHỈ SỐ CŨ', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                          const SizedBox(height: 6),
+                          SizedBox(height: 6),
                           Container(
                             height: 90,
                             decoration: BoxDecoration(
@@ -123,13 +123,13 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('ẢNH CHỈ SỐ MỚI', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                          const SizedBox(height: 6),
+                          SizedBox(height: 6),
                           Container(
                             height: 90,
                             decoration: BoxDecoration(
@@ -140,8 +140,8 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 24),
-                                const SizedBox(height: 4),
+                                Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 24),
+                                SizedBox(height: 4),
                                 Text('Chụp ảnh', style: GoogleFonts.manrope(fontSize: 12, color: AppColors.primary)),
                               ],
                             ),
@@ -154,7 +154,7 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
           // Water section
           Container(
@@ -168,9 +168,9 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                     Container(
                       width: 40, height: 40,
                       decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-                      child: const Icon(Icons.water_drop, color: AppColors.primary, size: 20),
+                      child: Icon(Icons.water_drop, color: AppColors.primary, size: 20),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -180,19 +180,19 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Text('CHỈ SỐ CŨ', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text('${_reading!.waterOld}', style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 Text('CHỈ SỐ MỚI', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 TextField(
                   controller: _waterCtrl,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(hintText: 'Nhập số nước mới...'),
+                  decoration: InputDecoration(hintText: 'Nhập số nước mới...'),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
@@ -200,7 +200,7 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('ẢNH CHỈ SỐ CŨ', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                          const SizedBox(height: 6),
+                          SizedBox(height: 6),
                           Container(
                             height: 90,
                             decoration: BoxDecoration(color: const Color(0xFF1a2a4a), borderRadius: BorderRadius.circular(10)),
@@ -209,13 +209,13 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('ẢNH CHỈ SỐ MỚI', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                          const SizedBox(height: 6),
+                          SizedBox(height: 6),
                           Container(
                             height: 90,
                             decoration: BoxDecoration(
@@ -226,8 +226,8 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 24),
-                                const SizedBox(height: 4),
+                                Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 24),
+                                SizedBox(height: 4),
                                 Text('Chụp ảnh', style: GoogleFonts.manrope(fontSize: 12, color: AppColors.primary)),
                               ],
                             ),
@@ -240,7 +240,7 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
           // Info note
           Container(
@@ -248,8 +248,8 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
             decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(12)),
             child: Row(
               children: [
-                const Icon(Icons.info_outline, color: AppColors.primary, size: 18),
-                const SizedBox(width: 8),
+                Icon(Icons.info_outline, color: AppColors.primary, size: 18),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Đảm bảo hình ảnh đồng hồ hiển thị rõ ràng để đối soát khi cần thiết.',
@@ -259,14 +259,14 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
         ],
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: ElevatedButton.icon(
-            icon: const Icon(Icons.save_outlined),
+            icon: Icon(Icons.save_outlined),
             label: const Text('Lưu chỉ số'),
             onPressed: () async {
               final eNew = int.tryParse(_electricCtrl.text) ?? 0;
@@ -288,7 +288,7 @@ class _MeterReadingDetailPageState extends State<MeterReadingDetailPage> {
 
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Đã lưu chỉ số thành công!')),
+                SnackBar(content: Text('Đã lưu chỉ số thành công!')),
               );
               context.pop();
             },

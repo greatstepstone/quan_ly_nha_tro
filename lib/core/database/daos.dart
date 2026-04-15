@@ -51,6 +51,7 @@ class AppDao extends DatabaseAccessor<AppDatabase> with _$AppDaoMixin {
   Future<List<Tenant>> getTenantsByProperty(String propertyId) => (select(tenants)..where((t) => t.propertyId.equals(propertyId))).get();
   Stream<List<Tenant>> watchTenantsByProperty(String propertyId) => (select(tenants)..where((t) => t.propertyId.equals(propertyId))).watch();
   Future<Tenant?> getTenantById(String id) => (select(tenants)..where((t) => t.id.equals(id))).getSingleOrNull();
+  Future<List<Tenant>> getTenantsByRoom(String roomId) => (select(tenants)..where((t) => t.roomId.equals(roomId))).get();
   Future<int> insertTenant(Insertable<Tenant> tenant) => into(tenants).insert(tenant);
   Future<bool> updateTenant(Insertable<Tenant> tenant) => update(tenants).replace(tenant);
   Future<int> deleteTenant(String id) => (delete(tenants)..where((t) => t.id.equals(id))).go();
@@ -59,6 +60,8 @@ class AppDao extends DatabaseAccessor<AppDatabase> with _$AppDaoMixin {
   Future<List<MeterReading>> getAllMeterReadings() => select(meterReadings).get();
   Stream<List<MeterReading>> watchAllMeterReadings() => select(meterReadings).watch();
   Future<MeterReading?> getMeterReadingByRoomId(String roomId) => (select(meterReadings)..where((t) => t.roomId.equals(roomId))).getSingleOrNull();
+  Future<MeterReading?> getMeterReadingByRoomAndMonth(String roomId, String month) =>
+      (select(meterReadings)..where((t) => t.roomId.equals(roomId) & t.month.equals(month))).getSingleOrNull();
   Stream<MeterReading?> watchMeterReadingByRoomId(String roomId) => (select(meterReadings)..where((t) => t.roomId.equals(roomId))).watchSingleOrNull();
   Stream<List<MeterReading>> watchMeterReadingsByRoom(String roomId) => (select(meterReadings)..where((t) => t.roomId.equals(roomId))).watch();
   Future<List<MeterReading>> getMeterReadingsByRoom(String roomId) => (select(meterReadings)..where((t) => t.roomId.equals(roomId))).get();

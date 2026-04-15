@@ -12,6 +12,7 @@ import '../../../../core/providers/property_providers.dart';
 import '../../../../core/providers/service_providers.dart';
 import '../../../../core/providers/meter_reading_providers.dart';
 import '../../../../core/providers/invoice_providers.dart';
+import 'invoice_export_page.dart';
 
 class CreateInvoicePage extends ConsumerStatefulWidget {
   final String roomId;
@@ -138,7 +139,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
     
     final ownerId = ref.watch(currentUserProvider)?.id;
     if (ownerId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng đăng nhập lại')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng đăng nhập lại')));
       return;
     }
 
@@ -220,7 +221,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
       appBar: AppBar(
         title: const Text('Lập hóa đơn'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
       ),
@@ -250,7 +251,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
             children: [
               Container(
                 height: 100,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: Color(0xFF1a2a3a),
                   borderRadius:
                       BorderRadius.vertical(top: Radius.circular(16)),
@@ -275,9 +276,9 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                     if (_property != null)
                       Row(
                         children: [
-                          const Icon(Icons.location_on_outlined,
+                          Icon(Icons.location_on_outlined,
                               size: 14, color: AppColors.textSecondary),
-                          const SizedBox(width: 4),
+                          SizedBox(width: 4),
                           Expanded(
                             child: Text(_property!.name,
                                 style: GoogleFonts.manrope(
@@ -290,16 +291,16 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                     if (_tenant != null)
                       Row(
                         children: [
-                          const Icon(Icons.person_outline,
+                          Icon(Icons.person_outline,
                               size: 14, color: AppColors.textSecondary),
-                          const SizedBox(width: 4),
+                          SizedBox(width: 4),
                           Text('Khách thuê: ${_tenant!.name}',
                               style: GoogleFonts.manrope(
                                   fontSize: 13,
                                   color: AppColors.textSecondary)),
                         ],
                       ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
@@ -321,7 +322,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // ── Electric & Water ──
         _Card(
@@ -336,34 +337,34 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                       child: _InputField(
                           'Chỉ số điện cũ', _electricOldCtrl,
                           suffix: 'kWh')),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                       child: _InputField(
                           'Chỉ số điện mới', _electricNewCtrl,
                           suffix: 'kWh')),
                 ],
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _CostRow(
                 label:
                     'Tiền điện (${_fmtDouble(_property?.electricityPrice ?? 3500)}/kWh)',
                 value: _electricCost,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
                       child: _InputField(
                           'Chỉ số nước cũ', _waterOldCtrl,
                           suffix: 'm³')),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                       child: _InputField(
                           'Chỉ số nước mới', _waterNewCtrl,
                           suffix: 'm³')),
                 ],
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _CostRow(
                 label:
                     'Tiền nước (${_fmtDouble(_property?.waterPrice ?? 15000)}/m³)',
@@ -372,7 +373,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // ── Rent + Services ──
         _Card(
@@ -388,7 +389,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                 isHighlight: true,
               ),
               if (_services.isNotEmpty) ...[
-                const Divider(height: 16, color: AppColors.surface),
+                Divider(height: 16, color: AppColors.surface),
                 ..._services.map((s) => Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: _ServiceRow(
@@ -401,7 +402,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // ── Notes ──
         _Card(
@@ -411,7 +412,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
           child: TextField(
             controller: _noteCtrl,
             maxLines: 3,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Nhập ghi chú cho hóa đơn này...',
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
@@ -421,7 +422,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // ── Total ──
         Container(
@@ -440,7 +441,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                     Text('Tổng số tiền cần thanh toán',
                         style: GoogleFonts.manrope(
                             fontSize: 13, color: AppColors.textSecondary)),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     StatefulBuilder(
                       builder: (context, setState) => Text(
                         _fmtDouble(_total),
@@ -460,44 +461,62 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(12)),
                 child:
-                    const Icon(Icons.receipt_long_outlined, color: Colors.white),
+                    Icon(Icons.receipt_long_outlined, color: Colors.white),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
 
         Row(
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                icon: const Icon(Icons.print_outlined),
-                label: const Text('In hóa đơn'),
+                icon: const Icon(Icons.share_outlined),
+                label: const Text('Xuất hóa đơn'),
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Tính năng in đang phát triển...')),
+                  if (_existingInvoice == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Vui lòng lưu hóa đơn trước khi xuất!')),
+                    );
+                    return;
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => InvoiceExportPage(
+                        invoice: _existingInvoice!,
+                        room: _room!,
+                        property: _property,
+                        tenant: _tenant,
+                        services: _services,
+                        electricOld: _electricOld,
+                        electricNew: _electricNew,
+                        waterOld: _waterOld,
+                        waterNew: _waterNew,
+                      ),
+                    ),
                   );
                 },
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(50)),
-                  side: const BorderSide(color: AppColors.primary),
+                  side: BorderSide(color: AppColors.primary),
                   foregroundColor: AppColors.primary,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: ElevatedButton.icon(
                 icon: _isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2))
-                    : const Icon(Icons.save_outlined),
+                    : Icon(Icons.save_outlined),
                 label: Text(_existingInvoice != null
                     ? 'Cập nhật hóa đơn'
                     : 'Lưu hóa đơn'),
@@ -506,7 +525,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
             ),
           ],
         ),
-        const SizedBox(height: 32),
+        SizedBox(height: 32),
       ],
     );
   }
@@ -537,13 +556,13 @@ class _Card extends StatelessWidget {
           Row(
             children: [
               Icon(icon, color: iconColor, size: 18),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(title,
                   style: GoogleFonts.manrope(
                       fontSize: 15, fontWeight: FontWeight.w700)),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           child,
         ],
       ),
@@ -576,7 +595,7 @@ class _InputFieldState extends State<_InputField> {
         Text(widget.label,
             style: GoogleFonts.manrope(
                 fontSize: 12, color: AppColors.textSecondary)),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         TextField(
           controller: widget.controller,
           keyboardType: TextInputType.number,
@@ -641,7 +660,7 @@ class _ServiceRow extends StatelessWidget {
               color: AppColors.primaryLight, shape: BoxShape.circle),
           child: Icon(icon, color: AppColors.primary, size: 16),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10),
         Expanded(child: Text(label, style: GoogleFonts.manrope(fontSize: 14))),
         Text(_fmtDouble(value),
             style: GoogleFonts.manrope(

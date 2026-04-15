@@ -3,11 +3,14 @@ import 'package:go_router/go_router.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/properties/presentation/pages/properties_list_page.dart';
 import '../../features/properties/presentation/pages/add_property_page.dart';
+import '../../features/properties/presentation/pages/edit_property_page.dart';
 import '../../features/rooms/presentation/pages/rooms_list_page.dart';
 import '../../features/rooms/presentation/pages/room_detail_page.dart';
 import '../../features/rooms/presentation/pages/add_room_page.dart';
+import '../../features/rooms/presentation/pages/edit_room_page.dart';
 import '../../features/tenants/presentation/pages/tenants_list_page.dart';
 import '../../features/tenants/presentation/pages/tenant_detail_page.dart';
+import '../../features/tenants/presentation/pages/add_tenant_page.dart';
 import '../../features/tenants/presentation/pages/edit_tenant_page.dart';
 import '../../features/meter_readings/presentation/pages/meter_readings_page.dart';
 import '../../features/meter_readings/presentation/pages/meter_reading_detail_page.dart';
@@ -70,6 +73,10 @@ final appRouter = GoRouter(
       builder: (c, s) => const AddPropertyPage(),
     ),
     GoRoute(
+      path: '/properties/:id/edit',
+      builder: (c, s) => EditPropertyPage(propertyId: s.pathParameters['id']!),
+    ),
+    GoRoute(
       path: '/rooms',
       builder: (c, s) {
         final propertyId = s.uri.queryParameters['propertyId'];
@@ -87,6 +94,14 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/rooms/:id',
       builder: (c, s) => RoomDetailPage(roomId: s.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/rooms/:id/edit',
+      builder: (c, s) => EditRoomPage(roomId: s.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/rooms/:id/add-tenant',
+      builder: (c, s) => AddTenantPage(roomId: s.pathParameters['id']!),
     ),
     GoRoute(
       path: '/tenants',

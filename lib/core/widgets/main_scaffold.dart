@@ -102,7 +102,7 @@ class _NavItem extends StatelessWidget {
               color: isActive ? AppColors.primary : AppColors.textTertiary,
               size: 24,
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: 2),
             Text(
               label,
               style: GoogleFonts.manrope(

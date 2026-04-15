@@ -79,7 +79,7 @@ class _PropertyReportPageState extends State<PropertyReportPage>
                         elevation: 0,
                         leading: IconButton(
                           icon:
-                              const Icon(Icons.arrow_back_ios_new_rounded),
+                              Icon(Icons.arrow_back_ios_new_rounded),
                           onPressed: () => context.pop(),
                         ),
                         title: Text('Báo cáo theo nhà trọ',
@@ -96,7 +96,7 @@ class _PropertyReportPageState extends State<PropertyReportPage>
                                       horizontal: 16, vertical: 4),
                                   child: DropdownButtonFormField<String>(
                                     initialValue: currentPropertyId,
-                                    decoration: const InputDecoration(
+                                    decoration: InputDecoration(
                                       fillColor: AppColors.surface,
                                       contentPadding: EdgeInsets.symmetric(
                                           horizontal: 16, vertical: 10),
@@ -118,7 +118,7 @@ class _PropertyReportPageState extends State<PropertyReportPage>
                                   ),
                                 )
                               else
-                                const SizedBox(height: 8),
+                                SizedBox(height: 8),
                               // Tabs
                               TabBar(
                                 controller: _tab,
@@ -225,7 +225,7 @@ class _RevenueTab extends StatelessWidget {
                 iconBg: AppColors.emeraldLight,
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Expanded(
               child: _KpiCard(
                 label: 'Chờ thanh toán',
@@ -235,7 +235,7 @@ class _RevenueTab extends StatelessWidget {
                 iconBg: AppColors.orangeLight,
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Expanded(
               child: _KpiCard(
                 label: 'Quá hạn',
@@ -247,7 +247,7 @@ class _RevenueTab extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Bar chart — doanh thu theo tháng
         Container(
@@ -261,30 +261,30 @@ class _RevenueTab extends StatelessWidget {
               Text('Doanh thu theo tháng',
                   style: GoogleFonts.manrope(
                       fontSize: 14, color: AppColors.textSecondary)),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text(
                 monthlyRev.isEmpty ? '0đ' : _fmt(_totalPaid),
                 style: GoogleFonts.manrope(
                     fontSize: 24, fontWeight: FontWeight.w800),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               if (monthlyRev.isNotEmpty)
                 Row(
                   children: [
-                    const Icon(Icons.trending_up,
+                    Icon(Icons.trending_up,
                         color: AppColors.emerald, size: 14),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     Text('Tổng tất cả thời gian',
                         style: GoogleFonts.manrope(
                             fontSize: 12, color: AppColors.emerald)),
                   ],
                 ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               _MonthlyBarChart(monthlyRevenue: monthlyRev),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Invoice total breakdown
         Container(
@@ -298,7 +298,7 @@ class _RevenueTab extends StatelessWidget {
               Text('Tổng hợp hóa đơn',
                   style: GoogleFonts.manrope(
                       fontSize: 15, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               _RevenueRow(
                 icon: Icons.check_circle_outline,
                 iconBg: AppColors.emeraldLight,
@@ -309,7 +309,7 @@ class _RevenueTab extends StatelessWidget {
                 value: _fmt(_totalPaid),
                 valueColor: AppColors.emerald,
               ),
-              const Divider(height: 20, color: AppColors.surface),
+              Divider(height: 20, color: AppColors.surface),
               _RevenueRow(
                 icon: Icons.hourglass_top_rounded,
                 iconBg: AppColors.orangeLight,
@@ -321,7 +321,7 @@ class _RevenueTab extends StatelessWidget {
                 valueColor: AppColors.orange,
               ),
               if (_overdueTotal > 0) ...[
-                const Divider(height: 20, color: AppColors.surface),
+                Divider(height: 20, color: AppColors.surface),
                 _RevenueRow(
                   icon: Icons.warning_amber_rounded,
                   iconBg: AppColors.redLight,
@@ -336,7 +336,7 @@ class _RevenueTab extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
       ],
     );
   }
@@ -412,11 +412,11 @@ class _InvoiceStatusTab extends StatelessWidget {
                 Text('Phân bổ trạng thái hóa đơn',
                     style: GoogleFonts.manrope(
                         fontSize: 15, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text('$total hóa đơn tổng cộng',
                     style: GoogleFonts.manrope(
                         fontSize: 13, color: AppColors.textSecondary)),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 ...statusGroups.where((g) => _count(g.$1) > 0).map((g) {
                   final count = _count(g.$1);
                   final pct = total > 0 ? count / total : 0.0;
@@ -434,7 +434,7 @@ class _InvoiceStatusTab extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
           // List of recent invoices
           Container(
@@ -448,13 +448,13 @@ class _InvoiceStatusTab extends StatelessWidget {
                 Text('Hóa đơn gần đây',
                     style: GoogleFonts.manrope(
                         fontSize: 15, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 ...invoices.take(8).map((inv) => _InvoiceRow(invoice: inv)),
               ],
             ),
           ),
         ],
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
       ],
     );
   }
@@ -493,7 +493,7 @@ class _VacancyTab extends StatelessWidget {
                 iconBg: AppColors.primaryLight,
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Expanded(
               child: _KpiCard(
                 label: 'Phòng trống',
@@ -503,7 +503,7 @@ class _VacancyTab extends StatelessWidget {
                 iconBg: AppColors.surfaceContainer,
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Expanded(
               child: _KpiCard(
                 label: 'Tổng phòng',
@@ -515,7 +515,7 @@ class _VacancyTab extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Breakdown bars
         Container(
@@ -529,7 +529,7 @@ class _VacancyTab extends StatelessWidget {
               Text('Phân bổ trạng thái phòng',
                   style: GoogleFonts.manrope(
                       fontSize: 15, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               if (total == 0)
                 Text('Chưa có phòng nào.',
                     style: GoogleFonts.manrope(
@@ -540,19 +540,19 @@ class _VacancyTab extends StatelessWidget {
                     count: rented,
                     total: total,
                     color: AppColors.primary),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 _VacancyBar(
                     label: 'Đặt cọc',
                     count: deposited,
                     total: total,
                     color: AppColors.amber),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 _VacancyBar(
                     label: 'Trống',
                     count: empty,
                     total: total,
                     color: AppColors.emerald),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 _VacancyBar(
                     label: 'Bảo trì',
                     count: maintenance,
@@ -562,7 +562,7 @@ class _VacancyTab extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Property info card
         Container(
@@ -576,22 +576,22 @@ class _VacancyTab extends StatelessWidget {
               Text('Thông tin nhà trọ',
                   style: GoogleFonts.manrope(
                       fontSize: 15, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _InfoRow(
                   icon: Icons.location_on_outlined,
                   label: 'Địa chỉ',
                   value: property.address),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _InfoRow(
                   icon: Icons.bolt,
                   label: 'Giá điện',
                   value: '${_fmt(property.electricityPrice)}/kWh'),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _InfoRow(
                   icon: Icons.water_drop_outlined,
                   label: 'Giá nước',
                   value: '${_fmt(property.waterPrice)}/m³'),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _InfoRow(
                   icon: Icons.water_drop_outlined,
                   label: 'Loại tính nước',
@@ -599,7 +599,7 @@ class _VacancyTab extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
       ],
     );
   }
@@ -638,7 +638,7 @@ class _KpiCard extends StatelessWidget {
                 BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(8)),
             child: Icon(icon, color: iconColor, size: 16),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(value,
               style: GoogleFonts.manrope(
                   fontSize: 18, fontWeight: FontWeight.w800)),
@@ -682,7 +682,7 @@ class _RevenueRow extends StatelessWidget {
               color: iconBg, borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, color: iconColor, size: 18),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -774,7 +774,7 @@ class _MonthlyBarChart extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     'T${int.tryParse(label) ?? label}',
                     style: GoogleFonts.manrope(
@@ -843,7 +843,7 @@ class _StatusBar extends StatelessWidget {
                 height: 8,
                 decoration:
                     BoxDecoration(color: color, shape: BoxShape.circle)),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: Text(label,
                   style: GoogleFonts.manrope(fontSize: 13)),
@@ -851,13 +851,13 @@ class _StatusBar extends StatelessWidget {
             Text('$count hóa đơn',
                 style: GoogleFonts.manrope(
                     fontSize: 12, color: AppColors.textSecondary)),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(_fmt(amount),
                 style: GoogleFonts.manrope(
                     fontSize: 13, fontWeight: FontWeight.w700, color: color)),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
@@ -888,7 +888,7 @@ class _InvoiceRow extends StatelessWidget {
             height: 8,
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(
             child: Text('Phòng • ${invoice.month}',
                 style: GoogleFonts.manrope(
@@ -897,7 +897,7 @@ class _InvoiceRow extends StatelessWidget {
           Text(invoice.status.label,
               style:
                   GoogleFonts.manrope(fontSize: 12, color: color)),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Text(_fmt(invoice.totalAmount),
               style: GoogleFonts.manrope(
                   fontSize: 13, fontWeight: FontWeight.w700)),
@@ -946,13 +946,13 @@ class _VacancyBar extends StatelessWidget {
             Text('$count phòng',
                 style: GoogleFonts.manrope(
                     fontSize: 12, color: AppColors.textSecondary)),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text('${(pct * 100).toStringAsFixed(0)}%',
                 style: GoogleFonts.manrope(
                     fontSize: 13, fontWeight: FontWeight.w700)),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
@@ -978,7 +978,7 @@ class _InfoRow extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 16, color: AppColors.textSecondary),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Text('$label: ',
             style: GoogleFonts.manrope(
                 fontSize: 13, color: AppColors.textSecondary)),
@@ -1006,7 +1006,7 @@ class _EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.bar_chart_rounded, size: 56, color: AppColors.textTertiary),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(message,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.manrope(

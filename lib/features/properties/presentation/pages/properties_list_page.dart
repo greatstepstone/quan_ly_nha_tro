@@ -23,11 +23,11 @@ class _PropertiesListPageState extends State<PropertiesListPage> {
       appBar: AppBar(
         title: const Text('Danh sách nhà trọ'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.tune_rounded), onPressed: () {}),
+          IconButton(icon: Icon(Icons.tune_rounded), onPressed: () {}),
         ],
       ),
       body: StreamBuilder<List<Property>>(
@@ -54,10 +54,10 @@ class _PropertiesListPageState extends State<PropertiesListPage> {
                 onChanged: (v) => setState(() => _query = v),
                 decoration: InputDecoration(
                   hintText: 'Tìm kiếm nhà trọ...',
-                  prefixIcon: const Icon(Icons.search, color: AppColors.textTertiary),
+                  prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Property list
               if (filtered.isEmpty)
@@ -72,13 +72,13 @@ class _PropertiesListPageState extends State<PropertiesListPage> {
                 ...filtered.map((p) => _PropertyCard(property: p)),
 
               // Add new
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _AddPropertyCard(onTap: () => context.push('/properties/add')),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Stats banner
               _StatsBanner(properties: properties),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
             ],
           );
         },
@@ -114,9 +114,9 @@ class _PropertyCard extends StatelessWidget {
                 color: AppColors.primaryLight,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.apartment_rounded, color: AppColors.primary, size: 24),
+              child: Icon(Icons.apartment_rounded, color: AppColors.primary, size: 24),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,11 +131,11 @@ class _PropertyCard extends StatelessWidget {
                       _StatusBadge(property.status),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_outlined, size: 12, color: AppColors.textTertiary),
-                      const SizedBox(width: 2),
+                      Icon(Icons.location_on_outlined, size: 12, color: AppColors.textTertiary),
+                      SizedBox(width: 2),
                       Expanded(
                         child: Text(property.address,
                             style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary),
@@ -143,7 +143,7 @@ class _PropertyCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
@@ -153,8 +153,8 @@ class _PropertyCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.door_front_door_outlined, size: 12, color: AppColors.primary),
-                        const SizedBox(width: 4),
+                        Icon(Icons.door_front_door_outlined, size: 12, color: AppColors.primary),
+                        SizedBox(width: 4),
                         Text('${property.totalRooms} phòng',
                             style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                       ],
@@ -163,7 +163,11 @@ class _PropertyCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+            IconButton(
+              icon: Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+              onPressed: () => context.push('/properties/${property.id}/edit'),
+            ),
+            Icon(Icons.chevron_right, color: AppColors.textTertiary),
           ],
         ),
       ),
@@ -209,17 +213,17 @@ class _AddPropertyCard extends StatelessWidget {
             Container(
               width: 48,
               height: 48,
-              decoration: const BoxDecoration(color: AppColors.surface, shape: BoxShape.circle),
-              child: const Icon(Icons.home_outlined, color: AppColors.textSecondary, size: 24),
+              decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle),
+              child: Icon(Icons.home_outlined, color: AppColors.textSecondary, size: 24),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text('Thêm nhà trọ mới',
                 style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text('Bắt đầu quản lý cơ sở kinh doanh mới của bạn',
                 style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary),
                 textAlign: TextAlign.center),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             ElevatedButton(
               onPressed: onTap,
               child: const Text('Thêm ngay'),
@@ -249,7 +253,7 @@ class _StatsBanner extends StatelessWidget {
         children: [
           Text('Thống kê nhanh',
               style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primaryDark)),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Row(
             children: [
               Expanded(

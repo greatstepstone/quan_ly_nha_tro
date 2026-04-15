@@ -22,7 +22,7 @@ class RoomDetailPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Chi tiết phòng'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -59,7 +59,7 @@ class RoomDetailPage extends ConsumerWidget {
                   
                   if (context.mounted) {
                     context.pop();
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã xóa phòng')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Đã xóa phòng')));
                   }
                 }
               }
@@ -67,7 +67,7 @@ class RoomDetailPage extends ConsumerWidget {
             itemBuilder: (context) => [
               const PopupMenuItem(value: 'delete', child: Text('Xóa phòng', style: TextStyle(color: Colors.red))),
             ],
-            icon: const Icon(Icons.more_vert),
+            icon: Icon(Icons.more_vert),
           ),
         ],
       ),
@@ -106,9 +106,9 @@ class RoomDetailPage extends ConsumerWidget {
                             size: 32,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         Text(room.name, style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w800)),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                           decoration: BoxDecoration(
@@ -125,7 +125,7 @@ class RoomDetailPage extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // Room info section
                   _Section(
@@ -133,12 +133,12 @@ class RoomDetailPage extends ConsumerWidget {
                     child: Column(
                       children: [
                         _InfoRow(icon: Icons.payments_outlined, label: 'Giá thuê', value: '${_fmt(room.rentPrice)}/tháng', valueColor: AppColors.primary),
-                        const Divider(height: 1, color: AppColors.surface),
+                        Divider(height: 1, color: AppColors.surface),
                         _InfoRow(icon: Icons.home_outlined, label: 'Tòa nhà', value: property?.name ?? 'Đang tải...'),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   if (tenant != null) ...[
                     _Section(
@@ -148,17 +148,29 @@ class RoomDetailPage extends ConsumerWidget {
                         child: Column(
                           children: [
                             _InfoRow(icon: Icons.person_outline, label: 'Họ tên', value: tenant.name),
-                            const Divider(height: 1, color: AppColors.surface),
+                            Divider(height: 1, color: AppColors.surface),
                             _InfoRow(icon: Icons.phone_outlined, label: 'Điện thoại', value: tenant.phone),
-                            const Divider(height: 1, color: AppColors.surface),
+                            Divider(height: 1, color: AppColors.surface),
                             _InfoRow(icon: Icons.calendar_today_outlined, label: 'Ngày bắt đầu', value: tenant.startDate),
-                            const Divider(height: 1, color: AppColors.surface),
+                            Divider(height: 1, color: AppColors.surface),
                             _InfoRow(icon: Icons.savings_outlined, label: 'Tiền cọc', value: _fmt(tenant.deposit), valueColor: AppColors.primary),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
+                  ] else ...[
+                    _Section(
+                      title: 'KHÁCH THUÊ HIỆN TẠI',
+                      child: Center(
+                        child: TextButton.icon(
+                          onPressed: () => context.push('/rooms/$roomId/add-tenant'),
+                          icon: Icon(Icons.person_add_alt_1_outlined),
+                          label: const Text('Thêm khách thuê'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
                   ],
 
                   // Meter readings shortcut
@@ -173,48 +185,48 @@ class RoomDetailPage extends ConsumerWidget {
                             Container(
                               width: 40,
                               height: 40,
-                              decoration: const BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-                              child: const Icon(Icons.bolt, color: AppColors.primary, size: 20),
+                              decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
+                              child: Icon(Icons.bolt, color: AppColors.primary, size: 20),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12),
                             Expanded(
                               child: Text('Ghi chỉ số điện nước tháng này',
                                   style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600)),
                             ),
-                            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+                            Icon(Icons.chevron_right, color: AppColors.textTertiary),
                           ],
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          icon: const Icon(Icons.edit_outlined),
+                          icon: Icon(Icons.edit_outlined),
                           label: const Text('Chỉnh sửa'),
-                          onPressed: () {},
+                          onPressed: () => context.push('/rooms/$roomId/edit'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                            side: const BorderSide(color: AppColors.primary),
+                            side: BorderSide(color: AppColors.primary),
                             foregroundColor: AppColors.primary,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
-                          icon: const Icon(Icons.receipt_long_outlined),
+                          icon: Icon(Icons.receipt_long_outlined),
                           label: const Text('Lập hóa đơn'),
                           onPressed: () => context.push('/invoices/create?roomId=$roomId'),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                 ],
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -259,7 +271,7 @@ class _Section extends StatelessWidget {
             child: Text(title,
                 style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary, letterSpacing: 0.5)),
           ),
-          const Divider(height: 0, color: AppColors.surface),
+          Divider(height: 0, color: AppColors.surface),
           Padding(padding: const EdgeInsets.all(16), child: child),
         ],
       ),
@@ -281,7 +293,7 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, size: 18, color: AppColors.primary),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(child: Text(label, style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary))),
           Text(value, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700, color: valueColor ?? AppColors.textPrimary)),
         ],

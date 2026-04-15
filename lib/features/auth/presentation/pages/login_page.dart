@@ -29,7 +29,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _handleLogin() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập đầy đủ thông tin')),
+        SnackBar(content: Text('Vui lòng nhập đầy đủ thông tin')),
       );
       return;
     }
@@ -51,7 +51,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã có lỗi xảy ra. Vui lòng thử lại.')),
+          SnackBar(content: Text('Đã có lỗi xảy ra. Vui lòng thử lại.')),
         );
       }
     } finally {
@@ -69,7 +69,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 40),
+              SizedBox(height: 40),
               // Logo
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -80,9 +80,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.apartment_rounded, color: Colors.white, size: 24),
+                    child: Icon(Icons.apartment_rounded, color: Colors.white, size: 24),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Text(
                     'Azure Clarity',
                     style: GoogleFonts.manrope(
@@ -93,7 +93,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 60),
+              SizedBox(height: 60),
 
               // Welcome Text
               Container(
@@ -121,7 +121,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       'Đăng nhập để quản lý căn hộ và phòng trọ của bạn một cách dễ dàng nhất.',
                       style: GoogleFonts.manrope(
@@ -130,7 +130,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         height: 1.5,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
 
                     // Email Field
                     Text(
@@ -142,16 +142,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
                         hintText: 'yourname@email.com',
-                        prefixIcon: const Icon(Icons.email_outlined, size: 20),
+                        prefixIcon: Icon(Icons.email_outlined, size: 20),
                         fillColor: Colors.grey.withOpacity(0.08),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
 
                     // Password Field
                     Row(
@@ -184,18 +184,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: '........',
-                        prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
-                        suffixIcon: const Icon(Icons.visibility_outlined, size: 20),
+                        prefixIcon: Icon(Icons.lock_outline_rounded, size: 20),
+                        suffixIcon: Icon(Icons.visibility_outlined, size: 20),
                         fillColor: Colors.grey.withOpacity(0.08),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
 
                     // Login Button
                     SizedBox(
@@ -208,7 +208,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           elevation: 0,
                         ),
                         child: _isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
@@ -225,7 +225,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
 
                     // Divider
                     Row(
@@ -245,7 +245,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         Expanded(child: Divider(color: Colors.grey.withOpacity(0.2))),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
 
                     // Social Buttons
                     Row(
@@ -257,7 +257,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             onTap: () {},
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: 16),
                         Expanded(
                           child: _SocialButton(
                             label: 'Facebook',
@@ -267,13 +267,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
 
                     // Guest Login
                     Center(
                       child: TextButton.icon(
                         onPressed: () => context.go('/'),
-                        icon: const Icon(Icons.person_search_rounded, size: 20),
+                        icon: Icon(Icons.person_search_rounded, size: 20),
                         label: Text(
                           'Tiếp tục với tư cách khách',
                           style: GoogleFonts.manrope(
@@ -287,7 +287,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
 
               // Register Link
               Row(
@@ -313,7 +313,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: 40),
             ],
           ),
         ),
@@ -348,7 +348,7 @@ class _SocialButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 24, color: AppColors.textPrimary),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(
               label,
               style: GoogleFonts.manrope(

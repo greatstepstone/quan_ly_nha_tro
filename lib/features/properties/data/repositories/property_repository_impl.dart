@@ -49,6 +49,29 @@ class PropertyRepositoryImpl implements PropertyRepository {
   }
 
   @override
+  Future<void> updateProperty(Property property) async {
+    // 1. Cập nhật local
+    await localDataSource.updateProperty(PropertiesCompanion(
+      id: Value(property.id),
+      ownerId: Value(property.ownerId),
+      name: Value(property.name),
+      address: Value(property.address),
+      totalRooms: Value(property.totalRooms),
+      electricityPrice: Value(property.electricityPrice),
+      waterPrice: Value(property.waterPrice),
+      waterBillingType: Value(property.waterBillingType),
+      status: Value(property.status),
+    ));
+
+    // 2. Push remote
+    try {
+      await remoteDataSource.upsertProperty(property);
+    } catch (e) {
+      print('Sync error (update): $e');
+    }
+  }
+
+  @override
   Future<void> deleteProperty(String id) async {
     await localDataSource.deleteProperty(id);
     try {

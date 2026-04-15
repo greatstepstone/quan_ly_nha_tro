@@ -5,93 +5,180 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/database/database.dart';
 import '../../../../core/models/models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/providers/property_providers.dart';
-import '../../../../features/auth/presentation/providers/auth_providers.dart';
 
-class AddPropertyPage extends ConsumerStatefulWidget {
-  const AddPropertyPage({super.key});
+import '../../../../core/providers/property_providers.dart';
+
+class EditPropertyPage extends ConsumerStatefulWidget {
+  final String propertyId;
+  const EditPropertyPage({super.key, required this.propertyId});
 
   @override
-  ConsumerState<AddPropertyPage> createState() => _AddPropertyPageState();
+  ConsumerState<EditPropertyPage> createState() => _EditPropertyPageState();
 }
 
-class _AddPropertyPageState extends ConsumerState<AddPropertyPage> {
+class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
   final _nameCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
-  final _electricCtrl = TextEditingController(text: '0');
-  final _waterCtrl = TextEditingController(text: '0');
+  final _electricCtrl = TextEditingController();
+  final _waterCtrl = TextEditingController();
   final _internetCtrl = TextEditingController(text: '0');
   final _trashCtrl = TextEditingController(text: '0');
   final _otherCtrl = TextEditingController(text: '0');
   final _otherNameCtrl = TextEditingController(text: 'Phí khác');
 
+  bool _isLoading = true;
+  Property? _property;
+  List<Service> _existingServices = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final property = await appDb.appDao.getPropertyById(widget.propertyId);
+    if (property != null) {
+      _property = property;
+      _nameCtrl.text = property.name;
+      _addressCtrl.text = property.address;
+      _electricCtrl.text = property.electricityPrice.toString();
+      _waterCtrl.text = property.waterPrice.toString();
+      
+      final services = await appDb.appDao.getServicesByProperty(widget.propertyId);
+      _existingServices = services;
+      
+      for (final srv in services) {
+        if (srv.name.toLowerCase() == 'internet') {
+          _internetCtrl.text = srv.price.toString();
+        } else if (srv.name.toLowerCase() == 'rác') {
+          _trashCtrl.text = srv.price.toString();
+        } else {
+          _otherCtrl.text = srv.price.toString();
+          _otherNameCtrl.text = srv.name;
+        }
+      }
+    }
+    
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _saveChanges() async {
+    if (_nameCtrl.text.isEmpty || _addressCtrl.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập tên và địa chỉ nhà trọ')),
+      );
+      return;
+    }
+
+    if (_property == null) return;
+
+    final updatedProperty = Property(
+      id: _property!.id,
+      ownerId: _property!.ownerId,
+      name: _nameCtrl.text,
+      address: _addressCtrl.text,
+      totalRooms: _property!.totalRooms,
+      electricityPrice: double.tryParse(_electricCtrl.text) ?? 0,
+      waterPrice: double.tryParse(_waterCtrl.text) ?? 0,
+      waterBillingType: _property!.waterBillingType,
+      status: _property!.status,
+    );
+
+    // Xóa các dịch vụ cũ và cập nhật cái mới cho đơn giản
+    for (final srv in _existingServices) {
+      await appDb.appDao.deleteService(srv.id);
+    }
+
+    final internetPrice = double.tryParse(_internetCtrl.text) ?? 0;
+    if (internetPrice > 0) {
+      await appDb.appDao.insertService(ServicesCompanion.insert(
+        id: 'SRV_INT_${DateTime.now().millisecondsSinceEpoch}',
+        propertyId: widget.propertyId,
+        name: 'Internet',
+        type: BillingType.fixed,
+        price: internetPrice,
+      ));
+    }
+
+    final trashPrice = double.tryParse(_trashCtrl.text) ?? 0;
+    if (trashPrice > 0) {
+      await appDb.appDao.insertService(ServicesCompanion.insert(
+        id: 'SRV_TRASH_${DateTime.now().millisecondsSinceEpoch}',
+        propertyId: widget.propertyId,
+        name: 'Rác',
+        type: BillingType.perPerson,
+        price: trashPrice,
+      ));
+    }
+
+    final otherPrice = double.tryParse(_otherCtrl.text) ?? 0;
+    if (otherPrice > 0) {
+      await appDb.appDao.insertService(ServicesCompanion.insert(
+        id: 'SRV_OTH_${DateTime.now().millisecondsSinceEpoch}',
+        propertyId: widget.propertyId,
+        name: _otherNameCtrl.text.isNotEmpty ? _otherNameCtrl.text : 'Phí khác',
+        type: BillingType.fixed,
+        price: otherPrice,
+      ));
+    }
+
+    await ref.read(propertyRepositoryProvider).updateProperty(updatedProperty);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cập nhật nhà trọ thành công!')),
+      );
+      context.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Đang tải...')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('Thêm nhà trọ'),
+        title: const Text('Sửa cấu hình nhà trọ'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
       ),
       body: ListView(
         children: [
-          // Banner image
-          Stack(
-            children: [
-              Container(
-                height: 180,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF1a2a3a), Color(0xFF2d4a6a)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: const Center(
-                  child: Icon(Icons.apartment_rounded, size: 80, color: Colors.white24),
-                ),
-              ),
-              Positioned(
-                bottom: 16,
-                left: 16,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('THÔNG TIN MỚI',
-                        style: GoogleFonts.manrope(color: Colors.white60, fontSize: 11, fontWeight: FontWeight.w600)),
-                    Text('Khởi tạo không gian sống',
-                        style: GoogleFonts.manrope(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _SectionHeader(icon: Icons.info_outline, label: 'THÔNG TIN CƠ BẢN'),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _LabeledField(label: 'Tên nhà trọ', controller: _nameCtrl, hint: 'Ví dụ: Azure House - Quận 1'),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _LabeledField(label: 'Địa chỉ chi tiết', controller: _addressCtrl, hint: 'Số nhà, tên đường, phường/xã...', maxLines: 3),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                _SectionHeader(icon: Icons.monetization_on_outlined, label: 'CẤU HÌNH ĐƠN GIÁ CHUNG'),
-                SizedBox(height: 16),
-                _PriceField(icon: Icons.bolt, iconColor: Color(0xFFf59e0b), iconBg: Color(0xFFFEF3C7), label: 'Giá điện', unit: 'PER KWH', controller: _electricCtrl),
-                SizedBox(height: 12),
-                _PriceField(icon: Icons.water_drop, iconColor: Color(0xFF3b82f6), iconBg: Color(0xFFdbeafe), label: 'Giá nước', unit: 'PER M3', controller: _waterCtrl),
-                SizedBox(height: 12),
-                _PriceField(icon: Icons.wifi, iconColor: Color(0xFF8b5cf6), iconBg: Color(0xFFede9fe), label: 'Phí internet', unit: 'MONTHLY', controller: _internetCtrl),
-                SizedBox(height: 12),
+                _SectionHeader(icon: Icons.monetization_on_outlined, label: 'CẤU HÌNH ĐƠN GIÁ CHỤNG'),
+                const SizedBox(height: 16),
+                _PriceField(icon: Icons.bolt, iconColor: const Color(0xFFf59e0b), iconBg: const Color(0xFFFEF3C7), label: 'Giá điện', unit: 'PER KWH', controller: _electricCtrl),
+                const SizedBox(height: 12),
+                _PriceField(icon: Icons.water_drop, iconColor: const Color(0xFF3b82f6), iconBg: const Color(0xFFdbeafe), label: 'Giá nước', unit: 'PER M3', controller: _waterCtrl),
+                const SizedBox(height: 12),
+                _PriceField(icon: Icons.wifi, iconColor: const Color(0xFF8b5cf6), iconBg: const Color(0xFFede9fe), label: 'Phí internet', unit: 'MONTHLY', controller: _internetCtrl),
+                const SizedBox(height: 12),
                 _PriceField(icon: Icons.delete_outline, iconColor: AppColors.emerald, iconBg: AppColors.emeraldLight, label: 'Phí rác', unit: 'FIXED', controller: _trashCtrl),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _PriceField(
                   icon: Icons.more_horiz_rounded, 
                   iconColor: AppColors.textSecondary, 
@@ -101,7 +188,7 @@ class _AddPropertyPageState extends ConsumerState<AddPropertyPage> {
                   controller: _otherCtrl,
                   labelController: _otherNameCtrl,
                 ),
-                SizedBox(height: 32),
+                const SizedBox(height: 32),
               ],
             ),
           ),
@@ -111,75 +198,9 @@ class _AddPropertyPageState extends ConsumerState<AddPropertyPage> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: ElevatedButton.icon(
-            icon: Icon(Icons.save_outlined),
-            label: const Text('Lưu thông tin'),
-            onPressed: () async {
-              if (_nameCtrl.text.isEmpty || _addressCtrl.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Vui lòng nhập tên và địa chỉ nhà trọ')),
-                );
-                return;
-              }
-
-              final ownerId = ref.read(currentUserProvider)?.id ?? 'UNKNOWN';
-
-              final propertyId = 'PROP_${DateTime.now().millisecondsSinceEpoch}';
-              
-              final property = Property(
-                id: propertyId,
-                ownerId: ownerId,
-                name: _nameCtrl.text,
-                address: _addressCtrl.text,
-                totalRooms: 0,
-                electricityPrice: double.tryParse(_electricCtrl.text) ?? 0,
-                waterPrice: double.tryParse(_waterCtrl.text) ?? 0,
-                waterBillingType: BillingType.byMeter,
-              );
-
-              // Lưu nhà trọ qua Repository (tự động sync)
-              await ref.read(propertyRepositoryProvider).addProperty(property);
-
-              // Lưu các dịch vụ (nếu có giá trị > 0)
-              final internetPrice = double.tryParse(_internetCtrl.text) ?? 0;
-              if (internetPrice > 0) {
-                await appDb.appDao.insertService(ServicesCompanion.insert(
-                  id: 'SRV_INT_${DateTime.now().millisecondsSinceEpoch}',
-                  propertyId: propertyId,
-                  name: 'Internet',
-                  type: BillingType.fixed,
-                  price: internetPrice,
-                ));
-              }
-
-              final trashPrice = double.tryParse(_trashCtrl.text) ?? 0;
-              if (trashPrice > 0) {
-                await appDb.appDao.insertService(ServicesCompanion.insert(
-                  id: 'SRV_TRASH_${DateTime.now().millisecondsSinceEpoch}',
-                  propertyId: propertyId,
-                  name: 'Rác',
-                  type: BillingType.perPerson,
-                  price: trashPrice,
-                ));
-              }
-
-              final otherPrice = double.tryParse(_otherCtrl.text) ?? 0;
-              if (otherPrice > 0) {
-                await appDb.appDao.insertService(ServicesCompanion.insert(
-                  id: 'SRV_OTH_${DateTime.now().millisecondsSinceEpoch}',
-                  propertyId: propertyId,
-                  name: _otherNameCtrl.text.isNotEmpty ? _otherNameCtrl.text : 'Phí khác',
-                  type: BillingType.fixed,
-                  price: otherPrice,
-                ));
-              }
-
-              if (!context.mounted) return;
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Đã thêm nhà trọ thành công!')),
-              );
-              context.pop();
-            },
+            icon: const Icon(Icons.save_outlined),
+            label: const Text('Lưu thay đổi'),
+            onPressed: _saveChanges,
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(double.infinity, 52),
             ),
@@ -200,7 +221,7 @@ class _SectionHeader extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, color: AppColors.primary, size: 16),
-        SizedBox(width: 6),
+        const SizedBox(width: 6),
         Text(label,
             style: GoogleFonts.manrope(
                 fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
@@ -222,7 +243,7 @@ class _LabeledField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-        SizedBox(height: 6),
+        const SizedBox(height: 6),
         TextField(
           controller: controller,
           maxLines: maxLines,
@@ -268,7 +289,7 @@ class _PriceField extends StatelessWidget {
             decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(10)),
             child: Icon(icon, color: iconColor, size: 22),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,12 +309,12 @@ class _PriceField extends StatelessWidget {
                   )
                 else
                   Text(label, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600)),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 TextField(
                   controller: controller,
                   keyboardType: TextInputType.number,
                   style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w600),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     suffixText: 'đ',
                     filled: false,
                     border: InputBorder.none,

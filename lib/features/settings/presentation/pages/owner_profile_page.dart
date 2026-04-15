@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/resources/string_manager.dart';
+import '../../../../core/providers/locale_provider.dart';
 
-class OwnerProfilePage extends StatelessWidget {
+class OwnerProfilePage extends ConsumerWidget {
   const OwnerProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(localeProvider); // Watch locale
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA), // Nền sáng nhẹ
       appBar: AppBar(
@@ -15,7 +19,7 @@ class OwnerProfilePage extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Thông tin chủ trọ',
+          AppStrings.profileTitle,
           style: GoogleFonts.manrope(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -23,12 +27,12 @@ class OwnerProfilePage extends StatelessWidget {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textSecondary),
           onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert, color: AppColors.textSecondary),
+            icon: Icon(Icons.more_vert, color: AppColors.textSecondary),
             onPressed: () {},
           ),
         ],
@@ -37,7 +41,7 @@ class OwnerProfilePage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           children: [
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             // Avatar & Badge
             Center(
               child: Stack(
@@ -68,17 +72,17 @@ class OwnerProfilePage extends StatelessWidget {
                     right: 4,
                     child: Container(
                       padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),
                       child: Container(
                         padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.check,
                           color: Colors.white,
                           size: 12,
@@ -89,7 +93,7 @@ class OwnerProfilePage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             // Tên và Trạng thái xác minh
             Text(
               'Nguyễn Văn Thành',
@@ -99,21 +103,21 @@ class OwnerProfilePage extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.emerald,
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 6),
+                SizedBox(width: 6),
                 Text(
-                  'Đã xác minh danh tính',
+                  AppStrings.verifiedIdentity,
                   style: GoogleFonts.manrope(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
@@ -122,38 +126,38 @@ class OwnerProfilePage extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Danh sách các thông tin (Cards)
             _ProfileInfoCard(
               icon: Icons.phone_in_talk_rounded,
               iconBgColor: const Color(0xFFE1F0FF),
               iconColor: AppColors.primary,
-              title: 'SỐ ĐIỆN THOẠI',
+              title: AppStrings.phoneNumber,
               value: '0908 123 456',
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             _ProfileInfoCard(
               icon: Icons.email_rounded,
               iconBgColor: const Color(0xFFE1F0FF),
               iconColor: AppColors.primary,
-              title: 'EMAIL LIÊN HỆ',
+              title: AppStrings.contactEmail,
               value: 'thanh.nguyen@azure.com',
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             _ProfileInfoCard(
               icon: Icons.location_on_rounded,
               iconBgColor: const Color(0xFFE1F0FF),
               iconColor: AppColors.primary,
-              title: 'ĐỊA CHỈ THƯỜNG TRÚ',
+              title: AppStrings.permanentAddress,
               value: '45/12 Đường Số 8, Phường Linh Trung, Thành phố Thủ Đức, TP. Hồ Chí Minh',
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             _ProfileInfoCard(
               icon: Icons.calendar_today_rounded,
               iconBgColor: const Color(0xFFF0F2F5),
               iconColor: AppColors.textSecondary,
-              title: 'NGÀY THAM GIA',
+              title: AppStrings.joinDate,
               value: '15 tháng 08, 2023',
               trailingWidget: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -162,7 +166,7 @@ class OwnerProfilePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '9 tháng trước',
+                  AppStrings.monthsAgo,
                   style: GoogleFonts.manrope(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -171,7 +175,7 @@ class OwnerProfilePage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Các thẻ chỉ số (Stats)
             Row(
@@ -180,28 +184,28 @@ class OwnerProfilePage extends StatelessWidget {
                   child: _StatCard(
                     value: '12',
                     valueColor: AppColors.primary,
-                    label: 'Phòng đang quản lý',
+                    label: AppStrings.managedRooms,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: _StatCard(
                     value: '4.8',
                     valueColor: AppColors.emerald,
-                    label: 'Đánh giá uy tín',
+                    label: AppStrings.credibilityRating,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: _StatCard(
                     value: '100%',
                     valueColor: AppColors.textPrimary,
-                    label: 'Tỷ lệ phản hồi',
+                    label: AppStrings.responseRate,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
           ],
         ),
       ),
@@ -231,10 +235,10 @@ class OwnerProfilePage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.edit_rounded, size: 18),
-                  const SizedBox(width: 8),
+                  Icon(Icons.edit_rounded, size: 18),
+                  SizedBox(width: 8),
                   Text(
-                    'Chỉnh sửa thông tin',
+                    AppStrings.editInfo,
                     style: GoogleFonts.manrope(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -243,9 +247,9 @@ class OwnerProfilePage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(
-              'Mọi thông tin cá nhân đều được bảo mật theo quy định\ncủa Azure Clarity.',
+              AppStrings.privacyPolicySnippet,
               textAlign: TextAlign.center,
               style: GoogleFonts.manrope(
                 fontSize: 11,
@@ -305,13 +309,13 @@ class _ProfileInfoCard extends StatelessWidget {
             ),
             child: Icon(icon, color: iconColor, size: 22),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   title,
                   style: GoogleFonts.manrope(
@@ -321,7 +325,7 @@ class _ProfileInfoCard extends StatelessWidget {
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   value,
                   style: GoogleFonts.manrope(
@@ -335,7 +339,7 @@ class _ProfileInfoCard extends StatelessWidget {
             ),
           ),
           if (trailingWidget != null) ...[
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             trailingWidget!,
           ],
         ],
@@ -380,7 +384,7 @@ class _StatCard extends StatelessWidget {
               color: valueColor,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             label,
             textAlign: TextAlign.center,

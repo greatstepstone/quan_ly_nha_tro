@@ -28,7 +28,7 @@ class InvoiceStatusPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Trạng thái hóa đơn'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
       ),
@@ -60,7 +60,7 @@ class InvoiceStatusPage extends ConsumerWidget {
                       child: DropdownButton<String>(
                         value: currentPropertyId,
                         isExpanded: true,
-                        icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+                        icon: Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
                         items: properties
                             .map((p) => DropdownMenuItem(
                                   value: p.id,
@@ -90,25 +90,25 @@ class InvoiceStatusPage extends ConsumerWidget {
                       isActive: filterStatus == null,
                       onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = null,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     _FilterChip(
                       label: 'Chưa lập',
                       isActive: filterStatus == InvoiceStatus.notCreated,
                       onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.notCreated,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     _FilterChip(
                       label: 'Chờ thanh toán',
                       isActive: filterStatus == InvoiceStatus.waitingPayment,
                       onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.waitingPayment,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     _FilterChip(
                       label: 'Đã thu',
                       isActive: filterStatus == InvoiceStatus.paid,
                       onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.paid,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     _FilterChip(
                       label: 'Quá hạn',
                       isActive: filterStatus == InvoiceStatus.overdue,
@@ -117,7 +117,7 @@ class InvoiceStatusPage extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -144,7 +144,7 @@ class InvoiceStatusPage extends ConsumerWidget {
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.textTertiary),
                           ),
-                          const Icon(Icons.arrow_drop_down, color: AppColors.textTertiary, size: 16),
+                          Icon(Icons.arrow_drop_down, color: AppColors.textTertiary, size: 16),
                         ],
                       ),
                     ),
@@ -159,7 +159,7 @@ class InvoiceStatusPage extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
 
               // Invoice List
               Expanded(
@@ -203,7 +203,7 @@ class InvoiceStatusPage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/invoices/create'),
         backgroundColor: AppColors.primary,
-        child: const Icon(Icons.receipt_long_outlined, color: Colors.white),
+        child: Icon(Icons.receipt_long_outlined, color: Colors.white),
       ),
     );
   }
@@ -320,7 +320,7 @@ class _InvoiceCard extends StatelessWidget {
                   BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
               child: Icon(_invoiceIcon(invoice.status), color: color, size: 22),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,7 +328,7 @@ class _InvoiceCard extends StatelessWidget {
                   Text(room.name,
                       style: GoogleFonts.manrope(
                           fontSize: 15, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 3),
+                  SizedBox(height: 3),
                   Row(
                     children: [
                       Container(
@@ -336,7 +336,7 @@ class _InvoiceCard extends StatelessWidget {
                           height: 7,
                           decoration: BoxDecoration(
                               color: color, shape: BoxShape.circle)),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Text(invoice.status.label,
                           style: GoogleFonts.manrope(
                               fontSize: 13,
@@ -360,9 +360,9 @@ class _InvoiceCard extends StatelessWidget {
                             fontSize: 11, color: AppColors.textTertiary)),
                 ],
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
             ],
-            const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18),
+            Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18),
           ],
         ),
       ),
@@ -389,16 +389,16 @@ class _EmptyState extends StatelessWidget {
         children: [
           Icon(Icons.receipt_long_outlined,
               size: 56, color: AppColors.textTertiary),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(msg,
               textAlign: TextAlign.center,
               style: GoogleFonts.manrope(
                   fontSize: 14, color: AppColors.textSecondary)),
           if (filterStatus == null) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: onCreateTap,
-              icon: const Icon(Icons.add),
+              icon: Icon(Icons.add),
               label: const Text('Tạo hóa đơn'),
             ),
           ],

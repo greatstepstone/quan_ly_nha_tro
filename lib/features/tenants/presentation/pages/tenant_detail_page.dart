@@ -19,10 +19,10 @@ class TenantDetailPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Chi tiết khách thuê'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
-        actions: [IconButton(icon: const Icon(Icons.more_vert), onPressed: () {})],
+        actions: [IconButton(icon: Icon(Icons.more_vert), onPressed: () {})],
       ),
       body: tenantAsync.when(
         data: (tenant) {
@@ -56,23 +56,23 @@ class TenantDetailPage extends ConsumerWidget {
                             Container(
                               width: 28,
                               height: 28,
-                              decoration: const BoxDecoration(color: AppColors.emerald, shape: BoxShape.circle),
-                              child: const Icon(Icons.check, color: Colors.white, size: 16),
+                              decoration: BoxDecoration(color: AppColors.emerald, shape: BoxShape.circle),
+                              child: Icon(Icons.check, color: Colors.white, size: 16),
                             ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       Text(tenant.name, style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w800)),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.phone_outlined, size: 14, color: AppColors.textSecondary),
-                          const SizedBox(width: 4),
+                          Icon(Icons.phone_outlined, size: 14, color: AppColors.textSecondary),
+                          SizedBox(width: 4),
                           Text(tenant.phone, style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary)),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                         decoration: BoxDecoration(
@@ -89,7 +89,7 @@ class TenantDetailPage extends ConsumerWidget {
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            SizedBox(width: 6),
                             Text(tenant.isVerified ? 'ĐÃ XÁC MINH' : 'CHƯA XÁC MINH',
                                 style: GoogleFonts.manrope(
                                     fontSize: 11,
@@ -101,7 +101,7 @@ class TenantDetailPage extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // CCCD info
                 _SectionCard(
@@ -115,7 +115,7 @@ class TenantDetailPage extends ConsumerWidget {
                         label: 'Quê quán', value: tenant.hometown),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // CCCD photos
                 Padding(
@@ -125,18 +125,18 @@ class TenantDetailPage extends ConsumerWidget {
                     children: [
                       Text('ẢNH CCCD',
                           style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       Row(
                         children: [
                           Expanded(child: _CccdPhoto(label: 'Mặt trước')),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(child: _CccdPhoto(label: 'Mặt sau', isEmpty: true)),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Rental info
                 if (room != null)
@@ -147,7 +147,7 @@ class TenantDetailPage extends ConsumerWidget {
                       children: [
                         Text('THÔNG TIN THUÊ PHÒNG',
                             style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
                         GestureDetector(
                           onTap: () => context.push('/rooms/${room.id}'),
                           child: Container(
@@ -158,9 +158,9 @@ class TenantDetailPage extends ConsumerWidget {
                                 Container(
                                   width: 40, height: 40,
                                   decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(10)),
-                                  child: const Icon(Icons.door_front_door_outlined, color: AppColors.primary, size: 20),
+                                  child: Icon(Icons.door_front_door_outlined, color: AppColors.primary, size: 20),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,12 +171,12 @@ class TenantDetailPage extends ConsumerWidget {
                                     ],
                                   ),
                                 ),
-                                const Icon(Icons.chevron_right, color: AppColors.primary),
+                                Icon(Icons.chevron_right, color: AppColors.primary),
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
                         Row(
                           children: [
                             Expanded(
@@ -184,7 +184,7 @@ class TenantDetailPage extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Ngày bắt đầu', style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: 4),
                                   Text(DateTime.tryParse(tenant.startDate) != null ? tenant.startDate.split('T').first : tenant.startDate, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700)),
                                 ],
                               ),
@@ -194,7 +194,7 @@ class TenantDetailPage extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Tiền cọc', style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: 4),
                                   Text(_fmt(tenant.deposit), style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
                                 ],
                               ),
@@ -204,7 +204,7 @@ class TenantDetailPage extends ConsumerWidget {
                       ],
                     ),
                   ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -215,13 +215,13 @@ class TenantDetailPage extends ConsumerWidget {
                         style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 52)),
                         child: const Text('Sửa thông tin'),
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       OutlinedButton(
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 52),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                          side: const BorderSide(color: AppColors.surfaceContainer, width: 1.5),
+                          side: BorderSide(color: AppColors.surfaceContainer, width: 1.5),
                           foregroundColor: AppColors.textPrimary,
                         ),
                         child: const Text('Liên hệ'),
@@ -229,7 +229,7 @@ class TenantDetailPage extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
               ],
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -267,7 +267,7 @@ class _SectionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Container(
             decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(12)),
             child: Column(children: children),
@@ -297,7 +297,7 @@ class _InfoItem extends StatelessWidget {
             decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(8)),
             child: Icon(icon, color: iconColor, size: 18),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

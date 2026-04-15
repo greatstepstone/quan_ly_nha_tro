@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class ReportsPage extends ConsumerStatefulWidget {
@@ -31,7 +32,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> with SingleTickerProv
             backgroundColor: AppColors.surfaceBright,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              icon: Icon(Icons.arrow_back_ios_new_rounded),
               onPressed: () => context.pop(),
             ),
             title: Text('Báo cáo Thống kê',
@@ -82,7 +83,7 @@ class _RevenueTab extends StatelessWidget {
                 icon: Icons.receipt_long_outlined,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: _StatCard(
                 label: '+2.1% so với năm trước',
@@ -93,7 +94,7 @@ class _RevenueTab extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Monthly revenue chart placeholder
         Container(
@@ -103,17 +104,17 @@ class _RevenueTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Doanh thu hàng tháng', style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary)),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text('120M VND', style: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w800)),
               Text('Năm 2024 ', style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text('Doanh thu hàng tháng', style: GoogleFonts.manrope(fontSize: 13, color: AppColors.emerald, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               _SimpleBarChart(),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Cost breakdown
         Container(
@@ -133,21 +134,21 @@ class _RevenueTab extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Icon(Icons.more_horiz, color: AppColors.textTertiary),
+                  Icon(Icons.more_horiz, color: AppColors.textTertiary),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               _PieItem(color: AppColors.primary, label: 'Bảo trì', percent: '45%'),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _PieItem(color: AppColors.chartBlue, label: 'Điện', percent: '30%'),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _PieItem(color: AppColors.chartGray, label: 'Nước', percent: '15%'),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               _PieItem(color: AppColors.chartLightGray, label: 'Khác', percent: '10%'),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Navigate to property report
         GestureDetector(
@@ -160,18 +161,18 @@ class _RevenueTab extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.bar_chart_rounded, color: AppColors.primary),
-                const SizedBox(width: 12),
+                Icon(Icons.bar_chart_rounded, color: AppColors.primary),
+                SizedBox(width: 12),
                 Expanded(
                   child: Text('Xem báo cáo theo nhà trọ',
                       style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primaryDark)),
                 ),
-                const Icon(Icons.chevron_right, color: AppColors.primary),
+                Icon(Icons.chevron_right, color: AppColors.primary),
               ],
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
       ],
     );
   }
@@ -191,13 +192,13 @@ class _CostsTab extends StatelessWidget {
             children: [
               Text('Tổng chi phí', style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary)),
               Text('45M VND', style: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               _CostRow(label: 'Bảo trì & Sửa chữa', value: '20.250.000đ'),
-              const Divider(height: 16, color: AppColors.surface),
+              Divider(height: 16, color: AppColors.surface),
               _CostRow(label: 'Tiền điện', value: '13.500.000đ'),
-              const Divider(height: 16, color: AppColors.surface),
+              Divider(height: 16, color: AppColors.surface),
               _CostRow(label: 'Tiền nước', value: '6.750.000đ'),
-              const Divider(height: 16, color: AppColors.surface),
+              Divider(height: 16, color: AppColors.surface),
               _CostRow(label: 'Chi phí khác', value: '4.500.000đ'),
             ],
           ),
@@ -218,13 +219,13 @@ class _VacancyTab extends StatelessWidget {
             Expanded(
               child: _StatCard(label: 'Tỷ lệ lấp đầy', value: '92%', trend: '+2.1% so với tháng trước', icon: Icons.home_outlined),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: _StatCard(label: 'Phòng trống', value: '4', trend: '', icon: Icons.door_front_door_outlined),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(12)),
@@ -232,13 +233,54 @@ class _VacancyTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Phân bổ tỷ lệ phòng', style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 16),
+              SizedBox(height: 24),
+              SizedBox(
+                height: 200,
+                child: PieChart(
+                  PieChartData(
+                    sectionsSpace: 2,
+                    centerSpaceRadius: 50,
+                    startDegreeOffset: 270,
+                    sections: [
+                      PieChartSectionData(
+                        color: AppColors.primary,
+                        value: 60,
+                        title: '60%',
+                        radius: 40,
+                        titleStyle: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                      PieChartSectionData(
+                        color: AppColors.amber,
+                        value: 20,
+                        title: '20%',
+                        radius: 40,
+                        titleStyle: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                      PieChartSectionData(
+                        color: AppColors.emerald,
+                        value: 15,
+                        title: '15%',
+                        radius: 40,
+                        titleStyle: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                      PieChartSectionData(
+                        color: AppColors.red,
+                        value: 5,
+                        title: '5%',
+                        radius: 40,
+                        titleStyle: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 32),
               _VacancyBar(label: 'Đã thuê', percent: 0.60, color: AppColors.primary),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               _VacancyBar(label: 'Đặt cọc', percent: 0.20, color: AppColors.amber),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               _VacancyBar(label: 'Trống', percent: 0.15, color: AppColors.emerald),
-              const SizedBox(height: 10),
+              SizedBox(height: 10),
               _VacancyBar(label: 'Sửa chữa', percent: 0.05, color: AppColors.red),
             ],
           ),
@@ -269,14 +311,14 @@ class _StatCard extends StatelessWidget {
               Icon(icon, color: AppColors.primary, size: 16),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(value, style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800)),
           if (trend.isNotEmpty) ...[
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.trending_up, color: AppColors.emerald, size: 14),
-                const SizedBox(width: 4),
+                Icon(Icons.trending_up, color: AppColors.emerald, size: 14),
+                SizedBox(width: 4),
                 Expanded(child: Text(trend, style: GoogleFonts.manrope(fontSize: 11, color: AppColors.emerald))),
               ],
             ),
@@ -294,36 +336,57 @@ class _SimpleBarChart extends StatelessWidget {
     final months = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
 
     return SizedBox(
-      height: 120,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: List.generate(values.length, (i) {
-          final isActive = i == 4;
-          return Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  AnimatedContainer(
-                    duration: Duration(milliseconds: 400 + i * 50),
-                    height: 80 * values[i],
-                    decoration: BoxDecoration(
-                      color: isActive ? AppColors.primary : AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(months[i],
+      height: 180,
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          maxY: 1.2,
+          barTouchData: BarTouchData(enabled: false),
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final i = value.toInt();
+                  if (i < 0 || i >= months.length) return const SizedBox();
+                  final isActive = i == 4;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      months[i],
                       style: GoogleFonts.manrope(
-                          fontSize: 9,
-                          fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                          color: isActive ? AppColors.primary : AppColors.textTertiary)),
-                ],
+                        fontSize: 10,
+                        fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                        color: isActive ? AppColors.primary : AppColors.textTertiary,
+                      ),
+                    ),
+                  );
+                },
+                reservedSize: 28,
               ),
             ),
-          );
-        }),
+            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          ),
+          gridData: const FlGridData(show: false),
+          borderData: FlBorderData(show: false),
+          barGroups: List.generate(values.length, (i) {
+            final isActive = i == 4;
+            return BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: values[i],
+                  color: isActive ? AppColors.primary : AppColors.primaryLight,
+                  width: 12,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }
@@ -340,7 +403,7 @@ class _PieItem extends StatelessWidget {
     return Row(
       children: [
         Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Expanded(child: Text(label, style: GoogleFonts.manrope(fontSize: 13))),
         Text(percent, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w700)),
       ],
@@ -381,7 +444,7 @@ class _VacancyBar extends StatelessWidget {
             Text('${(percent * 100).toInt()}%', style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w700)),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(

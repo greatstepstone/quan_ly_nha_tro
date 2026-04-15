@@ -21,7 +21,7 @@ class TenantsListPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Khách Thuê'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
       ),
@@ -35,16 +35,16 @@ class TenantsListPage extends ConsumerWidget {
                 onChanged: (v) => ref.read(tenantSearchQueryProvider.notifier).state = v,
                 decoration: InputDecoration(
                   hintText: 'Tìm kiếm khách thuê...',
-                  prefixIcon: const Icon(Icons.search, color: AppColors.textTertiary),
+                  prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
                   suffixIcon: query.isNotEmpty 
                     ? IconButton(
-                        icon: const Icon(Icons.clear, size: 18), 
+                        icon: Icon(Icons.clear, size: 18), 
                         onPressed: () => ref.read(tenantSearchQueryProvider.notifier).state = ''
                       ) 
                     : null,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
 
               // Filter chips
               SingleChildScrollView(
@@ -56,13 +56,13 @@ class TenantsListPage extends ConsumerWidget {
                       isActive: filterIndex == 0, 
                       onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 0
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     _FilterChip(
                       label: 'Đang thuê', 
                       isActive: filterIndex == 1, 
                       onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 1
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     _FilterChip(
                       label: 'Đã trả phòng', 
                       isActive: filterIndex == 2, 
@@ -71,7 +71,7 @@ class TenantsListPage extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Tenant list
               if (tenants.isEmpty)
@@ -88,13 +88,13 @@ class TenantsListPage extends ConsumerWidget {
                 ...tenants.map((Tenant t) => _TenantCard(tenant: t)),
 
               // Add new card
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _AddTenantCard(onTap: () => context.push('/rooms/add')),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
               // Stats banner
               _TenantStatsBanner(count: tenants.length),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
             ],
           );
         },
@@ -162,14 +162,14 @@ class _TenantCard extends ConsumerWidget {
                       style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primary),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(tenant.name,
                             style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 2),
+                        SizedBox(height: 2),
                         Text(tenant.phone,
                             style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
                       ],
@@ -179,31 +179,31 @@ class _TenantCard extends ConsumerWidget {
                 ],
               ),
               if (room != null) ...[
-                const SizedBox(height: 10),
-                const Divider(height: 1, color: AppColors.surface),
-                const SizedBox(height: 10),
+                SizedBox(height: 10),
+                Divider(height: 1, color: AppColors.surface),
+                SizedBox(height: 10),
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.textTertiary),
-                    const SizedBox(width: 4),
+                    Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.textTertiary),
+                    SizedBox(width: 4),
                     Text('Từ: ${tenant.startDate}',
                         style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
                     const Spacer(),
-                    const Icon(Icons.account_balance_wallet_outlined, size: 13, color: AppColors.textTertiary),
-                    const SizedBox(width: 4),
+                    Icon(Icons.account_balance_wallet_outlined, size: 13, color: AppColors.textTertiary),
+                    SizedBox(width: 4),
                     Text('Cọc: ${_fmt(tenant.deposit)}',
                         style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
                   ],
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.door_front_door_outlined, size: 14, color: AppColors.primary),
-                    const SizedBox(width: 6),
+                    Icon(Icons.door_front_door_outlined, size: 14, color: AppColors.primary),
+                    SizedBox(width: 6),
                     Text(room.name,
                         style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
                     const Spacer(),
-                    const Icon(Icons.chevron_right, size: 16, color: AppColors.textTertiary),
+                    Icon(Icons.chevron_right, size: 16, color: AppColors.textTertiary),
                   ],
                 ),
               ],
@@ -211,7 +211,7 @@ class _TenantCard extends ConsumerWidget {
           ),
         ),
       ),
-      loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
+      loading: () => SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
       error: (err, _) => Center(child: Text('Lỗi tải phòng: $err')),
     );
   }
@@ -240,7 +240,7 @@ class _VerifiedBadge extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           Text(
             verified ? 'ĐÃ XÁC MINH' : 'CHƯA XÁC MINH',
             style: GoogleFonts.manrope(
@@ -275,9 +275,9 @@ class _AddTenantCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-              child: const Icon(Icons.add, color: AppColors.primary, size: 24),
+              child: Icon(Icons.add, color: AppColors.primary, size: 24),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Text('Thêm khách mới',
                 style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary)),
           ],
@@ -311,10 +311,10 @@ class _TenantStatsBanner extends StatelessWidget {
               children: [
                 Text('Quản lý chuyên nghiệp',
                     style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text('Tất cả thông tin khách thuê, hợp đồng và thanh toán được quản lý tập trung.',
                     style: GoogleFonts.manrope(color: Colors.white70, fontSize: 12)),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(

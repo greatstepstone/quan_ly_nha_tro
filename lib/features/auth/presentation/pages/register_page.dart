@@ -35,21 +35,21 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         _emailController.text.isEmpty ||
         _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập đầy đủ thông tin')),
+        SnackBar(content: Text('Vui lòng nhập đầy đủ thông tin')),
       );
       return;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mật khẩu xác nhận không khớp')),
+        SnackBar(content: Text('Mật khẩu xác nhận không khớp')),
       );
       return;
     }
 
     if (!_acceptTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng đồng ý với điều khoản dịch vụ')),
+        SnackBar(content: Text('Vui lòng đồng ý với điều khoản dịch vụ')),
       );
       return;
     }
@@ -64,7 +64,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.'),
             backgroundColor: AppColors.emerald,
           ),
@@ -80,7 +80,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã có lỗi xảy ra. Vui lòng thử lại.')),
+          SnackBar(content: Text('Đã có lỗi xảy ra. Vui lòng thử lại.')),
         );
       }
     } finally {
@@ -98,7 +98,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 40),
+              SizedBox(height: 40),
               // Logo
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -109,9 +109,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.apartment_rounded, color: Colors.white, size: 24),
+                    child: Icon(Icons.apartment_rounded, color: Colors.white, size: 24),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Text(
                     'Azure Clarity',
                     style: GoogleFonts.manrope(
@@ -122,7 +122,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: 40),
 
               Text(
                 'Tạo tài khoản mới',
@@ -132,7 +132,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Text(
@@ -145,7 +145,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: 40),
 
               // Form Container
               Container(
@@ -172,7 +172,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       icon: Icons.person_outline_rounded,
                       controller: _nameController,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
 
                     // Email Field
                     _BuildField(
@@ -181,7 +181,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       icon: Icons.alternate_email_rounded,
                       controller: _emailController,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
 
                     // Password Field
                     _BuildField(
@@ -191,7 +191,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       isPassword: true,
                       controller: _passwordController,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
 
                     // Confirm Password Field
                     _BuildField(
@@ -201,7 +201,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       isPassword: true,
                       controller: _confirmPasswordController,
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
 
                     // Terms Checkbox
                     Row(
@@ -215,7 +215,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Expanded(
                           child: RichText(
                             text: TextSpan(
@@ -241,7 +241,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32),
 
                     // Register Button
                     SizedBox(
@@ -254,7 +254,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           elevation: 0,
                         ),
                         child: _isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
@@ -272,13 +272,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.arrow_forward_rounded, size: 20),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.arrow_forward_rounded, size: 20),
                                 ],
                               ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
 
                     // Divider
                     Row(
@@ -298,7 +298,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         Expanded(child: Divider(color: Colors.grey.withOpacity(0.2))),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
 
                     // Social Buttons
                     Row(
@@ -310,7 +310,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             onTap: () {},
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: 16),
                         Expanded(
                           child: _SocialButton(
                             label: 'Facebook',
@@ -323,7 +323,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
 
               // Login Link
               Row(
@@ -349,25 +349,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 48),
+              SizedBox(height: 48),
 
               // Footer
               Text(
                 '© 2024 Azure Clarity Management. All rights reserved.',
                 style: GoogleFonts.manrope(fontSize: 11, color: AppColors.textTertiary),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('Trợ giúp',
                       style: GoogleFonts.manrope(fontSize: 11, color: AppColors.textTertiary)),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16),
                   Text('Liên hệ',
                       style: GoogleFonts.manrope(fontSize: 11, color: AppColors.textTertiary)),
                 ],
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: 40),
             ],
           ),
         ),
@@ -405,14 +405,14 @@ class _BuildField extends StatelessWidget {
             letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextField(
           controller: controller,
           obscureText: isPassword,
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: Icon(icon, size: 20),
-            suffixIcon: isPassword ? const Icon(Icons.visibility_outlined, size: 20) : null,
+            suffixIcon: isPassword ? Icon(Icons.visibility_outlined, size: 20) : null,
             fillColor: Colors.grey.withOpacity(0.08),
           ),
         ),
@@ -447,7 +447,7 @@ class _SocialButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 24, color: AppColors.textPrimary),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(
               label,
               style: GoogleFonts.manrope(

@@ -50,6 +50,8 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
       print('❌ Sync error (meter reading) - ${reading.month}: $e');
       rethrow;
     }
+
+    await _syncNextMonthReading(reading);
   }
 
   @override
@@ -67,13 +69,101 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
     );
 
     // Assuming we update or insert
-    await localDataSource.insertMeterReading(companion);
+    final exist = await localDataSource.getMeterReadingByRoomAndMonth(reading.roomId, reading.month);
+    if (exist != null) {
+      await localDataSource.updateMeterReading(companion);
+    } else {
+      await localDataSource.insertMeterReading(companion);
+    }
 
     try {
       await remoteDataSource.upsertReading(reading);
     } catch (e) {
       print('Sync error (save meter reading): $e');
     }
+
+    await _syncNextMonthReading(reading);
+  }
+
+  Future<void> _syncNextMonthReading(MeterReading reading) async {
+    if (reading.electricNew == null || reading.waterNew == null || !reading.isRecorded) return;
+
+    final nextMonth = _getNextMonthStr(reading.month);
+    final existingNextMonth = await localDataSource.getMeterReadingByRoomAndMonth(reading.roomId, nextMonth);
+
+    if (existingNextMonth == null) {
+      final nextReading = MeterReading(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        ownerId: reading.ownerId,
+        roomId: reading.roomId,
+        month: nextMonth,
+        electricOld: reading.electricNew!,
+        waterOld: reading.waterNew!,
+        isRecorded: false,
+      );
+      
+      await localDataSource.insertMeterReading(MeterReadingsCompanion.insert(
+        id: nextReading.id,
+        ownerId: nextReading.ownerId,
+        roomId: nextReading.roomId,
+        month: nextReading.month,
+        electricOld: nextReading.electricOld,
+        electricNew: const Value(null),
+        waterOld: nextReading.waterOld,
+        waterNew: const Value(null),
+        isRecorded: Value(false),
+      ));
+      
+      try {
+        await remoteDataSource.upsertReading(nextReading);
+      } catch (e) {
+        print('Sync error next month: $e');
+      }
+    } else {
+      final companion = MeterReadingsCompanion(
+        id: Value(existingNextMonth.id),
+        electricOld: Value(reading.electricNew!),
+        waterOld: Value(reading.waterNew!),
+      );
+      await localDataSource.updateMeterReading(companion);
+      
+      try {
+        final updatedRemote = MeterReading(
+          id: existingNextMonth.id,
+          ownerId: existingNextMonth.ownerId,
+          roomId: existingNextMonth.roomId,
+          month: existingNextMonth.month,
+          electricOld: reading.electricNew!,
+          electricNew: existingNextMonth.electricNew,
+          waterOld: reading.waterNew!,
+          waterNew: existingNextMonth.waterNew,
+          isRecorded: existingNextMonth.isRecorded,
+        );
+        await remoteDataSource.upsertReading(updatedRemote);
+      } catch (e) {
+        print('Sync error update next month: $e');
+      }
+    }
+  }
+
+  String _getNextMonthStr(String currentMonth) {
+    final regex = RegExp(r'(\d{1,2})/(\d{4})');
+    final match = regex.firstMatch(currentMonth);
+    if (match != null) {
+      int month = int.parse(match.group(1)!);
+      int year = int.parse(match.group(2)!);
+      month++;
+      if (month > 12) {
+        month = 1;
+        year++;
+      }
+      String newMonthStr = '${month.toString().padLeft(2, '0')}/$year';
+      if (currentMonth.startsWith('Tháng ')) {
+        return 'Tháng $newMonthStr';
+      }
+      return newMonthStr;
+    }
+    return currentMonth; // fallback
   }
 
   @override

@@ -78,11 +78,11 @@ class _EditTenantPageState extends ConsumerState<EditTenantPage> {
       appBar: AppBar(
         title: const Text('Sửa thông tin khách thuê'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+          IconButton(icon: Icon(Icons.more_vert), onPressed: () {}),
         ],
       ),
       body: _isLoading 
@@ -94,47 +94,47 @@ class _EditTenantPageState extends ConsumerState<EditTenantPage> {
         children: [
           // Avatar with edit badge
           _AvatarSection(name: _tenant!.name),
-          const SizedBox(height: 28),
+          SizedBox(height: 28),
 
           // Personal info
           _SectionHeader(label: 'THÔNG TIN CÁ NHÂN'),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           _LabeledField(label: 'Họ và tên', controller: _name),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Row(
             children: [
               Expanded(child: _LabeledField(label: 'Số điện thoại', controller: _phone, type: TextInputType.phone)),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(child: _DateField(label: 'Ngày sinh', controller: _dob)),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           _LabeledField(label: 'Số CCCD', controller: _cccd, type: TextInputType.number),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           _LabeledField(label: 'Quê quán', controller: _hometown),
-          const SizedBox(height: 28),
+          SizedBox(height: 28),
 
           // CCCD photos
           _SectionHeader(label: 'ẢNH CCCD / ĐỊNH DANH'),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Row(
             children: [
               Expanded(child: _CccdUpload(label: 'MẶT TRƯỚC', hasImage: true)),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(child: _CccdUpload(label: 'MẶT SAU', hasImage: false)),
             ],
           ),
-          const SizedBox(height: 28),
+          SizedBox(height: 28),
 
           // Rental info
           _SectionHeader(label: 'THÔNG TIN THUÊ PHÒNG'),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           if (_room != null) _RoomInfoTile(room: _room!),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Row(
             children: [
               Expanded(child: _DateField(label: 'Ngày bắt đầu', controller: _startDate)),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: _LabeledField(
                   label: 'Tiền cọc (VND)',
@@ -144,7 +144,7 @@ class _EditTenantPageState extends ConsumerState<EditTenantPage> {
               ),
             ],
           ),
-          const SizedBox(height: 36),
+          SizedBox(height: 36),
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -159,13 +159,13 @@ class _EditTenantPageState extends ConsumerState<EditTenantPage> {
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                    side: const BorderSide(color: AppColors.surfaceContainer, width: 1.5),
+                    side: BorderSide(color: AppColors.surfaceContainer, width: 1.5),
                     foregroundColor: AppColors.textPrimary,
                   ),
                   child: Text('Hủy', style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w600)),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               // Save
               Expanded(
                 flex: 2,
@@ -263,7 +263,7 @@ class _AvatarSection extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 2.5),
               ),
-              child: const Icon(Icons.edit, color: Colors.white, size: 16),
+              child: Icon(Icons.edit, color: Colors.white, size: 16),
             ),
           ),
         ],
@@ -281,7 +281,7 @@ class _SectionHeader extends StatelessWidget {
     return Row(
       children: [
         Container(width: 3, height: 16, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2))),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Text(
           label,
           style: GoogleFonts.manrope(
@@ -308,12 +308,12 @@ class _LabeledField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         TextField(
           controller: controller,
           keyboardType: type,
           style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-          decoration: const InputDecoration(),
+          decoration: InputDecoration(),
         ),
       ],
     );
@@ -331,7 +331,7 @@ class _DateField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         GestureDetector(
           onTap: () async {
             final picked = await showDatePicker(
@@ -341,7 +341,7 @@ class _DateField extends StatelessWidget {
               lastDate: DateTime.now(),
               builder: (ctx, child) => Theme(
                 data: Theme.of(ctx).copyWith(
-                  colorScheme: const ColorScheme.light(primary: AppColors.primary),
+                  colorScheme: ColorScheme.light(primary: AppColors.primary),
                 ),
                 child: child!,
               ),
@@ -355,7 +355,7 @@ class _DateField extends StatelessWidget {
               controller: controller,
               style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600),
               decoration: InputDecoration(
-                suffixIcon: const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.textTertiary),
+                suffixIcon: Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.textTertiary),
               ),
             ),
           ),
@@ -402,12 +402,12 @@ class _CccdUpload extends StatelessWidget {
                     width: 20,
                     height: 20,
                     decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                    child: const Icon(Icons.camera_alt, color: Colors.white, size: 12),
+                    child: Icon(Icons.camera_alt, color: Colors.white, size: 12),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               label,
               style: GoogleFonts.manrope(
@@ -445,9 +445,9 @@ class _RoomInfoTile extends StatelessWidget {
               color: AppColors.surfaceBright,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.door_front_door_outlined, color: AppColors.primary, size: 20),
+            child: Icon(Icons.door_front_door_outlined, color: AppColors.primary, size: 20),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,7 +463,7 @@ class _RoomInfoTile extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.primary),
+          Icon(Icons.chevron_right, color: AppColors.primary),
         ],
       ),
     );

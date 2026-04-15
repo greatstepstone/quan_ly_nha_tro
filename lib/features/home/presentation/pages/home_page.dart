@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/resources/string_manager.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/models.dart';
 import '../../../../core/providers/property_providers.dart';
@@ -33,7 +34,7 @@ class HomePage extends ConsumerWidget {
             backgroundColor: AppColors.surfaceBright,
             elevation: 0,
             leadingWidth: 60,
-            leading: const Padding(
+            leading: Padding(
               padding: EdgeInsets.only(left: 16),
               child: CircleAvatar(
                 backgroundColor: AppColors.primaryLight,
@@ -61,7 +62,7 @@ class HomePage extends ConsumerWidget {
                 children: [
                   // Greeting
                   Text(
-                    'Xin chào,',
+                    AppStrings.homeGreeting,
                     style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary),
                   ),
                   Text(
@@ -72,7 +73,7 @@ class HomePage extends ConsumerWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // Stats Row
                   _StatsRow(
@@ -80,11 +81,11 @@ class HomePage extends ConsumerWidget {
                     invoicesAsync: invoicesAsync,
                     roomsAsync: roomsAsync,
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   // Monthly tasks
-                  _SectionTitle('NGHIỆP VỤ HÀNG THÁNG'),
-                  const SizedBox(height: 12),
+                  _SectionTitle(AppStrings.monthlyTasks),
+                  SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -97,7 +98,7 @@ class HomePage extends ConsumerWidget {
                           onTap: () => context.push('/meter-readings'),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: _TaskCard(
                           icon: Icons.receipt_long,
@@ -110,7 +111,7 @@ class HomePage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -126,11 +127,11 @@ class HomePage extends ConsumerWidget {
                       const Expanded(child: SizedBox()),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   // Management
                   _SectionTitle('QUẢN LÝ'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -145,7 +146,7 @@ class HomePage extends ConsumerWidget {
                           error: (_, __) => const _ErrorManagementCard(),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: roomsAsync.when(
                           data: (rooms) => _ManagementCard(
@@ -160,7 +161,7 @@ class HomePage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -175,7 +176,7 @@ class HomePage extends ConsumerWidget {
                           error: (_, __) => const _ErrorManagementCard(),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: invoicesAsync.when(
                           data: (invs) => _ManagementCard(
@@ -190,11 +191,11 @@ class HomePage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   // Reports
                   _SectionTitle('THỐNG KÊ VÀ BÁO CÁO'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -212,7 +213,7 @@ class HomePage extends ConsumerWidget {
                           error: (_, __) => const _ErrorReportCard(),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: ref.watch(totalOutstandingDebtProvider).when(
                           data: (debt) => _ReportCard(
@@ -230,7 +231,7 @@ class HomePage extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -248,7 +249,7 @@ class HomePage extends ConsumerWidget {
                       const Expanded(child: SizedBox()),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // Performance Banner
                   Container(
@@ -273,11 +274,11 @@ class HomePage extends ConsumerWidget {
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
                                       fontSize: 16)),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Text('Tỷ lệ lấp đầy đạt 92% trong tháng này.',
                                   style: GoogleFonts.manrope(
                                       color: Colors.white70, fontSize: 12)),
-                              const SizedBox(height: 12),
+                              SizedBox(height: 12),
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
@@ -297,11 +298,11 @@ class HomePage extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        const Icon(Icons.trending_up, color: Colors.white38, size: 60),
+                        Icon(Icons.trending_up, color: Colors.white38, size: 60),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                 ],
               ),
             ),
@@ -320,7 +321,7 @@ class _NotificationBell extends StatelessWidget {
     return Stack(
       children: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: AppColors.textSecondary),
+          icon: Icon(Icons.notifications_outlined, color: AppColors.textSecondary),
           onPressed: () {},
         ),
         Positioned(
@@ -329,7 +330,7 @@ class _NotificationBell extends StatelessWidget {
           child: Container(
             width: 8,
             height: 8,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.primary,
               shape: BoxShape.circle,
             ),
@@ -367,7 +368,7 @@ class _StatsRow extends ConsumerWidget {
           Expanded(
             child: ref.watch(totalMonthlyRevenueProvider).when(
               data: (total) => _StatItem(
-                label: 'TỔNG THU THÁNG NÀY',
+                label: AppStrings.totalRevenue,
                 value: '${formatter.format(total)}đ',
                 valueColor: AppColors.primary,
               ),
@@ -416,7 +417,7 @@ class _LoadingStatItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textTertiary)),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Container(width: 40, height: 10, decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(4))),
       ],
     );
@@ -453,10 +454,10 @@ class _ErrorManagementCard extends StatelessWidget {
   const _ErrorManagementCard();
   @override
   Widget build(BuildContext context) {
-     return Container(
+    return Container(
       height: 72,
       decoration: BoxDecoration(color: AppColors.redLight, borderRadius: BorderRadius.circular(12)),
-      child: const Center(child: Icon(Icons.error_outline, color: AppColors.red, size: 20)),
+      child: Center(child: Icon(Icons.error_outline, color: AppColors.red, size: 20)),
     );
   }
 }
@@ -499,7 +500,7 @@ class _StatItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: GoogleFonts.manrope(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textTertiary)),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(value, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w700, color: valueColor)),
         ],
       ),
@@ -564,9 +565,9 @@ class _TaskCard extends StatelessWidget {
               decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(12)),
               child: Icon(icon, color: iconColor, size: 22),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(title, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(subtitle, style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
           ],
         ),
@@ -612,7 +613,7 @@ class _ManagementCard extends StatelessWidget {
               ),
               child: Icon(icon, color: AppColors.textSecondary, size: 20),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -672,9 +673,9 @@ class _ReportCard extends StatelessWidget {
               decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
               child: Icon(icon, color: iconColor, size: 20),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Text(title, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               value,
               style: GoogleFonts.manrope(

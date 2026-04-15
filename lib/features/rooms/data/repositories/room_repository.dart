@@ -6,6 +6,7 @@ abstract class RoomRepository {
   Future<List<Room>> getAllRooms();
   Future<Room?> getRoomById(String id);
   Future<void> addRoom(Room room);
+  Future<void> saveRoom(Room room);
   Future<void> deleteRoom(String id);
   Future<void> syncRooms(String propertyId);
 }
