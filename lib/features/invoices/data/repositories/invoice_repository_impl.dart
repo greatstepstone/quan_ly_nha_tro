@@ -3,6 +3,7 @@ import '../../../../core/database/database.dart';
 import '../../../../core/database/daos.dart';
 import '../../../../core/models/models.dart';
 import '../data_sources/invoice_remote_data_source.dart';
+import '../../../../core/services/notification_service.dart';
 import 'invoice_repository.dart';
 
 class InvoiceRepositoryImpl implements InvoiceRepository {
@@ -52,6 +53,8 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     } catch (e) {
       print('Sync error (invoice): $e');
     }
+    
+    await _manageInvoiceNotification(invoice);
   }
 
   @override
@@ -77,6 +80,38 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
       await remoteDataSource.upsertInvoice(invoice);
     } catch (e) {
       print('Sync error (save invoice): $e');
+    }
+    
+    await _manageInvoiceNotification(invoice);
+  }
+
+  Future<void> _manageInvoiceNotification(Invoice invoice) async {
+    int notificationId = invoice.id.hashCode;
+    if (invoice.status == InvoiceStatus.paid) {
+      await NotificationService().cancelNotification(notificationId);
+      await NotificationService().cancelNotification(notificationId + 1);
+    } else if (invoice.dueDate != null && (invoice.status == InvoiceStatus.waitingPayment || invoice.status == InvoiceStatus.sent)) {
+      final dueDate = DateTime.parse(invoice.dueDate!);
+      // Fetch room name for better notification
+      final room = await localDataSource.getRoomById(invoice.roomId);
+      final roomName = room?.name ?? 'Không rõ';
+      
+      // Lên lịch thông báo đúng ngày hạn
+      await NotificationService().scheduleInvoiceReminder(
+        id: notificationId,
+        title: 'Nhắc nhở hóa đơn',
+        body: 'Phòng $roomName có hóa đơn tháng ${invoice.month} đến hạn thanh toán.',
+        scheduledDate: dueDate,
+      );
+      
+      // Có thể lên lịch thêm 1 thông báo quá hạn (hôm sau)
+      final overdueDate = dueDate.add(const Duration(days: 1));
+      await NotificationService().scheduleInvoiceReminder(
+        id: notificationId + 1, // ID khác cho thông báo quá hạn
+        title: 'Hóa đơn quá hạn!',
+        body: 'Phòng $roomName có hóa đơn tháng ${invoice.month} ĐÃ QUÁ HẠN thanh toán.',
+        scheduledDate: overdueDate,
+      );
     }
   }
 

@@ -22,3 +22,6 @@ final authStateProvider = StreamProvider<AuthState>((ref) {
 final currentUserProvider = Provider<User?>((ref) {
   return ref.watch(authRepositoryProvider).currentUser;
 });
+
+/// Provider theo dõi trạng thái Guest Mode
+final isGuestProvider = StateProvider<bool>((ref) => false);

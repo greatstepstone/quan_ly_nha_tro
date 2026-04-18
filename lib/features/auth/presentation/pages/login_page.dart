@@ -41,6 +41,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      // Reset guest mode if logging in properly
+      ref.read(isGuestProvider.notifier).state = false;
       if (mounted) context.go('/');
     } on AuthException catch (e) {
       if (mounted) {
@@ -271,17 +273,32 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                     // Guest Login
                     Center(
-                      child: TextButton.icon(
-                        onPressed: () => context.go('/'),
-                        icon: Icon(Icons.person_search_rounded, size: 20),
-                        label: Text(
-                          'Tiếp tục với tư cách khách',
-                          style: GoogleFonts.manrope(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                      child: Column(
+                        children: [
+                          TextButton.icon(
+                            onPressed: () {
+                              ref.read(isGuestProvider.notifier).state = true;
+                              context.go('/');
+                            },
+                            icon: Icon(Icons.play_circle_outline_rounded, size: 20),
+                            label: Text(
+                              'Dùng thử không cần tài khoản',
+                              style: GoogleFonts.manrope(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primary,
+                              ),
+                            ),
                           ),
-                        ),
+                          Text(
+                            'Lưu ý: Dữ liệu sẽ chỉ lưu trên máy này',
+                            style: GoogleFonts.manrope(
+                              fontSize: 12,
+                              color: AppColors.textTertiary,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

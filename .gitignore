@@ -1,4 +1,6 @@
-# Miscellaneous
+# Android signing
+/android/key.properties
+/android/app/upload-keystore.jks
 *.class
 *.log
 *.pyc

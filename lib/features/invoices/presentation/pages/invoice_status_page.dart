@@ -8,203 +8,233 @@ import '../../../../core/providers/property_providers.dart';
 import '../../../../core/providers/room_providers.dart';
 import '../../../../core/providers/invoice_providers.dart';
 
-class InvoiceStatusPage extends ConsumerWidget {
+class InvoiceStatusPage extends StatelessWidget {
   const InvoiceStatusPage({super.key});
 
-  String get _currentMonth {
-    final now = DateTime.now();
-    return '${now.month.toString().padLeft(2, '0')}/${now.year}';
-  }
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final propertiesAsync = ref.watch(allPropertiesProvider);
-    final filteredInvoicesAsync = ref.watch(filteredInvoicesProvider);
-    final selectedPropId = ref.watch(invoiceSelectedPropertyIdProvider);
-    final filterStatus = ref.watch(invoiceFilterStatusProvider);
-
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: const Text('Trạng thái hóa đơn'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
       ),
-      body: propertiesAsync.when(
-        data: (properties) {
-          final currentPropertyId = selectedPropId ?? (properties.isNotEmpty ? properties.first.id : null);
-
-          // Tự động set default property nếu chưa chọn
-          if (selectedPropId == null && properties.isNotEmpty) {
-            Future.microtask(() {
-              ref.read(invoiceSelectedPropertyIdProvider.notifier).state = properties.first.id;
-            });
-          }
-
-          return Column(
-            children: [
-              // Property Selection Dropdown
-              if (properties.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceBright,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.surfaceContainer),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: currentPropertyId,
-                        isExpanded: true,
-                        icon: Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
-                        items: properties
-                            .map((p) => DropdownMenuItem(
-                                  value: p.id,
-                                  child: Text(p.name,
-                                      style: GoogleFonts.manrope(
-                                          fontWeight: FontWeight.w600, fontSize: 15)),
-                                ))
-                            .toList(),
-                        onChanged: (v) {
-                          if (v != null) {
-                            ref.read(invoiceSelectedPropertyIdProvider.notifier).state = v;
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-
-              // Filter Chips
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    _FilterChip(
-                      label: 'Tất cả',
-                      isActive: filterStatus == null,
-                      onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = null,
-                    ),
-                    SizedBox(width: 8),
-                    _FilterChip(
-                      label: 'Chưa lập',
-                      isActive: filterStatus == InvoiceStatus.notCreated,
-                      onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.notCreated,
-                    ),
-                    SizedBox(width: 8),
-                    _FilterChip(
-                      label: 'Chờ thanh toán',
-                      isActive: filterStatus == InvoiceStatus.waitingPayment,
-                      onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.waitingPayment,
-                    ),
-                    SizedBox(width: 8),
-                    _FilterChip(
-                      label: 'Đã thu',
-                      isActive: filterStatus == InvoiceStatus.paid,
-                      onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.paid,
-                    ),
-                    SizedBox(width: 8),
-                    _FilterChip(
-                      label: 'Quá hạn',
-                      isActive: filterStatus == InvoiceStatus.overdue,
-                      onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.overdue,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 12),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: ref.read(invoiceSelectedMonthProvider),
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime(2100),
-                        );
-                        if (picked != null) {
-                          ref.read(invoiceSelectedMonthProvider.notifier).state = picked;
-                        }
-                      },
-                      child: Row(
-                        children: [
-                          Text(
-                            'THÁNG ${ref.watch(invoiceSelectedMonthProvider).month.toString().padLeft(2, '0')}/${ref.watch(invoiceSelectedMonthProvider).year}',
-                            style: GoogleFonts.manrope(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textTertiary),
-                          ),
-                          Icon(Icons.arrow_drop_down, color: AppColors.textTertiary, size: 16),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    filteredInvoicesAsync.whenData((invoices) => Text(
-                      '${invoices.length} hóa đơn',
-                      style: GoogleFonts.manrope(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary),
-                    )).value ?? const SizedBox.shrink(),
-                  ],
-                ),
-              ),
-              SizedBox(height: 12),
-
-              // Invoice List
-              Expanded(
-                child: filteredInvoicesAsync.when(
-                  data: (invoices) {
-                    if (invoices.isEmpty) {
-                      return _EmptyState(
-                        filterStatus: filterStatus,
-                        onCreateTap: () => context.push('/invoices/create'),
-                      );
-                    }
-
-                    return ref.watch(allRoomsProvider).when(
-                      data: (rooms) {
-                        final roomMap = {for (final r in rooms) r.id: r};
-                        return ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: invoices.length,
-                          itemBuilder: (context, index) {
-                            final inv = invoices[index];
-                            final room = roomMap[inv.roomId];
-                            if (room == null) return const SizedBox.shrink();
-                            return _InvoiceCard(invoice: inv, room: room);
-                          },
-                        );
-                      },
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (e, _) => Center(child: Text('Lỗi tải phòng: $e')),
-                    );
-                  },
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(child: Text('Lỗi tải hóa đơn: $e')),
-                ),
-              ),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Lỗi: $err')),
+      body: Column(
+        children: [
+          const _PropertySelector(),
+          const _FilterBar(),
+          const SizedBox(height: 12),
+          const _HeaderSection(),
+          const SizedBox(height: 12),
+          const Expanded(child: _InvoiceListSection()),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/invoices/create'),
         backgroundColor: AppColors.primary,
-        child: Icon(Icons.receipt_long_outlined, color: Colors.white),
+        child: const Icon(Icons.receipt_long_outlined, color: Colors.white),
       ),
+    );
+  }
+}
+
+class _PropertySelector extends ConsumerWidget {
+  const _PropertySelector();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final propertiesAsync = ref.watch(allPropertiesProvider);
+    final selectedPropId = ref.watch(invoiceSelectedPropertyIdProvider);
+
+    return propertiesAsync.when(
+      data: (properties) {
+        if (properties.isEmpty) return const SizedBox.shrink();
+        
+        final currentPropertyId = selectedPropId ?? properties.first.id;
+
+        // Tự động set default property nếu chưa chọn
+        if (selectedPropId == null) {
+          Future.microtask(() {
+            ref.read(invoiceSelectedPropertyIdProvider.notifier).state = properties.first.id;
+          });
+        }
+
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceBright,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.surfaceContainer),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: currentPropertyId,
+                isExpanded: true,
+                icon: Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+                items: properties
+                    .map((p) => DropdownMenuItem(
+                          value: p.id,
+                          child: Text(p.name,
+                              style: GoogleFonts.manrope(
+                                  fontWeight: FontWeight.w600, fontSize: 15)),
+                        ))
+                    .toList(),
+                onChanged: (v) {
+                  if (v != null) {
+                    ref.read(invoiceSelectedPropertyIdProvider.notifier).state = v;
+                  }
+                },
+              ),
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox(height: 80),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _FilterBar extends ConsumerWidget {
+  const _FilterBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filterStatus = ref.watch(invoiceFilterStatusProvider);
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          _FilterChip(
+            label: 'Tất cả',
+            isActive: filterStatus == null,
+            onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = null,
+          ),
+          const SizedBox(width: 8),
+          _FilterChip(
+            label: 'Chưa lập',
+            isActive: filterStatus == InvoiceStatus.notCreated,
+            onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.notCreated,
+          ),
+          const SizedBox(width: 8),
+          _FilterChip(
+            label: 'Chờ thanh toán',
+            isActive: filterStatus == InvoiceStatus.waitingPayment,
+            onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.waitingPayment,
+          ),
+          const SizedBox(width: 8),
+          _FilterChip(
+            label: 'Đã thu',
+            isActive: filterStatus == InvoiceStatus.paid,
+            onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.paid,
+          ),
+          const SizedBox(width: 8),
+          _FilterChip(
+            label: 'Quá hạn',
+            isActive: filterStatus == InvoiceStatus.overdue,
+            onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.overdue,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderSection extends ConsumerWidget {
+  const _HeaderSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedMonth = ref.watch(invoiceSelectedMonthProvider);
+    final filteredInvoicesAsync = ref.watch(filteredInvoicesProvider);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: selectedMonth,
+                firstDate: DateTime(2020),
+                lastDate: DateTime(2100),
+              );
+              if (picked != null) {
+                ref.read(invoiceSelectedMonthProvider.notifier).state = picked;
+              }
+            },
+            child: Row(
+              children: [
+                Text(
+                  'THÁNG ${selectedMonth.month.toString().padLeft(2, '0')}/${selectedMonth.year}',
+                  style: GoogleFonts.manrope(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textTertiary),
+                ),
+                Icon(Icons.arrow_drop_down, color: AppColors.textTertiary, size: 16),
+              ],
+            ),
+          ),
+          const Spacer(),
+          filteredInvoicesAsync.whenData((invoices) => Text(
+                '${invoices.length} hóa đơn',
+                style: GoogleFonts.manrope(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary),
+              )).value ?? const SizedBox.shrink(),
+        ],
+      ),
+    );
+  }
+}
+
+class _InvoiceListSection extends ConsumerWidget {
+  const _InvoiceListSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filteredInvoicesAsync = ref.watch(filteredInvoicesProvider);
+    final roomsAsync = ref.watch(allRoomsProvider);
+
+    return filteredInvoicesAsync.when(
+      data: (invoices) {
+        if (invoices.isEmpty) {
+          final filterStatus = ref.read(invoiceFilterStatusProvider);
+          return _EmptyState(
+            filterStatus: filterStatus,
+            onCreateTap: () => context.push('/invoices/create'),
+          );
+        }
+
+        return roomsAsync.when(
+          data: (rooms) {
+            final roomMap = {for (final r in rooms) r.id: r};
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: invoices.length,
+              itemBuilder: (context, index) {
+                final inv = invoices[index];
+                final room = roomMap[inv.roomId];
+                if (room == null) return const SizedBox.shrink();
+                return _InvoiceCard(invoice: inv, room: room);
+              },
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('Lỗi tải phòng: $e')),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Lỗi tải hóa đơn: $e')),
     );
   }
 }

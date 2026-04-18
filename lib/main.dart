@@ -5,9 +5,12 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/providers/locale_provider.dart';
-
+import 'core/services/notification_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Khởi tạo NotificationService
+  await NotificationService().init();
   
   // Khởi tạo Supabase
   await Supabase.initialize(
@@ -30,13 +33,14 @@ class QuanLyNhaTroApp extends ConsumerWidget {
     // Watch ThemeProvider to trigger rebuild
     final themeMode = ref.watch(themeProvider);
     final localeCode = ref.watch(localeProvider);
+    final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
       title: 'Quản Lý Nhà Trọ',
-      theme: AppTheme.lightTheme, // This now reacts dynamically to AppColors.isDark via themeMode trigger
+      theme: AppTheme.lightTheme, 
       themeMode: themeMode,
-      locale: Locale(localeCode), // Trigger app-wide locale updates
-      routerConfig: appRouter,
+      locale: Locale(localeCode),
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
     );
   }

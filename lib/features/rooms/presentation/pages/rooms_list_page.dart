@@ -33,42 +33,27 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
       appBar: AppBar(
         title: Text(AppStrings.roomsListTitle),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
       ),
       body: roomsAsync.when(
         data: (List<Room> dbRooms) {
-          List<Room> rooms = dbRooms;
+          final filteredRooms = dbRooms.where((r) {
+            final matchesFilter = _filter == null || r.status == _filter;
+            final matchesQuery = _query.isEmpty || r.name.toLowerCase().contains(_query.toLowerCase());
+            return matchesFilter && matchesQuery;
+          }).toList();
 
-          if (_filter != null) rooms = rooms.where((Room r) => r.status == _filter).toList();
-          if (_query.isNotEmpty) {
-            rooms = rooms.where((Room r) => r.name.toLowerCase().contains(_query.toLowerCase())).toList();
-          }
-
-          final occupied = dbRooms.where((Room r) => r.status == RoomStatus.rented).length;
+          final occupied = dbRooms.where((r) => r.status == RoomStatus.rented).length;
           final total = dbRooms.length;
 
           return Column(
             children: [
-              // Filter chips
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  children: [
-                    _FilterChip(label: AppStrings.filterAll, isActive: _filter == null, onTap: () => setState(() => _filter = null)),
-                    SizedBox(width: 8),
-                    _FilterChip(label: AppStrings.filterEmpty, isActive: _filter == RoomStatus.empty, onTap: () => setState(() => _filter = RoomStatus.empty)),
-                    SizedBox(width: 8),
-                    _FilterChip(label: AppStrings.filterRented, isActive: _filter == RoomStatus.rented, onTap: () => setState(() => _filter = RoomStatus.rented)),
-                    SizedBox(width: 8),
-                    _FilterChip(label: AppStrings.filterMaintenance, isActive: _filter == RoomStatus.maintenance, onTap: () => setState(() => _filter = RoomStatus.maintenance)),
-                  ],
-                ),
+              _RoomFilterBar(
+                selectedFilter: _filter,
+                onFilterChanged: (status) => setState(() => _filter = status),
               ),
-
-              // Search
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
@@ -79,32 +64,27 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 12),
-
-              // List
+              const SizedBox(height: 12),
               Expanded(
-                child: ListView(
+                child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    if (rooms.isEmpty && dbRooms.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 32),
-                        child: Center(child: Text(AppStrings.noRoomFound, style: GoogleFonts.manrope(color: AppColors.textSecondary))),
-                      )
-                    else if (dbRooms.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 32),
-                        child: Center(child: Text(AppStrings.noRoomYet, style: GoogleFonts.manrope(color: AppColors.textSecondary))),
-                      )
-                    else
-                      ...rooms.map((r) => _RoomCard(room: r)),
-                    
-                    SizedBox(height: 12),
-                    _AddRoomCard(onTap: () => context.push('/rooms/add?propertyId=${widget.propertyId ?? 'p1'}')),
-                    SizedBox(height: 16),
-                    _QuickStatsBanner(occupied: occupied, total: total),
-                    SizedBox(height: 24),
-                  ],
+                  itemCount: filteredRooms.length + 3, // +3 for add card, stats, and spacing
+                  itemBuilder: (context, index) {
+                    if (index < filteredRooms.length) {
+                      return _RoomCard(room: filteredRooms[index]);
+                    } else if (index == filteredRooms.length) {
+                      return _AddRoomCard(
+                        onTap: () => context.push('/rooms/add?propertyId=${widget.propertyId ?? 'p1'}'),
+                      );
+                    } else if (index == filteredRooms.length + 1) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: _QuickStatsBanner(occupied: occupied, total: total),
+                      );
+                    } else {
+                      return const SizedBox(height: 40);
+                    }
+                  },
                 ),
               ),
             ],
@@ -112,6 +92,32 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('${AppStrings.error}: $err', style: GoogleFonts.manrope(color: Colors.red))),
+      ),
+    );
+  }
+}
+
+class _RoomFilterBar extends StatelessWidget {
+  final RoomStatus? selectedFilter;
+  final Function(RoomStatus?) onFilterChanged;
+
+  const _RoomFilterBar({required this.selectedFilter, required this.onFilterChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          _FilterChip(label: AppStrings.filterAll, isActive: selectedFilter == null, onTap: () => onFilterChanged(null)),
+          const SizedBox(width: 8),
+          _FilterChip(label: AppStrings.filterEmpty, isActive: selectedFilter == RoomStatus.empty, onTap: () => onFilterChanged(RoomStatus.empty)),
+          const SizedBox(width: 8),
+          _FilterChip(label: AppStrings.filterRented, isActive: selectedFilter == RoomStatus.rented, onTap: () => onFilterChanged(RoomStatus.rented)),
+          const SizedBox(width: 8),
+          _FilterChip(label: AppStrings.filterMaintenance, isActive: selectedFilter == RoomStatus.maintenance, onTap: () => onFilterChanged(RoomStatus.maintenance)),
+        ],
       ),
     );
   }

@@ -11,19 +11,13 @@ import '../../../../core/providers/room_providers.dart';
 import '../../../../core/providers/invoice_providers.dart';
 import '../../../../core/providers/tenant_providers.dart';
 
-class HomePage extends ConsumerWidget {
+final _currencyFormatter = NumberFormat('#,###', 'vi_VN');
+
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final formatter = NumberFormat('#,###', 'vi_VN');
-
-    // Watch data
-    final propertiesAsync = ref.watch(allPropertiesProvider);
-    final roomsAsync = ref.watch(allRoomsProvider);
-    final invoicesAsync = ref.watch(allInvoicesProvider);
-    final tenantsAsync = ref.watch(allTenantsProvider);
-
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: CustomScrollView(
@@ -76,12 +70,8 @@ class HomePage extends ConsumerWidget {
                   SizedBox(height: 16),
 
                   // Stats Row
-                  _StatsRow(
-                    formatter: formatter,
-                    invoicesAsync: invoicesAsync,
-                    roomsAsync: roomsAsync,
-                  ),
-                  SizedBox(height: 24),
+                  const _StatsRow(),
+                  const SizedBox(height: 24),
 
                   // Monthly tasks
                   _SectionTitle(AppStrings.monthlyTasks),
@@ -130,126 +120,16 @@ class HomePage extends ConsumerWidget {
                   SizedBox(height: 24),
 
                   // Management
-                  _SectionTitle('QUẢN LÝ'),
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: propertiesAsync.when(
-                          data: (props) => _ManagementCard(
-                            icon: Icons.apartment_outlined,
-                            title: 'Nhà trọ',
-                            subtitle: '${props.length.toString().padLeft(2, '0')} Tòa nhà',
-                            onTap: () => context.push('/properties'),
-                          ),
-                          loading: () => const _LoadingManagementCard(),
-                          error: (_, __) => const _ErrorManagementCard(),
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: roomsAsync.when(
-                          data: (rooms) => _ManagementCard(
-                            icon: Icons.door_front_door_outlined,
-                            title: 'Phòng trọ',
-                            subtitle: '${rooms.where((r) => r.status == RoomStatus.empty).length} Phòng trống',
-                            onTap: () => context.push('/rooms'),
-                          ),
-                          loading: () => const _LoadingManagementCard(),
-                          error: (_, __) => const _ErrorManagementCard(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: tenantsAsync.when(
-                          data: (tenants) => _ManagementCard(
-                            icon: Icons.person_outline,
-                            title: 'Khách thuê',
-                            subtitle: '${tenants.length} Hợp đồng',
-                            onTap: () => context.push('/tenants'),
-                          ),
-                          loading: () => const _LoadingManagementCard(),
-                          error: (_, __) => const _ErrorManagementCard(),
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: invoicesAsync.when(
-                          data: (invs) => _ManagementCard(
-                            icon: Icons.receipt_outlined,
-                            title: 'Hóa đơn',
-                            subtitle: '${invs.where((i) => i.status != InvoiceStatus.paid).length} Chưa thanh toán',
-                            onTap: () => context.push('/invoices'),
-                          ),
-                          loading: () => const _LoadingManagementCard(),
-                          error: (_, __) => const _ErrorManagementCard(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 24),
+                  const _SectionTitle('QUẢN LÝ'),
+                  const SizedBox(height: 12),
+                  const _ManagementSection(),
+                  const SizedBox(height: 24),
 
                   // Reports
-                  _SectionTitle('THỐNG KÊ VÀ BÁO CÁO'),
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ref.watch(totalMonthlyRevenueProvider).when(
-                          data: (total) => _ReportCard(
-                            icon: Icons.trending_up,
-                            iconColor: AppColors.emerald,
-                            iconBg: AppColors.emeraldLight,
-                            title: 'Doanh thu',
-                            value: '${formatter.format(total)}đ',
-                            valueColor: AppColors.emerald,
-                            onTap: () => context.push('/reports'),
-                          ),
-                          loading: () => const _LoadingReportCard(),
-                          error: (_, __) => const _ErrorReportCard(),
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: ref.watch(totalOutstandingDebtProvider).when(
-                          data: (debt) => _ReportCard(
-                            icon: Icons.warning_amber_rounded,
-                            iconColor: AppColors.red,
-                            iconBg: AppColors.redLight,
-                            title: 'Quản lý Nợ',
-                            value: '${formatter.format(debt)}đ',
-                            valueColor: AppColors.red,
-                            onTap: () => context.push('/invoices'),
-                          ),
-                          loading: () => const _LoadingReportCard(),
-                          error: (_, __) => const _ErrorReportCard(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ReportCard(
-                          icon: Icons.download_outlined,
-                          iconColor: AppColors.primary,
-                          iconBg: AppColors.primaryLight,
-                          title: 'Xuất dữ liệu',
-                          value: 'Báo cáo Excel',
-                          valueColor: AppColors.textSecondary,
-                          isValueSmall: true,
-                          onTap: () {},
-                        ),
-                      ),
-                      const Expanded(child: SizedBox()),
-                    ],
-                  ),
-                  SizedBox(height: 20),
+                  const _SectionTitle('THỐNG KÊ VÀ BÁO CÁO'),
+                  const SizedBox(height: 12),
+                  const _ReportsSection(),
+                  const SizedBox(height: 20),
 
                   // Performance Banner
                   Container(
@@ -342,18 +222,11 @@ class _NotificationBell extends StatelessWidget {
 }
 
 class _StatsRow extends ConsumerWidget {
-  final NumberFormat formatter;
-  final AsyncValue<List<Invoice>> invoicesAsync;
-  final AsyncValue<List<Room>> roomsAsync;
-
-  const _StatsRow({
-    required this.formatter,
-    required this.invoicesAsync,
-    required this.roomsAsync,
-  });
+  const _StatsRow();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final roomsAsync = ref.watch(allRoomsProvider);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -369,7 +242,7 @@ class _StatsRow extends ConsumerWidget {
             child: ref.watch(totalMonthlyRevenueProvider).when(
               data: (total) => _StatItem(
                 label: AppStrings.totalRevenue,
-                value: '${formatter.format(total)}đ',
+                value: '${_currencyFormatter.format(total)}đ',
                 valueColor: AppColors.primary,
               ),
               loading: () => const _LoadingStatItem(label: 'TỔNG THU'),
@@ -381,7 +254,7 @@ class _StatsRow extends ConsumerWidget {
             child: ref.watch(totalOutstandingDebtProvider).when(
               data: (debt) => _StatItem(
                 label: 'TỔNG NỢ CHƯA THU',
-                value: '${formatter.format(debt)}đ',
+                value: '${_currencyFormatter.format(debt)}đ',
                 valueColor: AppColors.red,
               ),
               loading: () => const _LoadingStatItem(label: 'TỔNG NỢ'),
@@ -402,6 +275,147 @@ class _StatsRow extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ManagementSection extends ConsumerWidget {
+  const _ManagementSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final propertiesAsync = ref.watch(allPropertiesProvider);
+    final roomsAsync = ref.watch(allRoomsProvider);
+    final tenantsAsync = ref.watch(allTenantsProvider);
+    final invoicesAsync = ref.watch(allInvoicesProvider);
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: propertiesAsync.when(
+                data: (props) => _ManagementCard(
+                  icon: Icons.apartment_outlined,
+                  title: 'Nhà trọ',
+                  subtitle: '${props.length.toString().padLeft(2, '0')} Tòa nhà',
+                  onTap: () => context.push('/properties'),
+                ),
+                loading: () => const _LoadingManagementCard(),
+                error: (_, __) => const _ErrorManagementCard(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: roomsAsync.when(
+                data: (rooms) => _ManagementCard(
+                  icon: Icons.door_front_door_outlined,
+                  title: 'Phòng trọ',
+                  subtitle: '${rooms.where((r) => r.status == RoomStatus.empty).length} Phòng trống',
+                  onTap: () => context.push('/rooms'),
+                ),
+                loading: () => const _LoadingManagementCard(),
+                error: (_, __) => const _ErrorManagementCard(),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: tenantsAsync.when(
+                data: (tenants) => _ManagementCard(
+                  icon: Icons.person_outline,
+                  title: 'Khách thuê',
+                  subtitle: '${tenants.length} Hợp đồng',
+                  onTap: () => context.push('/tenants'),
+                ),
+                loading: () => const _LoadingManagementCard(),
+                error: (_, __) => const _ErrorManagementCard(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: invoicesAsync.when(
+                data: (invs) => _ManagementCard(
+                  icon: Icons.receipt_outlined,
+                  title: 'Hóa đơn',
+                  subtitle: '${invs.where((i) => i.status != InvoiceStatus.paid).length} Chưa thanh toán',
+                  onTap: () => context.push('/invoices'),
+                ),
+                loading: () => const _LoadingManagementCard(),
+                error: (_, __) => const _ErrorManagementCard(),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ReportsSection extends ConsumerWidget {
+  const _ReportsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: ref.watch(totalMonthlyRevenueProvider).when(
+                data: (total) => _ReportCard(
+                  icon: Icons.trending_up,
+                  iconColor: AppColors.emerald,
+                  iconBg: AppColors.emeraldLight,
+                  title: 'Doanh thu',
+                  value: '${_currencyFormatter.format(total)}đ',
+                  valueColor: AppColors.emerald,
+                  onTap: () => context.push('/reports'),
+                ),
+                loading: () => const _LoadingReportCard(),
+                error: (_, __) => const _ErrorReportCard(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ref.watch(totalOutstandingDebtProvider).when(
+                data: (debt) => _ReportCard(
+                  icon: Icons.warning_amber_rounded,
+                  iconColor: AppColors.red,
+                  iconBg: AppColors.redLight,
+                  title: 'Quản lý Nợ',
+                  value: '${_currencyFormatter.format(debt)}đ',
+                  valueColor: AppColors.red,
+                  onTap: () => context.push('/invoices'),
+                ),
+                loading: () => const _LoadingReportCard(),
+                error: (_, __) => const _ErrorReportCard(),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _ReportCard(
+                icon: Icons.download_outlined,
+                iconColor: AppColors.primary,
+                iconBg: AppColors.primaryLight,
+                title: 'Xuất dữ liệu',
+                value: 'Báo cáo Excel',
+                valueColor: AppColors.textSecondary,
+                isValueSmall: true,
+                onTap: () {},
+              ),
+            ),
+            const Expanded(child: SizedBox()),
+          ],
+        ),
+      ],
     );
   }
 }

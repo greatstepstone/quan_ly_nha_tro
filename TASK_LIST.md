@@ -42,6 +42,8 @@ Dựa trên quá trình phát triển ứng dụng và những thay đổi kiế
 
 - [x] **Xuất & Chia sẻ Hóa Đơn:** Export hóa đơn dưới dạng Ảnh (Image) hoặc PDF format để gửi trực tiếp qua Zalo/Messenger cho khách thuê.
 - [x] **Dashboard Thống kê:** Thêm biểu đồ trực quan xem tổng doanh thu hàng tháng, tỷ lệ lấp đầy phòng trống.
-- [ ] **Thông báo (Push Notifications/Reminders):** Nhắc nhở local trên điện thoại các ngày tới hạn thu tiền phòng hoặc hóa đơn đã quá hạn (Overdue).
-- [ ] **Phân quyền Khách thuê (Tenant Portal):** Dựa vào `ownerId` và `tenantId`, cho phép app có chế độ đăng nhập dành riêng cho khách để họ tự theo dõi hóa đơn phòng mình.
+- [x] **Thông báo (Push Notifications/Reminders):** Nhắc nhở local trên điện thoại các ngày tới hạn thu tiền phòng hoặc hóa đơn đã quá hạn (Overdue).
 - [x] **Thiết lập & Quản lý Dịch vụ:** Giao diện cho phép chủ trọ chỉnh sửa lại giá điện, giá nước, và cấu hình thêm/bớt các dịch vụ (rác, wifi...) sau khi đã tạo nhà trọ.
+- [x] **Hỗ trợ iOS:** Khởi tạo và cấu hình project iOS (Info.plist, Icons, App Store setup).
+- [ ] **Gỡ bỏ Web (Future):** Sau khi hoàn thiện bản Mobile, tiến hành gỡ bỏ platform Web để tối ưu hóa dự án.
+
