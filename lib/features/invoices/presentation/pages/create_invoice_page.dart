@@ -3,17 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/models/models.dart';
-import '../../../auth/presentation/providers/auth_providers.dart';
-import '../../../../core/providers/room_providers.dart';
-import '../../../../core/providers/tenant_providers.dart';
-import '../../../../core/providers/property_providers.dart';
-import '../../../../core/providers/service_providers.dart';
-import '../../../../core/providers/meter_reading_providers.dart';
-import '../../../../core/providers/invoice_providers.dart';
-import 'invoice_export_page.dart';
-
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/service_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/meter_reading_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/invoice_providers.dart';
+import 'package:quan_ly_nha_tro/features/invoices/presentation/pages/invoice_export_page.dart';
+import 'package:quan_ly_nha_tro/features/invoices/presentation/widgets/invoice_form_widgets.dart';
 class CreateInvoicePage extends ConsumerStatefulWidget {
   final String roomId;
   const CreateInvoicePage({super.key, required this.roomId});
@@ -325,7 +325,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
         SizedBox(height: 16),
 
         // ── Electric & Water ──
-        _Card(
+        InvoiceCard(
           icon: Icons.bolt,
           iconColor: AppColors.primary,
           title: 'Điện & Nước',
@@ -334,40 +334,40 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
               Row(
                 children: [
                   Expanded(
-                      child: _InputField(
+                      child: InvoiceInputField(
                           'Chỉ số điện cũ', _electricOldCtrl,
                           suffix: 'kWh')),
                   SizedBox(width: 12),
                   Expanded(
-                      child: _InputField(
+                      child: InvoiceInputField(
                           'Chỉ số điện mới', _electricNewCtrl,
                           suffix: 'kWh')),
                 ],
               ),
               SizedBox(height: 8),
-              _CostRow(
+              InvoiceCostRow(
                 label:
-                    'Tiền điện (${_fmtDouble(_property?.electricityPrice ?? 3500)}/kWh)',
+                    'Tiền điện (${fmtDouble(_property?.electricityPrice ?? 3500)}/kWh)',
                 value: _electricCost,
               ),
               SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                      child: _InputField(
+                      child: InvoiceInputField(
                           'Chỉ số nước cũ', _waterOldCtrl,
                           suffix: 'm³')),
                   SizedBox(width: 12),
                   Expanded(
-                      child: _InputField(
+                      child: InvoiceInputField(
                           'Chỉ số nước mới', _waterNewCtrl,
                           suffix: 'm³')),
                 ],
               ),
               SizedBox(height: 8),
-              _CostRow(
+              InvoiceCostRow(
                 label:
-                    'Tiền nước (${_fmtDouble(_property?.waterPrice ?? 15000)}/m³)',
+                    'Tiền nước (${fmtDouble(_property?.waterPrice ?? 15000)}/m³)',
                 value: _waterCost,
               ),
             ],
@@ -376,13 +376,13 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
         SizedBox(height: 16),
 
         // ── Rent + Services ──
-        _Card(
+        InvoiceCard(
           icon: Icons.layers_outlined,
           iconColor: AppColors.emerald,
           title: 'Tiền phòng & Dịch vụ',
           child: Column(
             children: [
-              _ServiceRow(
+              InvoiceServiceRow(
                 icon: Icons.bed_outlined,
                 label: 'Tiền phòng tháng $_currentMonth',
                 value: _rentPrice,
@@ -392,8 +392,8 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                 Divider(height: 16, color: AppColors.surface),
                 ..._services.map((s) => Padding(
                       padding: const EdgeInsets.only(bottom: 8),
-                      child: _ServiceRow(
-                        icon: _serviceIcon(s.name),
+                      child: InvoiceServiceRow(
+                        icon: serviceIcon(s.name),
                         label: s.name,
                         value: s.price,
                       ),
@@ -405,7 +405,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
         SizedBox(height: 16),
 
         // ── Notes ──
-        _Card(
+        InvoiceCard(
           icon: Icons.edit_note_rounded,
           iconColor: AppColors.textSecondary,
           title: 'Ghi chú',
@@ -444,7 +444,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                     SizedBox(height: 4),
                     StatefulBuilder(
                       builder: (context, setState) => Text(
-                        _fmtDouble(_total),
+                        fmtDouble(_total),
                         style: GoogleFonts.manrope(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
@@ -529,168 +529,4 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
       ],
     );
   }
-}
-
-// ── Sub-widgets ──
-
-class _Card extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final Widget child;
-  const _Card(
-      {required this.icon,
-      required this.iconColor,
-      required this.title,
-      required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-          color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: iconColor, size: 18),
-              SizedBox(width: 8),
-              Text(title,
-                  style: GoogleFonts.manrope(
-                      fontSize: 15, fontWeight: FontWeight.w700)),
-            ],
-          ),
-          SizedBox(height: 16),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-class _InputField extends StatefulWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  const _InputField(this.label, this.controller, {this.suffix});
-
-  @override
-  State<_InputField> createState() => _InputFieldState();
-}
-
-class _InputFieldState extends State<_InputField> {
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(() => setState(() {}));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(widget.label,
-            style: GoogleFonts.manrope(
-                fontSize: 12, color: AppColors.textSecondary)),
-        SizedBox(height: 4),
-        TextField(
-          controller: widget.controller,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: '0',
-            fillColor: AppColors.surface,
-            suffixText: widget.suffix,
-            suffixStyle: GoogleFonts.manrope(
-                fontSize: 12, color: AppColors.textTertiary),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CostRow extends StatelessWidget {
-  final String label;
-  final double value;
-  const _CostRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(label,
-              style: GoogleFonts.manrope(
-                  fontSize: 12, color: AppColors.textTertiary)),
-        ),
-        Text(
-          '= ${_fmtDouble(value)}',
-          style: GoogleFonts.manrope(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary),
-        ),
-      ],
-    );
-  }
-}
-
-class _ServiceRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final double value;
-  final bool isHighlight;
-  const _ServiceRow(
-      {required this.icon,
-      required this.label,
-      required this.value,
-      this.isHighlight = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-              color: AppColors.primaryLight, shape: BoxShape.circle),
-          child: Icon(icon, color: AppColors.primary, size: 16),
-        ),
-        SizedBox(width: 10),
-        Expanded(child: Text(label, style: GoogleFonts.manrope(fontSize: 14))),
-        Text(_fmtDouble(value),
-            style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: isHighlight ? AppColors.primary : AppColors.textPrimary)),
-      ],
-    );
-  }
-}
-
-// ── Helpers ──
-
-IconData _serviceIcon(String name) {
-  final lower = name.toLowerCase();
-  if (lower.contains('internet') || lower.contains('wifi')) return Icons.wifi;
-  if (lower.contains('rác') || lower.contains('vệ sinh')) return Icons.delete_outline;
-  if (lower.contains('xe') || lower.contains('giữ')) return Icons.two_wheeler;
-  if (lower.contains('điện')) return Icons.bolt;
-  if (lower.contains('nước')) return Icons.water_drop_outlined;
-  return Icons.miscellaneous_services_outlined;
-}
-
-String _fmtDouble(double value) {
-  final v = value.toInt();
-  final s = v.toString();
-  final result = StringBuffer();
-  for (int i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 == 0) result.write('.');
-    result.write(s[i]);
-  }
-  return '${result.toString()}đ';
 }

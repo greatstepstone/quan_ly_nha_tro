@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/resources/color_manager.dart';
-import '../providers/onboarding_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/color_manager.dart';
+import 'package:quan_ly_nha_tro/features/onboarding/presentation/providers/onboarding_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
@@ -134,7 +135,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   void _completeOnboarding() {
     ref.read(onboardingSeenProvider.notifier).completeOnboarding();
-    context.go('/login');
+    context.goNamed(AppRoutes.login);
   }
 }
 
@@ -169,7 +170,7 @@ class _OnboardingContent extends StatelessWidget {
               color: AppColors.surfaceBright,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha:0.05),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -209,4 +210,5 @@ class _OnboardingContent extends StatelessWidget {
     );
   }
 }
+
 

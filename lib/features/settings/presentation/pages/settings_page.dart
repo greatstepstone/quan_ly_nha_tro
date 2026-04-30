@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/providers/theme_provider.dart';
-import '../../../../core/resources/string_manager.dart';
-import '../../../../core/providers/locale_provider.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/providers/theme_provider.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/providers/locale_provider.dart';
+import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/database/database.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -63,7 +68,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           ),
                         ),
                         OutlinedButton(
-                          onPressed: () => context.push('/settings/profile'),
+                          onPressed: () => context.pushNamed(AppRoutes.profile),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -81,7 +86,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   _SectionLabel(AppStrings.accountOptions),
                   SizedBox(height: 8),
                   _SettingsGroup(items: [
-                    _SettingsItem(icon: Icons.manage_accounts_outlined, label: AppStrings.profile, onTap: () => context.push('/settings/profile')),
+                    _SettingsItem(icon: Icons.manage_accounts_outlined, label: AppStrings.profile, onTap: () => context.pushNamed(AppRoutes.profile)),
                     _SettingsItem(icon: Icons.notifications_outlined, label: AppStrings.notifications, onTap: () {}),
                     _SettingsItem(icon: Icons.security_outlined, label: AppStrings.security, onTap: () {}),
                   ]),
@@ -111,10 +116,62 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         onChanged: (v) {
                           ref.read(themeProvider.notifier).toggleTheme(v);
                         },
-                        activeColor: AppColors.primary,
+                        activeThumbColor: AppColors.primary,
                       ),
                     ),
                     _SettingsItem(icon: Icons.help_outline_rounded, label: AppStrings.help, onTap: () {}),
+                  ]),
+                  SizedBox(height: 20),
+
+                  // Data & Sync
+                  _SectionLabel('DỮ LIỆU & ĐỒNG BỘ'),
+                  SizedBox(height: 8),
+                  _SettingsGroup(items: [
+                    _SettingsItem(
+                      icon: Icons.sync_rounded,
+                      label: 'Đồng bộ lại toàn bộ dữ liệu',
+                      onTap: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Xác nhận đồng bộ'),
+                            content: const Text('Ứng dụng sẽ tải lại toàn bộ dữ liệu từ đám mây. Thao tác này có thể mất vài giây.'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Hủy')),
+                              TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Đồng bộ ngay')),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true) {
+                          if (!mounted) return;
+                          
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (ctx) => const Center(child: CircularProgressIndicator()),
+                          );
+
+                          try {
+                            await ref.read(propertyRepositoryProvider).syncProperties();
+                            await ref.read(roomRepositoryProvider).syncAllRooms();
+                            
+                            if (!mounted) return;
+                            Navigator.pop(context); // Close loading
+                            
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Đã đồng bộ dữ liệu thành công!')),
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            Navigator.pop(context); // Close loading
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Lỗi đồng bộ: $e'), backgroundColor: AppColors.red),
+                            );
+                          }
+                        }
+                      },
+                    ),
                   ]),
                   SizedBox(height: 24),
 
@@ -129,7 +186,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         actions: [
                           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppStrings.cancel)),
                           ElevatedButton(
-                            onPressed: () => Navigator.pop(ctx),
+                            onPressed: () async {
+                              Navigator.pop(ctx);
+                              await ref.read(authRepositoryProvider).signOut();
+                              ref.read(isGuestProvider.notifier).state = false;
+                            },
                             style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
                             child: Text(AppStrings.logout),
                           ),

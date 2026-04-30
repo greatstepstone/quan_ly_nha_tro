@@ -33,6 +33,9 @@ dependencies:
   timezone: ^0.11.0
   flutter_timezone: ^5.0.2
 
+dependency_overrides:
+  win32: 5.10.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -43,11 +46,13 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.4
 
+  supabase: any
 flutter:
   uses-material-design: true
 
   assets:
     - assets/icons/
+    - assets/google_fonts/
 
 flutter_launcher_icons:
   android: "launcher_icon"

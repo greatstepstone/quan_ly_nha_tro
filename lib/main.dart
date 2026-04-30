@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'core/router/app_router.dart';
-import 'core/theme/app_theme.dart';
-import 'core/providers/theme_provider.dart';
-import 'core/providers/locale_provider.dart';
-import 'core/services/notification_service.dart';
+import 'package:quan_ly_nha_tro/core/router/app_router.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/providers/theme_provider.dart';
+import 'package:quan_ly_nha_tro/core/providers/locale_provider.dart';
+import 'package:quan_ly_nha_tro/core/services/notification_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Khởi tạo NotificationService
   await NotificationService().init();
+
+  // Cấu hình Google Fonts để sử dụng offline (dùng assets đã tải về)
+  GoogleFonts.config.allowRuntimeFetching = false;
   
   // Khởi tạo Supabase
   await Supabase.initialize(

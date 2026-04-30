@@ -1,10 +1,18 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
 
 class RoomRemoteDataSource {
   final SupabaseClient _client;
 
   RoomRemoteDataSource(this._client);
+
+  Future<List<Room>> getAllRooms() async {
+    final response = await _client
+        .from('rooms')
+        .select();
+    
+    return (response as List).map((json) => _mapToRoom(json)).toList();
+  }
 
   Future<List<Room>> getRoomsByProperty(String propertyId) async {
     final response = await _client
@@ -16,7 +24,9 @@ class RoomRemoteDataSource {
   }
 
   Future<void> upsertRoom(Room room) async {
-    await _client.from('rooms').upsert(_mapFromRoom(room));
+    final data = _mapFromRoom(room);
+    print('DEBUG: Upserting room to Supabase: $data');
+    await _client.from('rooms').upsert(data);
   }
 
   Future<void> deleteRoom(String id) async {

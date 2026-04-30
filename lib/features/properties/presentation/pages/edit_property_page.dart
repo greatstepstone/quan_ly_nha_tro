@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/database/database.dart';
-import '../../../../core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/database/database.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
 
 class EditPropertyPage extends ConsumerStatefulWidget {
   final String propertyId;
@@ -37,7 +38,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
   }
 
   Future<void> _loadData() async {
-    final property = await appDb.appDao.getPropertyById(widget.propertyId);
+    final property = await ref.read(propertyDaoProvider).getPropertyById(widget.propertyId);
     if (property != null) {
       _property = property;
       _nameCtrl.text = property.name;
@@ -45,7 +46,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
       _electricCtrl.text = property.electricityPrice.toString();
       _waterCtrl.text = property.waterPrice.toString();
       
-      final services = await appDb.appDao.getServicesByProperty(widget.propertyId);
+      final services = await ref.read(serviceDaoProvider).getServicesByProperty(widget.propertyId);
       _existingServices = services;
       
       for (final srv in services) {
@@ -91,12 +92,12 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
 
     // Xóa các dịch vụ cũ và cập nhật cái mới cho đơn giản
     for (final srv in _existingServices) {
-      await appDb.appDao.deleteService(srv.id);
+      await ref.read(serviceDaoProvider).deleteService(srv.id);
     }
 
     final internetPrice = double.tryParse(_internetCtrl.text) ?? 0;
     if (internetPrice > 0) {
-      await appDb.appDao.insertService(ServicesCompanion.insert(
+      await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
         id: 'SRV_INT_${DateTime.now().millisecondsSinceEpoch}',
         propertyId: widget.propertyId,
         name: 'Internet',
@@ -107,7 +108,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
 
     final trashPrice = double.tryParse(_trashCtrl.text) ?? 0;
     if (trashPrice > 0) {
-      await appDb.appDao.insertService(ServicesCompanion.insert(
+      await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
         id: 'SRV_TRASH_${DateTime.now().millisecondsSinceEpoch}',
         propertyId: widget.propertyId,
         name: 'Rác',
@@ -118,7 +119,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
 
     final otherPrice = double.tryParse(_otherCtrl.text) ?? 0;
     if (otherPrice > 0) {
-      await appDb.appDao.insertService(ServicesCompanion.insert(
+      await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
         id: 'SRV_OTH_${DateTime.now().millisecondsSinceEpoch}',
         propertyId: widget.propertyId,
         name: _otherNameCtrl.text.isNotEmpty ? _otherNameCtrl.text : 'Phí khác',

@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/resources/string_manager.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/models/models.dart';
-import '../../../../core/providers/property_providers.dart';
-import '../../../../core/providers/room_providers.dart';
-import '../../../../core/providers/invoice_providers.dart';
-import '../../../../core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/invoice_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 final _currencyFormatter = NumberFormat('#,###', 'vi_VN');
 
@@ -85,7 +86,7 @@ class HomePage extends StatelessWidget {
                           iconBg: const Color(0xFFFEF3C7),
                           title: 'Ghi điện nước',
                           subtitle: 'Cập nhật chỉ số',
-                          onTap: () => context.push('/meter-readings'),
+                          onTap: () => context.pushNamed(AppRoutes.meterReadings),
                         ),
                       ),
                       SizedBox(width: 12),
@@ -96,7 +97,7 @@ class HomePage extends StatelessWidget {
                           iconBg: const Color(0xFFffedd5),
                           title: 'Lập hóa đơn',
                           subtitle: 'Kỳ tháng hiện tại',
-                          onTap: () => context.push('/invoices'),
+                          onTap: () => context.pushNamed(AppRoutes.invoices),
                         ),
                       ),
                     ],
@@ -233,7 +234,7 @@ class _StatsRow extends ConsumerWidget {
         color: AppColors.surfaceBright,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Row(
@@ -246,7 +247,7 @@ class _StatsRow extends ConsumerWidget {
                 valueColor: AppColors.primary,
               ),
               loading: () => const _LoadingStatItem(label: 'TỔNG THU'),
-              error: (_, __) => const _ErrorStatItem(label: 'TỔNG THU'),
+              error: (_, _) => const _ErrorStatItem(label: 'TỔNG THU'),
             ),
           ),
           Container(width: 1, height: 40, color: AppColors.surfaceContainer),
@@ -258,7 +259,7 @@ class _StatsRow extends ConsumerWidget {
                 valueColor: AppColors.red,
               ),
               loading: () => const _LoadingStatItem(label: 'TỔNG NỢ'),
-              error: (_, __) => const _ErrorStatItem(label: 'TỔNG NỢ'),
+              error: (_, _) => const _ErrorStatItem(label: 'TỔNG NỢ'),
             ),
           ),
           Container(width: 1, height: 40, color: AppColors.surfaceContainer),
@@ -270,7 +271,7 @@ class _StatsRow extends ConsumerWidget {
                 valueColor: AppColors.emerald,
               ),
               loading: () => const _LoadingStatItem(label: 'SỐ PHÒNG'),
-              error: (_, __) => const _ErrorStatItem(label: 'SỐ PHÒNG'),
+              error: (_, _) => const _ErrorStatItem(label: 'SỐ PHÒNG'),
             ),
           ),
         ],
@@ -299,10 +300,10 @@ class _ManagementSection extends ConsumerWidget {
                   icon: Icons.apartment_outlined,
                   title: 'Nhà trọ',
                   subtitle: '${props.length.toString().padLeft(2, '0')} Tòa nhà',
-                  onTap: () => context.push('/properties'),
+                  onTap: () => context.pushNamed(AppRoutes.properties),
                 ),
                 loading: () => const _LoadingManagementCard(),
-                error: (_, __) => const _ErrorManagementCard(),
+                error: (_, _) => const _ErrorManagementCard(),
               ),
             ),
             const SizedBox(width: 12),
@@ -312,10 +313,10 @@ class _ManagementSection extends ConsumerWidget {
                   icon: Icons.door_front_door_outlined,
                   title: 'Phòng trọ',
                   subtitle: '${rooms.where((r) => r.status == RoomStatus.empty).length} Phòng trống',
-                  onTap: () => context.push('/rooms'),
+                  onTap: () => context.pushNamed(AppRoutes.rooms),
                 ),
                 loading: () => const _LoadingManagementCard(),
-                error: (_, __) => const _ErrorManagementCard(),
+                error: (_, _) => const _ErrorManagementCard(),
               ),
             ),
           ],
@@ -329,10 +330,10 @@ class _ManagementSection extends ConsumerWidget {
                   icon: Icons.person_outline,
                   title: 'Khách thuê',
                   subtitle: '${tenants.length} Hợp đồng',
-                  onTap: () => context.push('/tenants'),
+                  onTap: () => context.pushNamed(AppRoutes.tenants),
                 ),
                 loading: () => const _LoadingManagementCard(),
-                error: (_, __) => const _ErrorManagementCard(),
+                error: (_, _) => const _ErrorManagementCard(),
               ),
             ),
             const SizedBox(width: 12),
@@ -342,10 +343,10 @@ class _ManagementSection extends ConsumerWidget {
                   icon: Icons.receipt_outlined,
                   title: 'Hóa đơn',
                   subtitle: '${invs.where((i) => i.status != InvoiceStatus.paid).length} Chưa thanh toán',
-                  onTap: () => context.push('/invoices'),
+                  onTap: () => context.pushNamed(AppRoutes.invoices),
                 ),
                 loading: () => const _LoadingManagementCard(),
-                error: (_, __) => const _ErrorManagementCard(),
+                error: (_, _) => const _ErrorManagementCard(),
               ),
             ),
           ],
@@ -373,10 +374,10 @@ class _ReportsSection extends ConsumerWidget {
                   title: 'Doanh thu',
                   value: '${_currencyFormatter.format(total)}đ',
                   valueColor: AppColors.emerald,
-                  onTap: () => context.push('/reports'),
+                  onTap: () => context.pushNamed(AppRoutes.reports),
                 ),
                 loading: () => const _LoadingReportCard(),
-                error: (_, __) => const _ErrorReportCard(),
+                error: (_, _) => const _ErrorReportCard(),
               ),
             ),
             const SizedBox(width: 12),
@@ -389,10 +390,10 @@ class _ReportsSection extends ConsumerWidget {
                   title: 'Quản lý Nợ',
                   value: '${_currencyFormatter.format(debt)}đ',
                   valueColor: AppColors.red,
-                  onTap: () => context.push('/invoices'),
+                  onTap: () => context.pushNamed(AppRoutes.invoices),
                 ),
                 loading: () => const _LoadingReportCard(),
-                error: (_, __) => const _ErrorReportCard(),
+                error: (_, _) => const _ErrorReportCard(),
               ),
             ),
           ],
@@ -567,7 +568,7 @@ class _TaskCard extends StatelessWidget {
           color: AppColors.surfaceBright,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 2)),
+            BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 6, offset: const Offset(0, 2)),
           ],
         ),
         child: Column(
@@ -613,7 +614,7 @@ class _ManagementCard extends StatelessWidget {
           color: AppColors.surfaceBright,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 2)),
+            BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 6, offset: const Offset(0, 2)),
           ],
         ),
         child: Row(
@@ -675,7 +676,7 @@ class _ReportCard extends StatelessWidget {
           color: AppColors.surfaceBright,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6, offset: const Offset(0, 2)),
+            BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 6, offset: const Offset(0, 2)),
           ],
         ),
         child: Column(
@@ -704,3 +705,4 @@ class _ReportCard extends StatelessWidget {
     );
   }
 }
+

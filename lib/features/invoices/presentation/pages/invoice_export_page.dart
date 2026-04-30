@@ -6,10 +6,10 @@ import 'package:screenshot/screenshot.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'export_helper.dart'; // conditional import: web=dart:html, mobile=share_plus
+import 'package:quan_ly_nha_tro/features/invoices/presentation/pages/export_helper.dart'; // conditional import: web=dart:html, mobile=share_plus
 
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
 
 class InvoiceExportPage extends StatefulWidget {
   final Invoice invoice;
@@ -381,7 +381,7 @@ class _InvoiceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.08), blurRadius: 20, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -416,7 +416,7 @@ class _InvoiceCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha:0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(invoice.status.label,
@@ -536,7 +536,7 @@ class _HeaderChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha:0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -640,9 +640,9 @@ class _ExportButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha:0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.3)),
+            border: Border.all(color: color.withValues(alpha:0.3)),
           ),
           child: Column(
             children: [
@@ -669,3 +669,4 @@ String _fmt(double value) {
   }
   return '${result.toString()}đ';
 }
+

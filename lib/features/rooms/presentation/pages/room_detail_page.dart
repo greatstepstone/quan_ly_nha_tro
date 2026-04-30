@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/models/models.dart';
-import '../../../../core/providers/room_providers.dart';
-import '../../../../core/providers/property_providers.dart';
-import '../../../../core/providers/tenant_providers.dart';
-import '../../../../core/providers/database_providers.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class RoomDetailPage extends ConsumerWidget {
   final String roomId;
@@ -144,7 +144,7 @@ class RoomDetailPage extends ConsumerWidget {
                     _Section(
                       title: 'KHÁCH THUÊ HIỆN TẠI',
                       child: GestureDetector(
-                        onTap: () => context.push('/tenants/${tenant.id}'),
+                        onTap: () => context.pushNamed(AppRoutes.tenantDetail, pathParameters: {'id': tenant.id}),
                         child: Column(
                           children: [
                             _InfoRow(icon: Icons.person_outline, label: 'Họ tên', value: tenant.name),
@@ -164,7 +164,7 @@ class RoomDetailPage extends ConsumerWidget {
                       title: 'KHÁCH THUÊ HIỆN TẠI',
                       child: Center(
                         child: TextButton.icon(
-                          onPressed: () => context.push('/rooms/$roomId/add-tenant'),
+                          onPressed: () => context.pushNamed(AppRoutes.tenantAdd, pathParameters: {'id': roomId}),
                           icon: Icon(Icons.person_add_alt_1_outlined),
                           label: const Text('Thêm khách thuê'),
                         ),
@@ -177,7 +177,7 @@ class RoomDetailPage extends ConsumerWidget {
                   _Section(
                     title: 'ĐIỆN NƯỚC',
                     child: GestureDetector(
-                      onTap: () => context.push('/meter-readings/$roomId'),
+                      onTap: () => context.pushNamed(AppRoutes.meterReadingDetail, pathParameters: {'roomId': roomId}),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Row(
@@ -207,7 +207,7 @@ class RoomDetailPage extends ConsumerWidget {
                         child: OutlinedButton.icon(
                           icon: Icon(Icons.edit_outlined),
                           label: const Text('Chỉnh sửa'),
-                          onPressed: () => context.push('/rooms/$roomId/edit'),
+                          onPressed: () => context.pushNamed(AppRoutes.roomEdit, pathParameters: {'id': roomId}),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
@@ -221,7 +221,7 @@ class RoomDetailPage extends ConsumerWidget {
                         child: ElevatedButton.icon(
                           icon: Icon(Icons.receipt_long_outlined),
                           label: const Text('Lập hóa đơn'),
-                          onPressed: () => context.push('/invoices/create?roomId=$roomId'),
+                          onPressed: () => context.pushNamed(AppRoutes.invoiceCreate, queryParameters: {'roomId': roomId}),
                         ),
                       ),
                     ],

@@ -1,12 +1,12 @@
 import 'package:drift/drift.dart';
-import '../../../../core/database/database.dart';
-import '../../../../core/database/daos.dart';
-import '../../../../core/models/models.dart';
-import '../data_sources/meter_reading_remote_data_source.dart';
-import 'meter_reading_repository.dart';
+import 'package:quan_ly_nha_tro/core/database/database.dart';
+import 'package:quan_ly_nha_tro/core/database/daos/meter_reading_dao.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/features/meter_reading/data/data_sources/meter_reading_remote_data_source.dart';
+import 'package:quan_ly_nha_tro/features/meter_reading/data/repositories/meter_reading_repository.dart';
 
 class MeterReadingRepositoryImpl implements MeterReadingRepository {
-  final AppDao localDataSource;
+  final MeterReadingDao localDataSource;
   final MeterReadingRemoteDataSource remoteDataSource;
 
   MeterReadingRepositoryImpl({
@@ -41,14 +41,18 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
       waterOld: reading.waterOld,
       waterNew: Value(reading.waterNew),
       isRecorded: Value(reading.isRecorded),
+      isSynced: const Value(false),
     ));
 
     try {
       await remoteDataSource.upsertReading(reading);
+      await localDataSource.updateMeterReading(MeterReadingsCompanion(
+        id: Value(reading.id),
+        isSynced: const Value(true),
+      ));
       print('✅ Sync success (meter reading): ${reading.month}');
     } catch (e) {
       print('❌ Sync error (meter reading) - ${reading.month}: $e');
-      rethrow;
     }
 
     await _syncNextMonthReading(reading);
@@ -66,6 +70,7 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
       waterOld: Value(reading.waterOld),
       waterNew: Value(reading.waterNew),
       isRecorded: Value(reading.isRecorded),
+      isSynced: const Value(false),
     );
 
     // Assuming we update or insert
@@ -78,6 +83,10 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
 
     try {
       await remoteDataSource.upsertReading(reading);
+      await localDataSource.updateMeterReading(MeterReadingsCompanion(
+        id: Value(reading.id),
+        isSynced: const Value(true),
+      ));
     } catch (e) {
       print('Sync error (save meter reading): $e');
     }
@@ -112,10 +121,15 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
         waterOld: nextReading.waterOld,
         waterNew: const Value(null),
         isRecorded: Value(false),
+        isSynced: const Value(false),
       ));
       
       try {
         await remoteDataSource.upsertReading(nextReading);
+        await localDataSource.updateMeterReading(MeterReadingsCompanion(
+          id: Value(nextReading.id),
+          isSynced: const Value(true),
+        ));
       } catch (e) {
         print('Sync error next month: $e');
       }
@@ -124,6 +138,7 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
         id: Value(existingNextMonth.id),
         electricOld: Value(reading.electricNew!),
         waterOld: Value(reading.waterNew!),
+        isSynced: const Value(false),
       );
       await localDataSource.updateMeterReading(companion);
       
@@ -140,6 +155,10 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
           isRecorded: existingNextMonth.isRecorded,
         );
         await remoteDataSource.upsertReading(updatedRemote);
+        await localDataSource.updateMeterReading(MeterReadingsCompanion(
+          id: Value(existingNextMonth.id),
+          isSynced: const Value(true),
+        ));
       } catch (e) {
         print('Sync error update next month: $e');
       }
@@ -171,6 +190,7 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
     await localDataSource.deleteMeterReading(id);
     try {
       await remoteDataSource.deleteReading(id);
+      await localDataSource.hardDeleteMeterReading(id);
     } catch (e) {
       print('Sync error (delete reading): $e');
     }

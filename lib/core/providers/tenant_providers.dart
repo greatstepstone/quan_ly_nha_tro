@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/auth/presentation/providers/auth_providers.dart';
-import '../models/models.dart';
-import 'database_providers.dart';
-import '../../features/tenants/data/data_sources/tenant_remote_data_source.dart';
-import '../../features/tenants/data/repositories/tenant_repository.dart';
-import '../../features/tenants/data/repositories/tenant_repository_impl.dart';
+import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
+import 'package:quan_ly_nha_tro/features/tenants/data/data_sources/tenant_remote_data_source.dart';
+import 'package:quan_ly_nha_tro/features/tenants/data/repositories/tenant_repository.dart';
+import 'package:quan_ly_nha_tro/features/tenants/data/repositories/tenant_repository_impl.dart';
 
 final tenantRemoteDataSourceProvider = Provider<TenantRemoteDataSource>((ref) {
   final client = ref.watch(supabaseClientProvider);
@@ -12,7 +12,7 @@ final tenantRemoteDataSourceProvider = Provider<TenantRemoteDataSource>((ref) {
 });
 
 final tenantRepositoryProvider = Provider<TenantRepository>((ref) {
-  final local = ref.watch(appDaoProvider);
+  final local = ref.watch(tenantDaoProvider);
   final remote = ref.watch(tenantRemoteDataSourceProvider);
   return TenantRepositoryImpl(localDataSource: local, remoteDataSource: remote);
 });
@@ -32,7 +32,6 @@ final tenantFilterIndexProvider = StateProvider<int>((ref) => 0);
 final filteredTenantsProvider = Provider<AsyncValue<List<Tenant>>>((ref) {
   final allTenantsAsync = ref.watch(allTenantsProvider);
   final query = ref.watch(tenantSearchQueryProvider).toLowerCase();
-  final filterIndex = ref.watch(tenantFilterIndexProvider);
 
   return allTenantsAsync.whenData((tenants) {
     return tenants.where((tenant) {

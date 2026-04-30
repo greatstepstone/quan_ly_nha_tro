@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/models/models.dart';
-import '../../../../core/providers/room_providers.dart';
-import '../../../../core/providers/tenant_providers.dart';
-import '../../../auth/presentation/providers/auth_providers.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
 
 class AddTenantPage extends ConsumerStatefulWidget {
   final String roomId;
@@ -73,7 +73,15 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
       final roomRepo = ref.read(roomRepositoryProvider);
       
       final tenantId = const Uuid().v4();
-      final ownerId = ref.read(currentUserProvider)?.id ?? 'owner_1';
+      final user = ref.read(currentUserProvider);
+      if (user == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vui lòng đăng nhập để thực hiện thao tác này')),
+        );
+        return;
+      }
+      final ownerId = user.id;
 
       final newTenant = Tenant(
         id: tenantId,

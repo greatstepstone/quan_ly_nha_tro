@@ -1,4 +1,5 @@
 /// Web implementation — uses dart:html Blob + AnchorElement to trigger downloads.
+library;
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'dart:typed_data';

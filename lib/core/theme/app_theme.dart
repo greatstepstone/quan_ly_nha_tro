@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 // Exporting colors so existing imports continue to work
 export '../resources/color_manager.dart';
-import '../resources/color_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/color_manager.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {

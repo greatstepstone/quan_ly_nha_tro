@@ -1,6 +1,6 @@
 /// Stub — resolved at compile time by conditional imports.
 /// The real implementations live in export_helper_web.dart and export_helper_mobile.dart.
-library export_helper;
+library;
 
 export 'export_helper_stub.dart'
     if (dart.library.html) 'export_helper_web.dart'

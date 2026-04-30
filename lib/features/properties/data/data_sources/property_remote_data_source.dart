@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
 
 class PropertyRemoteDataSource {
   final SupabaseClient _client;
@@ -17,7 +17,9 @@ class PropertyRemoteDataSource {
 
   /// Upsert (Insert hoặc Update) nhà trọ lên Supabase
   Future<void> upsertProperty(Property property) async {
-    await _client.from('properties').upsert(_mapFromProperty(property));
+    final data = _mapFromProperty(property);
+    print('DEBUG: Upserting property to Supabase: $data');
+    await _client.from('properties').upsert(data);
   }
 
   /// Xóa nhà trọ khỏi Supabase
@@ -37,7 +39,10 @@ class PropertyRemoteDataSource {
       electricityPrice: (json['electricity_price'] as num).toDouble(),
       waterPrice: (json['water_price'] as num).toDouble(),
       waterBillingType: BillingType.values.byName(json['water_billing_type']),
-      status: json['status'],
+      status: PropertyStatus.values.firstWhere(
+        (e) => e.name.toLowerCase() == json['status'].toString().toLowerCase(),
+        orElse: () => PropertyStatus.active,
+      ),
     );
   }
 
@@ -51,7 +56,7 @@ class PropertyRemoteDataSource {
       'electricity_price': p.electricityPrice,
       'water_price': p.waterPrice,
       'water_billing_type': p.waterBillingType.name,
-      'status': p.status,
+      'status': p.status.name,
     };
   }
 }

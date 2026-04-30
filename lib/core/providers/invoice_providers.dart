@@ -1,11 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/auth/presentation/providers/auth_providers.dart';
-import '../models/models.dart';
-import '../../features/invoices/data/data_sources/invoice_remote_data_source.dart';
-import '../../features/invoices/data/repositories/invoice_repository.dart';
-import '../../features/invoices/data/repositories/invoice_repository_impl.dart';
-import 'database_providers.dart';
-import 'property_providers.dart';
+import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/features/invoices/data/data_sources/invoice_remote_data_source.dart';
+import 'package:quan_ly_nha_tro/features/invoices/data/repositories/invoice_repository.dart';
+import 'package:quan_ly_nha_tro/features/invoices/data/repositories/invoice_repository_impl.dart';
+import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
 
 final invoiceRemoteDataSourceProvider = Provider<InvoiceRemoteDataSource>((ref) {
   final client = ref.watch(supabaseClientProvider);
@@ -13,9 +12,23 @@ final invoiceRemoteDataSourceProvider = Provider<InvoiceRemoteDataSource>((ref) 
 });
 
 final invoiceRepositoryProvider = Provider<InvoiceRepository>((ref) {
-  final local = ref.watch(appDaoProvider);
+  final local = ref.watch(invoiceDaoProvider);
+  final room = ref.watch(roomDaoProvider);
+  final property = ref.watch(propertyDaoProvider);
+  final service = ref.watch(serviceDaoProvider);
+  final meter = ref.watch(meterReadingDaoProvider);
+  final tenant = ref.watch(tenantDaoProvider);
   final remote = ref.watch(invoiceRemoteDataSourceProvider);
-  return InvoiceRepositoryImpl(localDataSource: local, remoteDataSource: remote);
+  
+  return InvoiceRepositoryImpl(
+    localDataSource: local,
+    roomDao: room,
+    propertyDao: property,
+    serviceDao: service,
+    meterDao: meter,
+    tenantDao: tenant,
+    remoteDataSource: remote,
+  );
 });
 final allInvoicesProvider = StreamProvider<List<Invoice>>((ref) {
   return ref.watch(invoiceRepositoryProvider).watchAllInvoices();
@@ -40,7 +53,7 @@ final filteredInvoicesProvider = FutureProvider<List<Invoice>>((ref) async {
   if (propertyId == null) return [];
   
   final allInvoices = await repo.getAllInvoices();
-  final allRooms = await ref.watch(appDaoProvider).getAllRooms();
+  final allRooms = await ref.watch(roomDaoProvider).getAllRooms();
   final propertyRoomIds = allRooms.where((r) => r.propertyId == propertyId).map((r) => r.id).toSet();
 
   return allInvoices.where((inv) {

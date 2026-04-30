@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../../../core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class ReportsPage extends ConsumerStatefulWidget {
   const ReportsPage({super.key});
@@ -152,7 +153,7 @@ class _RevenueTab extends StatelessWidget {
 
         // Navigate to property report
         GestureDetector(
-          onTap: () => context.push('/reports/property'),
+          onTap: () => context.pushNamed(AppRoutes.propertyReport),
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

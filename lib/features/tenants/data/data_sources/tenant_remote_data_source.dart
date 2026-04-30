@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../../core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
 
 class TenantRemoteDataSource {
   final SupabaseClient _client;

@@ -29,6 +29,14 @@ class AuthRepository {
     );
   }
 
+  /// Đăng nhập bằng Social Provider (Google, Apple, Facebook)
+  Future<bool> signInWithProvider(OAuthProvider provider) async {
+    return await _client.auth.signInWithOAuth(
+      provider,
+      // redirectTo: 'io.supabase.flutter.quanlynhatro://login-callback',
+    );
+  }
+
   /// Đăng xuất
   Future<void> signOut() async {
     await _client.auth.signOut();

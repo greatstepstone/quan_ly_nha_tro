@@ -1,4 +1,4 @@
-import '../models/models.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
 
 class MockData {
   // Properties

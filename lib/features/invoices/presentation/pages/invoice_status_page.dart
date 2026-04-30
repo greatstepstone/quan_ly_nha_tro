@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/models/models.dart';
-import '../../../../core/providers/property_providers.dart';
-import '../../../../core/providers/room_providers.dart';
-import '../../../../core/providers/invoice_providers.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/invoice_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class InvoiceStatusPage extends StatelessWidget {
   const InvoiceStatusPage({super.key});
@@ -33,7 +34,7 @@ class InvoiceStatusPage extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/invoices/create'),
+        onPressed: () => context.pushNamed(AppRoutes.invoiceCreate),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.receipt_long_outlined, color: Colors.white),
       ),
@@ -95,7 +96,7 @@ class _PropertySelector extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox(height: 80),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }
@@ -211,7 +212,7 @@ class _InvoiceListSection extends ConsumerWidget {
           final filterStatus = ref.read(invoiceFilterStatusProvider);
           return _EmptyState(
             filterStatus: filterStatus,
-            onCreateTap: () => context.push('/invoices/create'),
+            onCreateTap: () => context.pushNamed(AppRoutes.invoiceCreate),
           );
         }
 
@@ -330,7 +331,7 @@ class _InvoiceCard extends StatelessWidget {
     final bg = _invoiceBg(invoice.status);
 
     return GestureDetector(
-      onTap: () => context.push('/invoices/create?roomId=${room.id}'),
+      onTap: () => context.pushNamed(AppRoutes.invoiceCreate, queryParameters: {'roomId': room.id}),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(16),
@@ -338,7 +339,7 @@ class _InvoiceCard extends StatelessWidget {
           color: AppColors.surfaceBright,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)
+            BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 6)
           ],
         ),
         child: Row(
@@ -450,3 +451,4 @@ String _fmt(double value) {
   }
   return '${result.toString()}đ';
 }
+

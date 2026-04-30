@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/models/models.dart';
-import '../../../../core/providers/tenant_providers.dart';
-import '../../../../core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class TenantsListPage extends ConsumerWidget {
   const TenantsListPage({super.key});
@@ -89,7 +90,7 @@ class TenantsListPage extends ConsumerWidget {
 
               // Add new card
               SizedBox(height: 12),
-              _AddTenantCard(onTap: () => context.push('/rooms/add')),
+              _AddTenantCard(onTap: () => context.pushNamed(AppRoutes.roomAdd)),
               SizedBox(height: 16),
 
               // Stats banner
@@ -141,14 +142,14 @@ class _TenantCard extends ConsumerWidget {
 
     return roomAsync.when(
       data: (room) => GestureDetector(
-        onTap: () => context.push('/tenants/${tenant.id}'),
+        onTap: () => context.pushNamed(AppRoutes.tenantDetail, pathParameters: {'id': tenant.id}),
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.surfaceBright,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 6)],
           ),
           child: Column(
             children: [
@@ -356,3 +357,4 @@ String _fmt(double value) {
   }
   return '${result.toString()}đ';
 }
+

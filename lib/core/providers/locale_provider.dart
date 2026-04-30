@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 
 class LocaleNotifier extends StateNotifier<String> {
   LocaleNotifier() : super('vi') {

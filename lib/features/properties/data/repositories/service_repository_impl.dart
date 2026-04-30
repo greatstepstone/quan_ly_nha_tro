@@ -1,12 +1,12 @@
 import 'package:drift/drift.dart';
-import '../../../../core/database/database.dart';
-import '../../../../core/database/daos.dart';
-import '../../../../core/models/models.dart';
-import '../data_sources/service_remote_data_source.dart';
-import 'service_repository.dart';
+import 'package:quan_ly_nha_tro/core/database/database.dart';
+import 'package:quan_ly_nha_tro/core/database/daos/service_dao.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/features/properties/data/data_sources/service_remote_data_source.dart';
+import 'package:quan_ly_nha_tro/features/properties/data/repositories/service_repository.dart';
 
 class ServiceRepositoryImpl implements ServiceRepository {
-  final AppDao localDataSource;
+  final ServiceDao localDataSource;
   final ServiceRemoteDataSource remoteDataSource;
 
   ServiceRepositoryImpl({

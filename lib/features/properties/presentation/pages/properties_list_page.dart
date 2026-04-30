@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/models/models.dart';
-import '../../../../core/database/database.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
-class PropertiesListPage extends StatefulWidget {
+class PropertiesListPage extends ConsumerStatefulWidget {
   const PropertiesListPage({super.key});
 
   @override
-  State<PropertiesListPage> createState() => _PropertiesListPageState();
+  ConsumerState<PropertiesListPage> createState() => _PropertiesListPageState();
 }
 
-class _PropertiesListPageState extends State<PropertiesListPage> {
+class _PropertiesListPageState extends ConsumerState<PropertiesListPage> {
   final _search = TextEditingController();
   String _query = '';
 
   @override
   Widget build(BuildContext context) {
+    final allPropertiesAsync = ref.watch(allPropertiesProvider);
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
@@ -30,17 +34,10 @@ class _PropertiesListPageState extends State<PropertiesListPage> {
           IconButton(icon: Icon(Icons.tune_rounded), onPressed: () {}),
         ],
       ),
-      body: StreamBuilder<List<Property>>(
-        stream: appDb.appDao.watchAllProperties(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Lỗi: ${snapshot.error}', style: GoogleFonts.manrope(color: Colors.red)));
-          }
-
-          final properties = snapshot.data ?? [];
+      body: allPropertiesAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Lỗi: $err', style: GoogleFonts.manrope(color: Colors.red))),
+        data: (properties) {
           final filtered = properties
               .where((p) => p.name.toLowerCase().contains(_query.toLowerCase()))
               .toList();
@@ -73,7 +70,7 @@ class _PropertiesListPageState extends State<PropertiesListPage> {
 
               // Add new
               SizedBox(height: 12),
-              _AddPropertyCard(onTap: () => context.push('/properties/add')),
+              _AddPropertyCard(onTap: () => context.pushNamed(AppRoutes.propertyAdd)),
               SizedBox(height: 16),
 
               // Stats banner
@@ -94,7 +91,7 @@ class _PropertyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/rooms?propertyId=${property.id}'),
+      onTap: () => context.pushNamed(AppRoutes.rooms, queryParameters: {'propertyId': property.id}),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
@@ -102,7 +99,7 @@ class _PropertyCard extends StatelessWidget {
           color: AppColors.surfaceBright,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6),
+            BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 6),
           ],
         ),
         child: Row(
@@ -128,7 +125,14 @@ class _PropertyCard extends StatelessWidget {
                             style: GoogleFonts.manrope(
                                 fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                       ),
-                      _StatusBadge(property.status),
+                      _StatusBadge(property.status.label),
+                      if (!property.isSynced) ...[
+                        const SizedBox(width: 8),
+                        const Icon(Icons.cloud_off_rounded, size: 16, color: Colors.orange),
+                      ] else ...[
+                        const SizedBox(width: 8),
+                        Icon(Icons.cloud_done_rounded, size: 16, color: AppColors.emerald.withValues(alpha:0.5)),
+                      ],
                     ],
                   ),
                   SizedBox(height: 4),
@@ -165,7 +169,7 @@ class _PropertyCard extends StatelessWidget {
             ),
             IconButton(
               icon: Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
-              onPressed: () => context.push('/properties/${property.id}/edit'),
+              onPressed: () => context.pushNamed(AppRoutes.propertyEdit, pathParameters: {'id': property.id}),
             ),
             Icon(Icons.chevron_right, color: AppColors.textTertiary),
           ],
@@ -262,7 +266,7 @@ class _StatsBanner extends StatelessWidget {
                   children: [
                     Text('TỔNG SỐ NHÀ',
                         style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary)),
-                    Text('${properties.length.toString().padLeft(2, '0')}',
+                    Text(properties.length.toString().padLeft(2, '0'),
                         style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.primaryDark)),
                   ],
                 ),
@@ -285,3 +289,4 @@ class _StatsBanner extends StatelessWidget {
     );
   }
 }
+

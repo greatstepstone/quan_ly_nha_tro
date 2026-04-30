@@ -1,5 +1,6 @@
 /// Mobile implementation — uses share_plus to open the native OS share sheet
 /// (Zalo, Messenger, Gmail, Save to Files, etc.)
+library;
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';

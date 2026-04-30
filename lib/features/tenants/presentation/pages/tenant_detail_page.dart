@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/providers/tenant_providers.dart';
-import '../../../../core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class TenantDetailPage extends ConsumerWidget {
   final String tenantId;
@@ -149,7 +150,7 @@ class TenantDetailPage extends ConsumerWidget {
                             style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
                         SizedBox(height: 10),
                         GestureDetector(
-                          onTap: () => context.push('/rooms/${room.id}'),
+                          onTap: () => context.pushNamed(AppRoutes.roomDetail, pathParameters: {'id': room.id}),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(12)),
@@ -211,7 +212,7 @@ class TenantDetailPage extends ConsumerWidget {
                   child: Column(
                     children: [
                       ElevatedButton(
-                        onPressed: () => context.push('/tenants/${tenant.id}/edit'),
+                        onPressed: () => context.pushNamed(AppRoutes.tenantEdit, pathParameters: {'id': tenant.id}),
                         style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 52)),
                         child: const Text('Sửa thông tin'),
                       ),

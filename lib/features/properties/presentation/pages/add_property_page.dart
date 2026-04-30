@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/database/database.dart';
-import '../../../../core/models/models.dart';
+import 'package:uuid/uuid.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/database/database.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/providers/property_providers.dart';
-import '../../../../features/auth/presentation/providers/auth_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
+import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
+import 'package:quan_ly_nha_tro/core/widgets/error_dialog.dart';
 
 class AddPropertyPage extends ConsumerStatefulWidget {
   const AddPropertyPage({super.key});
@@ -121,64 +124,83 @@ class _AddPropertyPageState extends ConsumerState<AddPropertyPage> {
                 return;
               }
 
-              final ownerId = ref.read(currentUserProvider)?.id ?? 'UNKNOWN';
+              try {
+                final user = ref.read(currentUserProvider);
+                if (user == null) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Vui lòng đăng nhập để thực hiện thao tác này')),
+                  );
+                  return;
+                }
+                final ownerId = user.id;
 
-              final propertyId = 'PROP_${DateTime.now().millisecondsSinceEpoch}';
-              
-              final property = Property(
-                id: propertyId,
-                ownerId: ownerId,
-                name: _nameCtrl.text,
-                address: _addressCtrl.text,
-                totalRooms: 0,
-                electricityPrice: double.tryParse(_electricCtrl.text) ?? 0,
-                waterPrice: double.tryParse(_waterCtrl.text) ?? 0,
-                waterBillingType: BillingType.byMeter,
-              );
+                final propertyId = const Uuid().v4();
+                
+                final property = Property(
+                  id: propertyId,
+                  ownerId: ownerId,
+                  name: _nameCtrl.text,
+                  address: _addressCtrl.text,
+                  totalRooms: 0,
+                  electricityPrice: double.tryParse(_electricCtrl.text) ?? 0,
+                  waterPrice: double.tryParse(_waterCtrl.text) ?? 0,
+                  waterBillingType: BillingType.byMeter,
+                );
 
-              // Lưu nhà trọ qua Repository (tự động sync)
-              await ref.read(propertyRepositoryProvider).addProperty(property);
+                // Lưu nhà trọ qua Repository (tự động sync)
+                await ref.read(propertyRepositoryProvider).addProperty(property);
 
-              // Lưu các dịch vụ (nếu có giá trị > 0)
-              final internetPrice = double.tryParse(_internetCtrl.text) ?? 0;
-              if (internetPrice > 0) {
-                await appDb.appDao.insertService(ServicesCompanion.insert(
-                  id: 'SRV_INT_${DateTime.now().millisecondsSinceEpoch}',
-                  propertyId: propertyId,
-                  name: 'Internet',
-                  type: BillingType.fixed,
-                  price: internetPrice,
-                ));
+                // Lưu các dịch vụ (nếu có giá trị > 0)
+                final internetPrice = double.tryParse(_internetCtrl.text) ?? 0;
+                if (internetPrice > 0) {
+                  await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
+                    id: const Uuid().v4(),
+                    propertyId: propertyId,
+                    name: 'Internet',
+                    type: BillingType.fixed,
+                    price: internetPrice,
+                  ));
+                }
+
+                final trashPrice = double.tryParse(_trashCtrl.text) ?? 0;
+                if (trashPrice > 0) {
+                  await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
+                    id: const Uuid().v4(),
+                    propertyId: propertyId,
+                    name: 'Rác',
+                    type: BillingType.perPerson,
+                    price: trashPrice,
+                  ));
+                }
+
+                final otherPrice = double.tryParse(_otherCtrl.text) ?? 0;
+                if (otherPrice > 0) {
+                  await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
+                    id: const Uuid().v4(),
+                    propertyId: propertyId,
+                    name: _otherNameCtrl.text.isNotEmpty ? _otherNameCtrl.text : 'Phí khác',
+                    type: BillingType.fixed,
+                    price: otherPrice,
+                  ));
+                }
+
+                if (!context.mounted) return;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Đã thêm nhà trọ thành công!')),
+                );
+                context.pop();
+              } catch (e, stackTrace) {
+                if (mounted) {
+                  ErrorDialog.show(
+                    context,
+                    message: 'Không thể thêm nhà trọ mới. Vui lòng kiểm tra lại kết nối.',
+                    error: e,
+                    stackTrace: stackTrace,
+                  );
+                }
               }
-
-              final trashPrice = double.tryParse(_trashCtrl.text) ?? 0;
-              if (trashPrice > 0) {
-                await appDb.appDao.insertService(ServicesCompanion.insert(
-                  id: 'SRV_TRASH_${DateTime.now().millisecondsSinceEpoch}',
-                  propertyId: propertyId,
-                  name: 'Rác',
-                  type: BillingType.perPerson,
-                  price: trashPrice,
-                ));
-              }
-
-              final otherPrice = double.tryParse(_otherCtrl.text) ?? 0;
-              if (otherPrice > 0) {
-                await appDb.appDao.insertService(ServicesCompanion.insert(
-                  id: 'SRV_OTH_${DateTime.now().millisecondsSinceEpoch}',
-                  propertyId: propertyId,
-                  name: _otherNameCtrl.text.isNotEmpty ? _otherNameCtrl.text : 'Phí khác',
-                  type: BillingType.fixed,
-                  price: otherPrice,
-                ));
-              }
-
-              if (!context.mounted) return;
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Đã thêm nhà trọ thành công!')),
-              );
-              context.pop();
             },
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(double.infinity, 52),

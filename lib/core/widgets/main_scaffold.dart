@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class MainScaffold extends StatelessWidget {
   final Widget child;
@@ -25,7 +26,7 @@ class MainScaffold extends StatelessWidget {
           color: AppColors.surfaceBright,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 12,
               offset: const Offset(0, -4),
             ),
@@ -42,21 +43,21 @@ class MainScaffold extends StatelessWidget {
                   activeIcon: Icons.home_rounded,
                   label: 'Trang chủ',
                   isActive: currentIndex == 0,
-                  onTap: () => context.go('/'),
+                  onTap: () => context.goNamed(AppRoutes.home),
                 ),
                 _NavItem(
                   icon: Icons.bar_chart_outlined,
                   activeIcon: Icons.bar_chart_rounded,
                   label: 'Báo cáo',
                   isActive: currentIndex == 1,
-                  onTap: () => context.go('/reports'),
+                  onTap: () => context.goNamed(AppRoutes.reports),
                 ),
                 _NavItem(
                   icon: Icons.settings_outlined,
                   activeIcon: Icons.settings_rounded,
                   label: 'Cài đặt',
                   isActive: currentIndex == 2,
-                  onTap: () => context.go('/settings'),
+                  onTap: () => context.goNamed(AppRoutes.settings),
                 ),
               ],
             ),

@@ -1,33 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/database/database.dart';
-import '../../../../core/models/models.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/invoice_providers.dart';
 
-class PropertyReportPage extends StatefulWidget {
+class PropertyReportPage extends ConsumerStatefulWidget {
   const PropertyReportPage({super.key});
 
   @override
-  State<PropertyReportPage> createState() => _PropertyReportPageState();
+  ConsumerState<PropertyReportPage> createState() => _PropertyReportPageState();
 }
 
-class _PropertyReportPageState extends State<PropertyReportPage>
+class _PropertyReportPageState extends ConsumerState<PropertyReportPage>
     with SingleTickerProviderStateMixin {
   late TabController _tab;
   String? _selectedPropertyId;
-
-  late Stream<List<Property>> _propertiesStream;
-  late Stream<List<Room>> _roomsStream;
-  late Stream<List<Invoice>> _invoicesStream;
 
   @override
   void initState() {
     super.initState();
     _tab = TabController(length: 3, vsync: this);
-    _propertiesStream = appDb.appDao.watchAllProperties();
-    _roomsStream = appDb.appDao.watchAllRooms();
-    _invoicesStream = appDb.appDao.watchAllInvoices();
   }
 
   @override
@@ -38,27 +34,24 @@ class _PropertyReportPageState extends State<PropertyReportPage>
 
   @override
   Widget build(BuildContext context) {
+    final propertiesAsync = ref.watch(allPropertiesProvider);
+    final roomsAsync = ref.watch(allRoomsProvider);
+    final invoicesAsync = ref.watch(allInvoicesProvider);
+
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: StreamBuilder<List<Property>>(
-        stream: _propertiesStream,
-        builder: (context, propsSnap) {
-          return StreamBuilder<List<Room>>(
-            stream: _roomsStream,
-            builder: (context, roomsSnap) {
-              return StreamBuilder<List<Invoice>>(
-                stream: _invoicesStream,
-                builder: (context, invoicesSnap) {
-                  final properties = propsSnap.data ?? [];
-                  final allRooms = roomsSnap.data ?? [];
-                  final allInvoices = invoicesSnap.data ?? [];
-
-                  final isLoading =
-                      propsSnap.connectionState == ConnectionState.waiting ||
-                          roomsSnap.connectionState == ConnectionState.waiting ||
-                          invoicesSnap.connectionState ==
-                              ConnectionState.waiting;
-
+      body: propertiesAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Lỗi: $err')),
+        data: (properties) {
+          return roomsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, stack) => Center(child: Text('Lỗi: $err')),
+            data: (allRooms) {
+              return invoicesAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(child: Text('Lỗi: $err')),
+                data: (allInvoices) {
                   final currentPropertyId = _selectedPropertyId ??
                       (properties.isNotEmpty ? properties.first.id : null);
 
@@ -78,8 +71,7 @@ class _PropertyReportPageState extends State<PropertyReportPage>
                         backgroundColor: AppColors.surfaceBright,
                         elevation: 0,
                         leading: IconButton(
-                          icon:
-                              Icon(Icons.arrow_back_ios_new_rounded),
+                          icon: const Icon(Icons.arrow_back_ios_new_rounded),
                           onPressed: () => context.pop(),
                         ),
                         title: Text('Báo cáo theo nhà trọ',
@@ -98,7 +90,7 @@ class _PropertyReportPageState extends State<PropertyReportPage>
                                     initialValue: currentPropertyId,
                                     decoration: InputDecoration(
                                       fillColor: AppColors.surface,
-                                      contentPadding: EdgeInsets.symmetric(
+                                      contentPadding: const EdgeInsets.symmetric(
                                           horizontal: 16, vertical: 10),
                                     ),
                                     items: properties
@@ -118,7 +110,7 @@ class _PropertyReportPageState extends State<PropertyReportPage>
                                   ),
                                 )
                               else
-                                SizedBox(height: 8),
+                                const SizedBox(height: 8),
                               // Tabs
                               TabBar(
                                 controller: _tab,
@@ -139,10 +131,8 @@ class _PropertyReportPageState extends State<PropertyReportPage>
                         ),
                       ),
                       SliverFillRemaining(
-                        child: isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : properties.isEmpty
-                                ? _EmptyState(
+                        child: properties.isEmpty
+                                ? const _EmptyState(
                                     message: 'Chưa có nhà trọ nào trong hệ thống.')
                                 : TabBarView(
                                     controller: _tab,
@@ -225,7 +215,7 @@ class _RevenueTab extends StatelessWidget {
                 iconBg: AppColors.emeraldLight,
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(
               child: _KpiCard(
                 label: 'Chờ thanh toán',
@@ -235,7 +225,7 @@ class _RevenueTab extends StatelessWidget {
                 iconBg: AppColors.orangeLight,
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(
               child: _KpiCard(
                 label: 'Quá hạn',
@@ -247,7 +237,7 @@ class _RevenueTab extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
 
         // Bar chart — doanh thu theo tháng
         Container(
@@ -261,30 +251,30 @@ class _RevenueTab extends StatelessWidget {
               Text('Doanh thu theo tháng',
                   style: GoogleFonts.manrope(
                       fontSize: 14, color: AppColors.textSecondary)),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 monthlyRev.isEmpty ? '0đ' : _fmt(_totalPaid),
                 style: GoogleFonts.manrope(
                     fontSize: 24, fontWeight: FontWeight.w800),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               if (monthlyRev.isNotEmpty)
                 Row(
                   children: [
                     Icon(Icons.trending_up,
                         color: AppColors.emerald, size: 14),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text('Tổng tất cả thời gian',
                         style: GoogleFonts.manrope(
                             fontSize: 12, color: AppColors.emerald)),
                   ],
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _MonthlyBarChart(monthlyRevenue: monthlyRev),
             ],
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
 
         // Invoice total breakdown
         Container(
@@ -298,7 +288,7 @@ class _RevenueTab extends StatelessWidget {
               Text('Tổng hợp hóa đơn',
                   style: GoogleFonts.manrope(
                       fontSize: 15, fontWeight: FontWeight.w700)),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _RevenueRow(
                 icon: Icons.check_circle_outline,
                 iconBg: AppColors.emeraldLight,
@@ -336,7 +326,7 @@ class _RevenueTab extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 24),
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -399,7 +389,7 @@ class _InvoiceStatusTab extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         if (invoices.isEmpty)
-          _EmptyState(message: 'Chưa có hóa đơn nào cho nhà trọ này.')
+          const _EmptyState(message: 'Chưa có hóa đơn nào cho nhà trọ này.')
         else ...[
           Container(
             padding: const EdgeInsets.all(20),
@@ -412,11 +402,11 @@ class _InvoiceStatusTab extends StatelessWidget {
                 Text('Phân bổ trạng thái hóa đơn',
                     style: GoogleFonts.manrope(
                         fontSize: 15, fontWeight: FontWeight.w700)),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text('$total hóa đơn tổng cộng',
                     style: GoogleFonts.manrope(
                         fontSize: 13, color: AppColors.textSecondary)),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 ...statusGroups.where((g) => _count(g.$1) > 0).map((g) {
                   final count = _count(g.$1);
                   final pct = total > 0 ? count / total : 0.0;
@@ -434,7 +424,7 @@ class _InvoiceStatusTab extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           // List of recent invoices
           Container(
@@ -448,13 +438,13 @@ class _InvoiceStatusTab extends StatelessWidget {
                 Text('Hóa đơn gần đây',
                     style: GoogleFonts.manrope(
                         fontSize: 15, fontWeight: FontWeight.w700)),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 ...invoices.take(8).map((inv) => _InvoiceRow(invoice: inv)),
               ],
             ),
           ),
         ],
-        SizedBox(height: 24),
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -493,7 +483,7 @@ class _VacancyTab extends StatelessWidget {
                 iconBg: AppColors.primaryLight,
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(
               child: _KpiCard(
                 label: 'Phòng trống',
@@ -503,7 +493,7 @@ class _VacancyTab extends StatelessWidget {
                 iconBg: AppColors.surfaceContainer,
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Expanded(
               child: _KpiCard(
                 label: 'Tổng phòng',
@@ -515,7 +505,7 @@ class _VacancyTab extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
 
         // Breakdown bars
         Container(
@@ -529,7 +519,7 @@ class _VacancyTab extends StatelessWidget {
               Text('Phân bổ trạng thái phòng',
                   style: GoogleFonts.manrope(
                       fontSize: 15, fontWeight: FontWeight.w700)),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               if (total == 0)
                 Text('Chưa có phòng nào.',
                     style: GoogleFonts.manrope(
@@ -540,19 +530,19 @@ class _VacancyTab extends StatelessWidget {
                     count: rented,
                     total: total,
                     color: AppColors.primary),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _VacancyBar(
                     label: 'Đặt cọc',
                     count: deposited,
                     total: total,
                     color: AppColors.amber),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _VacancyBar(
                     label: 'Trống',
                     count: empty,
                     total: total,
                     color: AppColors.emerald),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _VacancyBar(
                     label: 'Bảo trì',
                     count: maintenance,
@@ -562,7 +552,7 @@ class _VacancyTab extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
 
         // Property info card
         Container(
@@ -576,22 +566,22 @@ class _VacancyTab extends StatelessWidget {
               Text('Thông tin nhà trọ',
                   style: GoogleFonts.manrope(
                       fontSize: 15, fontWeight: FontWeight.w700)),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _InfoRow(
                   icon: Icons.location_on_outlined,
                   label: 'Địa chỉ',
                   value: property.address),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               _InfoRow(
                   icon: Icons.bolt,
                   label: 'Giá điện',
                   value: '${_fmt(property.electricityPrice)}/kWh'),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               _InfoRow(
                   icon: Icons.water_drop_outlined,
                   label: 'Giá nước',
                   value: '${_fmt(property.waterPrice)}/m³'),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               _InfoRow(
                   icon: Icons.water_drop_outlined,
                   label: 'Loại tính nước',
@@ -599,13 +589,34 @@ class _VacancyTab extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 24),
+        const SizedBox(height: 24),
       ],
     );
   }
 }
 
-// ── Sub-widgets ───────────────────────────────────────────────────────────────
+// ── Shared Sub-widgets ────────────────────────────────────────────────────────
+
+class _EmptyState extends StatelessWidget {
+  final String message;
+  const _EmptyState({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.analytics_outlined, size: 64, color: AppColors.textTertiary),
+          const SizedBox(height: 16),
+          Text(message,
+              style: GoogleFonts.manrope(
+                  fontSize: 14, color: AppColors.textSecondary)),
+        ],
+      ),
+    );
+  }
+}
 
 class _KpiCard extends StatelessWidget {
   final String label;
@@ -638,7 +649,7 @@ class _KpiCard extends StatelessWidget {
                 BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(8)),
             child: Icon(icon, color: iconColor, size: 16),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(value,
               style: GoogleFonts.manrope(
                   fontSize: 18, fontWeight: FontWeight.w800)),
@@ -682,7 +693,7 @@ class _RevenueRow extends StatelessWidget {
               color: iconBg, borderRadius: BorderRadius.circular(8)),
           child: Icon(icon, color: iconColor, size: 18),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -704,7 +715,6 @@ class _RevenueRow extends StatelessWidget {
   }
 }
 
-/// Bar chart driven by actual monthly invoice totals
 class _MonthlyBarChart extends StatelessWidget {
   final Map<String, double> monthlyRevenue;
   const _MonthlyBarChart({required this.monthlyRevenue});
@@ -721,7 +731,6 @@ class _MonthlyBarChart extends StatelessWidget {
       );
     }
 
-    // Sort months chronologically
     final sortedEntries = monthlyRevenue.entries.toList()
       ..sort((a, b) {
         final ap = _parseMonth(a.key);
@@ -729,13 +738,12 @@ class _MonthlyBarChart extends StatelessWidget {
         return ap.compareTo(bp);
       });
 
-    // Take at most last 12 months
     final display = sortedEntries.length > 12
         ? sortedEntries.sublist(sortedEntries.length - 12)
         : sortedEntries;
 
     final maxVal = display.map((e) => e.value).reduce((a, b) => a > b ? a : b);
-    final currentMonth = _currentMonthKey();
+    final currentMonth = '${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}';
 
     return SizedBox(
       height: 130,
@@ -743,8 +751,8 @@ class _MonthlyBarChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: display.map((entry) {
           final ratio = maxVal > 0 ? entry.value / maxVal : 0.0;
-          final isActive = entry.key == currentMonth;
-          final label = entry.key.substring(0, 2); // "MM"
+          final isActive = entry.key == currentMonth || entry.key == 'Tháng $currentMonth';
+          final label = entry.key.replaceAll('Tháng ', '').substring(0, 2); 
           return Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -774,7 +782,7 @@ class _MonthlyBarChart extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'T${int.tryParse(label) ?? label}',
                     style: GoogleFonts.manrope(
@@ -796,24 +804,12 @@ class _MonthlyBarChart extends StatelessWidget {
   }
 
   DateTime _parseMonth(String key) {
-    // key format "MM/YYYY"
-    final parts = key.split('/');
+    final cleanKey = key.replaceAll('Tháng ', '');
+    final parts = cleanKey.split('/');
     if (parts.length == 2) {
-      return DateTime(
-          int.tryParse(parts[1]) ?? 2024, int.tryParse(parts[0]) ?? 1);
+      return DateTime(int.parse(parts[1]), int.parse(parts[0]));
     }
-    return DateTime(2024);
-  }
-
-  String _currentMonthKey() {
-    final now = DateTime.now();
-    return '${now.month.toString().padLeft(2, '0')}/${now.year}';
-  }
-
-  String _fmtShort(double v) {
-    if (v >= 1000000) return '${(v / 1000000).toStringAsFixed(1)}M';
-    if (v >= 1000) return '${(v / 1000).toStringAsFixed(0)}K';
-    return v.toStringAsFixed(0);
+    return DateTime.now();
   }
 }
 
@@ -834,38 +830,37 @@ class _StatusBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Container(
-                width: 8,
-                height: 8,
-                decoration:
-                    BoxDecoration(color: color, shape: BoxShape.circle)),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(label,
-                  style: GoogleFonts.manrope(fontSize: 13)),
-            ),
-            Text('$count hóa đơn',
+            Text(label,
+                style: GoogleFonts.manrope(
+                    fontSize: 13, fontWeight: FontWeight.w600)),
+            const Spacer(),
+            Text('$count h.đơn (${(percent * 100).toStringAsFixed(0)}%)',
                 style: GoogleFonts.manrope(
                     fontSize: 12, color: AppColors.textSecondary)),
-            SizedBox(width: 8),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: percent,
+                  minHeight: 8,
+                  backgroundColor: AppColors.surface,
+                  valueColor: AlwaysStoppedAnimation(color),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
             Text(_fmt(amount),
                 style: GoogleFonts.manrope(
                     fontSize: 13, fontWeight: FontWeight.w700, color: color)),
           ],
-        ),
-        SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: percent,
-            backgroundColor: AppColors.surface,
-            color: color,
-            minHeight: 7,
-          ),
         ),
       ],
     );
@@ -878,46 +873,47 @@ class _InvoiceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColor(invoice.status);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Container(
             width: 8,
-            height: 8,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            height: 32,
+            decoration: BoxDecoration(
+              color: _getStatusColor(invoice.status),
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text('Phòng • ${invoice.month}',
-                style: GoogleFonts.manrope(
-                    fontSize: 13, color: AppColors.textSecondary)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Hóa đơn ${invoice.month}',
+                    style: GoogleFonts.manrope(
+                        fontSize: 13, fontWeight: FontWeight.w600)),
+                Text(invoice.status.label,
+                    style: GoogleFonts.manrope(
+                        fontSize: 11, color: AppColors.textTertiary)),
+              ],
+            ),
           ),
-          Text(invoice.status.label,
-              style:
-                  GoogleFonts.manrope(fontSize: 12, color: color)),
-          SizedBox(width: 10),
           Text(_fmt(invoice.totalAmount),
               style: GoogleFonts.manrope(
-                  fontSize: 13, fontWeight: FontWeight.w700)),
+                  fontSize: 14, fontWeight: FontWeight.w700)),
         ],
       ),
     );
   }
 
-  Color _statusColor(InvoiceStatus s) {
-    switch (s) {
-      case InvoiceStatus.paid:
-        return AppColors.emerald;
-      case InvoiceStatus.overdue:
-        return AppColors.red;
-      case InvoiceStatus.waitingPayment:
-        return AppColors.orange;
-      case InvoiceStatus.sent:
-        return AppColors.primary;
-      case InvoiceStatus.notCreated:
-        return AppColors.textTertiary;
+  Color _getStatusColor(InvoiceStatus status) {
+    switch (status) {
+      case InvoiceStatus.paid: return AppColors.emerald;
+      case InvoiceStatus.overdue: return AppColors.red;
+      case InvoiceStatus.waitingPayment: return AppColors.orange;
+      case InvoiceStatus.sent: return AppColors.primary;
+      default: return AppColors.textTertiary;
     }
   }
 }
@@ -927,39 +923,37 @@ class _VacancyBar extends StatelessWidget {
   final int count;
   final int total;
   final Color color;
-  const _VacancyBar(
-      {required this.label,
-      required this.count,
-      required this.total,
-      required this.color});
+  const _VacancyBar({
+    required this.label,
+    required this.count,
+    required this.total,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     final pct = total > 0 ? count / total : 0.0;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Expanded(
-                child: Text(label, style: GoogleFonts.manrope(fontSize: 13))),
-            Text('$count phòng',
+            Text(label,
+                style: GoogleFonts.manrope(
+                    fontSize: 13, fontWeight: FontWeight.w600)),
+            const Spacer(),
+            Text('$count/$total phòng',
                 style: GoogleFonts.manrope(
                     fontSize: 12, color: AppColors.textSecondary)),
-            SizedBox(width: 8),
-            Text('${(pct * 100).toStringAsFixed(0)}%',
-                style: GoogleFonts.manrope(
-                    fontSize: 13, fontWeight: FontWeight.w700)),
           ],
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 6),
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: pct,
-            backgroundColor: AppColors.surface,
-            color: color,
             minHeight: 8,
+            backgroundColor: AppColors.surface,
+            valueColor: AlwaysStoppedAnimation(color),
           ),
         ),
       ],
@@ -971,62 +965,49 @@ class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const _InfoRow({required this.icon, required this.label, required this.value});
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
-        SizedBox(width: 8),
-        Text('$label: ',
+        Icon(icon, size: 16, color: AppColors.textTertiary),
+        const SizedBox(width: 8),
+        Text('$label:',
             style: GoogleFonts.manrope(
                 fontSize: 13, color: AppColors.textSecondary)),
+        const SizedBox(width: 4),
         Expanded(
           child: Text(value,
               style: GoogleFonts.manrope(
-                  fontSize: 13, fontWeight: FontWeight.w600),
-              overflow: TextOverflow.ellipsis),
+                  fontSize: 13, fontWeight: FontWeight.w600)),
         ),
       ],
     );
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  final String message;
-  const _EmptyState({required this.message});
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.bar_chart_rounded, size: 56, color: AppColors.textTertiary),
-            SizedBox(height: 12),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.manrope(
-                    fontSize: 14, color: AppColors.textSecondary)),
-          ],
-        ),
-      ),
-    );
-  }
+String _fmt(double n) {
+  return '${n.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}đ';
 }
 
-// ── Formatters ────────────────────────────────────────────────────────────────
-
-String _fmt(double value) {
-  final v = value.toInt();
-  final s = v.toString();
-  final result = StringBuffer();
-  for (int i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 == 0) result.write('.');
-    result.write(s[i]);
+String _fmtShort(double n) {
+  if (n >= 1000000) {
+    return '${(n / 1000000).toStringAsFixed(1)}M';
+  } else if (n >= 1000) {
+    return '${(n / 1000).toStringAsFixed(0)}k';
   }
-  return '${result.toString()}đ';
+  return n.toInt().toString();
+}
+
+String _currentMonthKey() {
+  final now = DateTime.now();
+  return '${now.month.toString().padLeft(2, '0')}/${now.year}';
 }

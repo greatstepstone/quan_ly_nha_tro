@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/auth/presentation/providers/auth_providers.dart';
-import '../models/models.dart';
-import '../../features/meter_reading/data/data_sources/meter_reading_remote_data_source.dart';
-import '../../features/meter_reading/data/repositories/meter_reading_repository.dart';
-import '../../features/meter_reading/data/repositories/meter_reading_repository_impl.dart';
-import 'database_providers.dart';
+import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/features/meter_reading/data/data_sources/meter_reading_remote_data_source.dart';
+import 'package:quan_ly_nha_tro/features/meter_reading/data/repositories/meter_reading_repository.dart';
+import 'package:quan_ly_nha_tro/features/meter_reading/data/repositories/meter_reading_repository_impl.dart';
+import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
 
 final meterReadingRemoteDataSourceProvider = Provider<MeterReadingRemoteDataSource>((ref) {
   final client = ref.watch(supabaseClientProvider);
@@ -12,7 +12,7 @@ final meterReadingRemoteDataSourceProvider = Provider<MeterReadingRemoteDataSour
 });
 
 final meterReadingRepositoryProvider = Provider<MeterReadingRepository>((ref) {
-  final local = ref.watch(appDaoProvider);
+  final local = ref.watch(meterReadingDaoProvider);
   final remote = ref.watch(meterReadingRemoteDataSourceProvider);
   return MeterReadingRepositoryImpl(localDataSource: local, remoteDataSource: remote);
 });

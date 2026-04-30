@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/resources/string_manager.dart';
-import '../../../../core/providers/locale_provider.dart';
-import '../../../../core/models/models.dart';
-import '../../../../core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/providers/locale_provider.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class RoomsListPage extends ConsumerStatefulWidget {
   final String? propertyId;
@@ -74,7 +75,7 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
                       return _RoomCard(room: filteredRooms[index]);
                     } else if (index == filteredRooms.length) {
                       return _AddRoomCard(
-                        onTap: () => context.push('/rooms/add?propertyId=${widget.propertyId ?? 'p1'}'),
+                        onTap: () => context.pushNamed(AppRoutes.roomAdd, queryParameters: widget.propertyId != null ? {'propertyId': widget.propertyId!} : const {}),
                       );
                     } else if (index == filteredRooms.length + 1) {
                       return Padding(
@@ -189,14 +190,14 @@ class _RoomCard extends StatelessWidget {
     final color = _statusColor(room.status);
     final bg = _statusBg(room.status);
     return GestureDetector(
-      onTap: () => context.push('/rooms/${room.id}'),
+      onTap: () => context.pushNamed(AppRoutes.roomDetail, pathParameters: {'id': room.id}),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.surfaceBright,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 6)],
         ),
         child: Row(
           children: [
@@ -338,3 +339,4 @@ class _QuickStatsBanner extends StatelessWidget {
     );
   }
 }
+

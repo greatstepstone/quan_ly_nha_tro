@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/resources/string_manager.dart';
-import '../../../../core/providers/locale_provider.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/providers/locale_provider.dart';
 
 class OwnerProfilePage extends ConsumerWidget {
   const OwnerProfilePage({super.key});
@@ -54,7 +54,7 @@ class OwnerProfilePage extends ConsumerWidget {
                       border: Border.all(color: Colors.white, width: 4),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha:0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -291,7 +291,7 @@ class _ProfileInfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha:0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -368,7 +368,7 @@ class _StatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha:0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -400,3 +400,4 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
+

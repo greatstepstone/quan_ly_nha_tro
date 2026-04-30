@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/models/models.dart';
-import '../../../../core/providers/property_providers.dart';
-import '../../../../core/providers/room_providers.dart';
-import '../../../../core/providers/meter_reading_providers.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/meter_reading_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class MeterReadingsPage extends ConsumerStatefulWidget {
   const MeterReadingsPage({super.key});
@@ -190,14 +191,14 @@ class _MeterReadingCardState extends State<_MeterReadingCard> {
     }
 
     return GestureDetector(
-      onTap: () => context.push('/meter-readings/${widget.room.id}'),
+      onTap: () => context.pushNamed(AppRoutes.meterReadingDetail, pathParameters: {'roomId': widget.room.id}),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: AppColors.surfaceBright,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: AppColors.redLight, width: 1.5),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6)],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 6)],
         ),
         child: Column(
           children: [
@@ -369,3 +370,4 @@ class _ReadingRow extends StatelessWidget {
     );
   }
 }
+

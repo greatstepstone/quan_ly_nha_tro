@@ -28,6 +28,17 @@ extension BillingTypeExt on BillingType {
   }
 }
 
+enum PropertyStatus { active, inactive }
+
+extension PropertyStatusExt on PropertyStatus {
+  String get label {
+    switch (this) {
+      case PropertyStatus.active: return 'Hoạt động';
+      case PropertyStatus.inactive: return 'Không hoạt động';
+    }
+  }
+}
+
 class Property {
   final String id;
   final String ownerId; // Thêm id của Chủ trọ (User)
@@ -37,7 +48,9 @@ class Property {
   final double electricityPrice;
   final double waterPrice;
   final BillingType waterBillingType;
-  final String status;
+  final PropertyStatus status;
+  final bool isSynced;
+  final bool isDeleted;
 
   const Property({
     required this.id,
@@ -48,8 +61,38 @@ class Property {
     required this.electricityPrice,
     required this.waterPrice,
     required this.waterBillingType,
-    this.status = 'HOẠT ĐỘNG',
+    this.status = PropertyStatus.active,
+    this.isSynced = true,
+    this.isDeleted = false,
   });
+
+  Property copyWith({
+    String? id,
+    String? ownerId,
+    String? name,
+    String? address,
+    int? totalRooms,
+    double? electricityPrice,
+    double? waterPrice,
+    BillingType? waterBillingType,
+    PropertyStatus? status,
+    bool? isSynced,
+    bool? isDeleted,
+  }) {
+    return Property(
+      id: id ?? this.id,
+      ownerId: ownerId ?? this.ownerId,
+      name: name ?? this.name,
+      address: address ?? this.address,
+      totalRooms: totalRooms ?? this.totalRooms,
+      electricityPrice: electricityPrice ?? this.electricityPrice,
+      waterPrice: waterPrice ?? this.waterPrice,
+      waterBillingType: waterBillingType ?? this.waterBillingType,
+      status: status ?? this.status,
+      isSynced: isSynced ?? this.isSynced,
+      isDeleted: isDeleted ?? this.isDeleted,
+    );
+  }
 }
 
 // Service (Dịch vụ) model
@@ -59,6 +102,8 @@ class Service {
   final String name;
   final BillingType type;
   final double price;
+  final bool isSynced;
+  final bool isDeleted;
 
   const Service({
     required this.id,
@@ -66,6 +111,8 @@ class Service {
     required this.name,
     required this.type,
     required this.price,
+    this.isSynced = true,
+    this.isDeleted = false,
   });
 }
 
@@ -78,6 +125,8 @@ class Room {
   final RoomStatus status;
   final double rentPrice;
   final String? tenantId;
+  final bool isSynced;
+  final bool isDeleted;
 
   const Room({
     required this.id,
@@ -87,6 +136,8 @@ class Room {
     required this.status,
     required this.rentPrice,
     this.tenantId,
+    this.isSynced = true,
+    this.isDeleted = false,
   });
 }
 
@@ -117,6 +168,8 @@ class Tenant {
   final String startDate;
   final double deposit;
   final bool isVerified;
+  final bool isSynced;
+  final bool isDeleted;
 
   const Tenant({
     required this.id,
@@ -131,6 +184,8 @@ class Tenant {
     required this.startDate,
     required this.deposit,
     this.isVerified = false,
+    this.isSynced = true,
+    this.isDeleted = false,
   });
 }
 
@@ -145,6 +200,8 @@ class MeterReading {
   final int waterOld;
   final int? waterNew;
   final bool isRecorded;
+  final bool isSynced;
+  final bool isDeleted;
 
   const MeterReading({
     required this.id,
@@ -156,6 +213,8 @@ class MeterReading {
     required this.waterOld,
     this.waterNew,
     this.isRecorded = false,
+    this.isSynced = true,
+    this.isDeleted = false,
   });
 }
 
@@ -170,6 +229,8 @@ class Invoice {
   final String? dueDate;
   final String? paidDate;
   final String? createdAt; // Thêm trường này để lọc theo ngày tạo
+  final bool isSynced;
+  final bool isDeleted;
 
   const Invoice({
     required this.id,
@@ -181,6 +242,8 @@ class Invoice {
     this.dueDate,
     this.paidDate,
     this.createdAt,
+    this.isSynced = true,
+    this.isDeleted = false,
   });
 }
 
@@ -196,4 +259,14 @@ extension InvoiceStatusExt on InvoiceStatus {
       case InvoiceStatus.overdue: return 'Quá hạn';
     }
   }
+}
+
+class OnboardingState {
+  final String userId;
+  final bool hasCompletedOnboarding;
+
+  const OnboardingState({
+    required this.userId,
+    required this.hasCompletedOnboarding,
+  });
 }

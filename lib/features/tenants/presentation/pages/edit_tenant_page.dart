@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/models/models.dart';
-import '../../../../core/providers/room_providers.dart';
-import '../../../../core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
 
 class EditTenantPage extends ConsumerStatefulWidget {
   final String tenantId;
@@ -242,7 +242,7 @@ class _AvatarSection extends StatelessWidget {
           CircleAvatar(
             radius: 52,
             backgroundImage: const AssetImage('assets/avatar_placeholder.png'),
-            onBackgroundImageError: (_, __) {},
+            onBackgroundImageError: (_, _) {},
             backgroundColor: AppColors.primaryLight,
             child: Text(
               name.isNotEmpty ? name[0] : '?',
@@ -377,7 +377,7 @@ class _CccdUpload extends StatelessWidget {
       child: Container(
         height: 110,
         decoration: BoxDecoration(
-          color: hasImage ? AppColors.primaryLight.withOpacity(0.5) : AppColors.surfaceBright,
+          color: hasImage ? AppColors.primaryLight.withValues(alpha:0.5) : AppColors.surfaceBright,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: AppColors.surfaceContainer,
@@ -393,7 +393,7 @@ class _CccdUpload extends StatelessWidget {
                 Icon(
                   hasImage ? Icons.image_outlined : Icons.image_outlined,
                   size: 36,
-                  color: hasImage ? AppColors.primary.withOpacity(0.5) : AppColors.surfaceContainer,
+                  color: hasImage ? AppColors.primary.withValues(alpha:0.5) : AppColors.surfaceContainer,
                 ),
                 Positioned(
                   bottom: 0,
@@ -457,7 +457,7 @@ class _RoomInfoTile extends StatelessWidget {
                   style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.primary),
                 ),
                 Text(
-                  '${room.name}',
+                  room.name,
                   style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
                 ),
               ],
@@ -481,3 +481,4 @@ String _fmt(double value) {
   }
   return '${result.toString()}đ';
 }
+

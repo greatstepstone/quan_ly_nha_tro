@@ -1,12 +1,12 @@
 import 'package:drift/drift.dart';
-import '../../../../core/database/database.dart';
-import '../../../../core/database/daos.dart';
-import '../../../../core/models/models.dart';
-import '../data_sources/room_remote_data_source.dart';
-import 'room_repository.dart';
+import 'package:quan_ly_nha_tro/core/database/database.dart';
+import 'package:quan_ly_nha_tro/core/database/daos/room_dao.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/features/rooms/data/data_sources/room_remote_data_source.dart';
+import 'package:quan_ly_nha_tro/features/rooms/data/repositories/room_repository.dart';
 
 class RoomRepositoryImpl implements RoomRepository {
-  final AppDao localDataSource;
+  final RoomDao localDataSource;
   final RoomRemoteDataSource remoteDataSource;
 
   RoomRepositoryImpl({
@@ -45,15 +45,19 @@ class RoomRepositoryImpl implements RoomRepository {
       status: room.status,
       rentPrice: room.rentPrice,
       tenantId: Value(room.tenantId),
+      isSynced: const Value(false),
     ));
 
     // 2. Push remote
     try {
       await remoteDataSource.upsertRoom(room);
+      await localDataSource.updateRoom(RoomsCompanion(
+        id: Value(room.id),
+        isSynced: const Value(true),
+      ));
       print('✅ Sync success (room): ${room.name}');
     } catch (e) {
       print('❌ Sync error (room) - ${room.name}: $e');
-      rethrow; // Ném lỗi để UI dừng chuỗi thao tác phụ thuộc
     }
   }
 
@@ -67,10 +71,15 @@ class RoomRepositoryImpl implements RoomRepository {
       status: Value(room.status),
       rentPrice: Value(room.rentPrice),
       tenantId: Value(room.tenantId),
+      isSynced: const Value(false),
     );
     await localDataSource.updateRoom(companion);
     try {
       await remoteDataSource.upsertRoom(room);
+      await localDataSource.updateRoom(RoomsCompanion(
+        id: Value(room.id),
+        isSynced: const Value(true),
+      ));
     } catch (e) {
       print('Sync error (save room): $e');
     }
@@ -78,9 +87,12 @@ class RoomRepositoryImpl implements RoomRepository {
 
   @override
   Future<void> deleteRoom(String id) async {
+    // Soft delete
     await localDataSource.deleteRoom(id);
     try {
       await remoteDataSource.deleteRoom(id);
+      // Hard delete
+      await localDataSource.hardDeleteRoom(id);
     } catch (e) {
       print('Sync error (delete room): $e');
     }
@@ -88,7 +100,9 @@ class RoomRepositoryImpl implements RoomRepository {
 
   @override
   Future<void> syncRooms(String propertyId) async {
+    // Lấy dữ liệu remote
     final remoteData = await remoteDataSource.getRoomsByProperty(propertyId);
+    
     for (var r in remoteData) {
       await localDataSource.insertRoom(RoomsCompanion.insert(
         id: r.id,
@@ -98,6 +112,61 @@ class RoomRepositoryImpl implements RoomRepository {
         status: r.status,
         rentPrice: r.rentPrice,
         tenantId: Value(r.tenantId),
+        isSynced: const Value(true),
+      ));
+    }
+  }
+
+  @override
+  Future<void> syncAllRooms() async {
+    // 1. PUSH DELETIONS
+    final deleted = await localDataSource.getDeletedRooms();
+    for (var r in deleted) {
+      try {
+        await remoteDataSource.deleteRoom(r.id);
+        await localDataSource.hardDeleteRoom(r.id);
+      } catch (e) {
+        print('Error syncing deleted room ${r.id}: $e');
+      }
+    }
+
+    // 2. PUSH UPDATES/INSERTS
+    final unsynced = await localDataSource.getUnsyncedRooms();
+    for (var r in unsynced) {
+      try {
+        await remoteDataSource.upsertRoom(r);
+        await localDataSource.updateRoom(RoomsCompanion(
+          id: Value(r.id),
+          isSynced: const Value(true),
+        ));
+      } catch (e) {
+        print('Error syncing room ${r.id}: $e');
+      }
+    }
+
+    // 3. PULL
+    final remoteData = await remoteDataSource.getAllRooms();
+    final remoteIds = remoteData.map((r) => r.id).toSet();
+    final localData = await localDataSource.getAllRooms();
+
+    // Xóa các bản ghi local không tồn tại trên Remote (nếu đã được sync)
+    for (var lr in localData) {
+      if (lr.isSynced && !remoteIds.contains(lr.id)) {
+        await localDataSource.hardDeleteRoom(lr.id);
+      }
+    }
+
+    // Cập nhật/Thêm mới từ Remote
+    for (var r in remoteData) {
+      await localDataSource.insertRoom(RoomsCompanion.insert(
+        id: r.id,
+        ownerId: r.ownerId,
+        propertyId: r.propertyId,
+        name: r.name,
+        status: r.status,
+        rentPrice: r.rentPrice,
+        tenantId: Value(r.tenantId),
+        isSynced: const Value(true),
       ));
     }
   }

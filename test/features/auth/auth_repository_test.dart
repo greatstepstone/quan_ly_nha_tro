@@ -28,13 +28,19 @@ void main() {
       when(() => mockAuth.signUp(
         email: 'test@example.com',
         password: 'password123',
+        data: {'full_name': 'Test User'},
       )).thenAnswer((_) async => mockResponse);
 
-      await repository.signUp('test@example.com', 'password123');
+      await repository.signUp(
+        email: 'test@example.com', 
+        password: 'password123',
+        fullName: 'Test User',
+      );
 
       verify(() => mockAuth.signUp(
         email: 'test@example.com',
         password: 'password123',
+        data: {'full_name': 'Test User'},
       )).called(1);
     });
 
@@ -45,7 +51,10 @@ void main() {
         password: 'password123',
       )).thenAnswer((_) async => mockResponse);
 
-      await repository.signIn('test@example.com', 'password123');
+      await repository.signIn(
+        email: 'test@example.com', 
+        password: 'password123',
+      );
 
       verify(() => mockAuth.signInWithPassword(
         email: 'test@example.com',

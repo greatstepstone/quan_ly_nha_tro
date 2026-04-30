@@ -1,4 +1,4 @@
-import '../../../../core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
 
 abstract class RoomRepository {
   Stream<List<Room>> watchAllRooms();
@@ -9,4 +9,5 @@ abstract class RoomRepository {
   Future<void> saveRoom(Room room);
   Future<void> deleteRoom(String id);
   Future<void> syncRooms(String propertyId);
+  Future<void> syncAllRooms();
 }

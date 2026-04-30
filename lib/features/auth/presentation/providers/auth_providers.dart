@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../data/repositories/auth_repository.dart';
+import 'package:quan_ly_nha_tro/features/auth/data/repositories/auth_repository.dart';
 
 /// Provider cung cấp instance Supabase Client
 final supabaseClientProvider = Provider<SupabaseClient>((ref) {
