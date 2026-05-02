@@ -146,9 +146,9 @@ enum RoomStatus { empty, rented, deposited, maintenance }
 extension RoomStatusExt on RoomStatus {
   String get label {
     switch (this) {
-      case RoomStatus.empty: return 'Trống';
-      case RoomStatus.rented: return 'Đã thuê';
-      case RoomStatus.deposited: return 'Đã đặt cọc';
+      case RoomStatus.empty:       return 'Trống';
+      case RoomStatus.rented:      return 'Đã thuê';
+      case RoomStatus.deposited:   return 'Đã đặt cọc';
       case RoomStatus.maintenance: return 'Đang sửa';
     }
   }
@@ -252,21 +252,12 @@ enum InvoiceStatus { notCreated, sent, waitingPayment, paid, overdue }
 extension InvoiceStatusExt on InvoiceStatus {
   String get label {
     switch (this) {
-      case InvoiceStatus.notCreated: return 'Chưa chốt số';
-      case InvoiceStatus.sent: return 'Đã gửi hóa đơn';
+      case InvoiceStatus.notCreated:     return 'Chưa chốt số';
+      case InvoiceStatus.sent:           return 'Đã gửi hóa đơn';
       case InvoiceStatus.waitingPayment: return 'Chờ thanh toán';
-      case InvoiceStatus.paid: return 'Đã thu tiền';
-      case InvoiceStatus.overdue: return 'Quá hạn';
+      case InvoiceStatus.paid:           return 'Đã thu tiền';
+      case InvoiceStatus.overdue:        return 'Quá hạn';
     }
   }
 }
 
-class OnboardingState {
-  final String userId;
-  final bool hasCompletedOnboarding;
-
-  const OnboardingState({
-    required this.userId,
-    required this.hasCompletedOnboarding,
-  });
-}

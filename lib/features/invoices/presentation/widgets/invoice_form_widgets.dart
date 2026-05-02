@@ -1,38 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 
 class InvoiceCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String title;
   final Widget child;
-  const InvoiceCard(
-      {super.key,
-      required this.icon,
-      required this.iconColor,
-      required this.title,
-      required this.child});
+
+  const InvoiceCard({
+    super.key,
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppPadding.p16),
       decoration: BoxDecoration(
-          color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(12)),
+        color: AppColors.surfaceBright,
+        borderRadius: BorderRadius.circular(AppRadius.r12),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: iconColor, size: 18),
-              SizedBox(width: 8),
-              Text(title,
-                  style: GoogleFonts.manrope(
-                      fontSize: 15, fontWeight: FontWeight.w700)),
+              Icon(icon, color: iconColor, size: AppSize.s18),
+              const SizedBox(width: AppWidth.w8),
+              Text(
+                title,
+                style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold),
+              ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: AppHeight.h16),
           child,
         ],
       ),
@@ -54,7 +62,17 @@ class _InvoiceInputFieldState extends State<InvoiceInputField> {
   @override
   void initState() {
     super.initState();
-    widget.controller.addListener(() => setState(() {}));
+    widget.controller.addListener(_update);
+  }
+
+  void _update() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_update);
+    super.dispose();
   }
 
   @override
@@ -62,19 +80,19 @@ class _InvoiceInputFieldState extends State<InvoiceInputField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label,
-            style: GoogleFonts.manrope(
-                fontSize: 12, color: AppColors.textSecondary)),
-        SizedBox(height: 4),
+        Text(
+          widget.label,
+          style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: AppHeight.h4),
         TextField(
           controller: widget.controller,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            hintText: '0',
+            hintText: AppStrings.zero,
             fillColor: AppColors.surface,
             suffixText: widget.suffix,
-            suffixStyle: GoogleFonts.manrope(
-                fontSize: 12, color: AppColors.textTertiary),
+            suffixStyle: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textTertiary),
           ),
         ),
       ],
@@ -92,16 +110,18 @@ class InvoiceCostRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Text(label,
-              style: GoogleFonts.manrope(
-                  fontSize: 12, color: AppColors.textTertiary)),
+          child: Text(
+            label,
+            style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textTertiary),
+          ),
         ),
         Text(
           '= ${fmtDouble(value)}',
           style: GoogleFonts.manrope(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary),
+            fontSize: FontSize.s13,
+            fontWeight: FontWeightManager.semiBold,
+            color: AppColors.primary,
+          ),
         ),
       ],
     );
@@ -113,37 +133,44 @@ class InvoiceServiceRow extends StatelessWidget {
   final String label;
   final double value;
   final bool isHighlight;
-  const InvoiceServiceRow(
-      {super.key,
-      required this.icon,
-      required this.label,
-      required this.value,
-      this.isHighlight = false});
+
+  const InvoiceServiceRow({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.isHighlight = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-              color: AppColors.primaryLight, shape: BoxShape.circle),
-          child: Icon(icon, color: AppColors.primary, size: 16),
+          width: AppSize.s32,
+          height: AppSize.s32,
+          decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
+          child: Icon(icon, color: AppColors.primary, size: AppSize.s16),
         ),
-        SizedBox(width: 10),
-        Expanded(child: Text(label, style: GoogleFonts.manrope(fontSize: 14))),
-        Text(fmtDouble(value),
-            style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: isHighlight ? AppColors.primary : AppColors.textPrimary)),
+        const SizedBox(width: AppWidth.w10),
+        Expanded(
+          child: Text(
+            label,
+            style: GoogleFonts.manrope(fontSize: FontSize.s14),
+          ),
+        ),
+        Text(
+          fmtDouble(value),
+          style: GoogleFonts.manrope(
+            fontSize: FontSize.s14,
+            fontWeight: FontWeightManager.bold,
+            color: isHighlight ? AppColors.primary : AppColors.textPrimary,
+          ),
+        ),
       ],
     );
   }
 }
-
-// ── Helpers ──
 
 IconData serviceIcon(String name) {
   final lower = name.toLowerCase();
@@ -163,5 +190,5 @@ String fmtDouble(double value) {
     if (i > 0 && (s.length - i) % 3 == 0) result.write('.');
     result.write(s[i]);
   }
-  return '${result.toString()}đ';
+  return '${result.toString()}${AppStrings.currencySymbol}';
 }

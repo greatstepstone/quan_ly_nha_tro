@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
+
 import 'package:quan_ly_nha_tro/core/database/database.dart';
 import 'package:quan_ly_nha_tro/core/database/daos/tenant_dao.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
@@ -53,9 +55,11 @@ class TenantRepositoryImpl implements TenantRepository {
         id: Value(tenant.id),
         isSynced: const Value(true),
       ));
-      print('✅ Sync success (tenant): ${tenant.name}');
+      debugPrint('✅ Sync success (tenant): ${tenant.name}');
+
     } catch (e) {
-      print('❌ Sync error (tenant) - ${tenant.name}: $e');
+      debugPrint('❌ Sync error (tenant) - ${tenant.name}: $e');
+
     }
   }
 
@@ -89,9 +93,11 @@ class TenantRepositoryImpl implements TenantRepository {
         id: Value(tenant.id),
         isSynced: const Value(true),
       ));
-      print('✅ Sync success (tenant): ${tenant.name}');
+      debugPrint('✅ Sync success (tenant): ${tenant.name}');
+
     } catch (e) {
-      print('❌ Sync error (tenant) - ${tenant.name}: $e');
+      debugPrint('❌ Sync error (tenant) - ${tenant.name}: $e');
+
     }
   }
 
@@ -102,7 +108,8 @@ class TenantRepositoryImpl implements TenantRepository {
       await remoteDataSource.deleteTenant(id);
       await localDataSource.hardDeleteTenant(id);
     } catch (e) {
-      print('Sync error (delete tenant): $e');
+      debugPrint('Sync error (delete tenant): $e');
+
     }
   }
 
@@ -110,57 +117,86 @@ class TenantRepositoryImpl implements TenantRepository {
   Future<void> syncTenants(String propertyId) async {
     // 1. PUSH DELETIONS
     final deleted = await localDataSource.getDeletedTenants();
-    for (var t in deleted) {
-      try {
-        await remoteDataSource.deleteTenant(t.id);
-        await localDataSource.hardDeleteTenant(t.id);
-      } catch (e) {
-        print('Error syncing deleted tenant ${t.id}: $e');
+    if (deleted.isNotEmpty) {
+      for (var t in deleted) {
+        try {
+          await remoteDataSource.deleteTenant(t.id);
+        } catch (e) {
+          debugPrint('Error syncing deleted tenant ${t.id}: $e');
+
+        }
       }
+      
+      // Batch hard delete locally
+      await localDataSource.db.batch((batch) {
+        for (var t in deleted) {
+          batch.deleteWhere(localDataSource.tenants, (tbl) => tbl.id.equals(t.id));
+        }
+      });
     }
+
 
     // 2. PUSH UPDATES/INSERTS
     final unsynced = await localDataSource.getUnsyncedTenants();
-    for (var t in unsynced) {
-      try {
-        await remoteDataSource.upsertTenant(t);
-        await localDataSource.updateTenant(TenantsCompanion(
-          id: Value(t.id),
-          isSynced: const Value(true),
-        ));
-      } catch (e) {
-        print('Error syncing tenant ${t.id}: $e');
+    if (unsynced.isNotEmpty) {
+      for (var t in unsynced) {
+        try {
+          await remoteDataSource.upsertTenant(t);
+        } catch (e) {
+          debugPrint('Error syncing tenant ${t.id}: $e');
+
+        }
       }
+      
+      // Batch update sync status locally
+      await localDataSource.db.batch((batch) {
+        for (var t in unsynced) {
+          batch.update(localDataSource.tenants,
+            TenantsCompanion(id: Value(t.id), isSynced: const Value(true)),
+            where: (tbl) => tbl.id.equals(t.id),
+          );
+        }
+      });
     }
+
 
     // 3. PULL
     final remoteData = await remoteDataSource.getTenantsByProperty(propertyId);
     final remoteIds = remoteData.map((t) => t.id).toSet();
     final localData = await localDataSource.getAllTenants();
     
-    // Xóa local record đã bị xóa trên server
-    for (var lt in localData) {
-      if (lt.propertyId == propertyId && lt.isSynced && !remoteIds.contains(lt.id)) {
-        await localDataSource.hardDeleteTenant(lt.id);
+    // Perform local updates in a single batch
+    await localDataSource.db.batch((batch) {
+      // Remove local records that don't exist on server
+      for (var lt in localData) {
+        if (lt.propertyId == propertyId && lt.isSynced && !remoteIds.contains(lt.id)) {
+          batch.deleteWhere(localDataSource.tenants, (tbl) => tbl.id.equals(lt.id));
+        }
       }
-    }
+      
+      // Insert/Update from remote
+      for (var t in remoteData) {
+        batch.insert(
+          localDataSource.tenants,
+          TenantsCompanion.insert(
+            id: t.id,
+            ownerId: t.ownerId,
+            name: t.name,
+            phone: t.phone,
+            cccd: t.cccd,
+            dateOfBirth: t.dateOfBirth,
+            hometown: t.hometown,
+            roomId: t.roomId,
+            propertyId: t.propertyId,
+            startDate: t.startDate,
+            deposit: t.deposit,
+            isVerified: Value(t.isVerified),
+            isSynced: const Value(true),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+    });
 
-    for (var t in remoteData) {
-      await localDataSource.insertTenant(TenantsCompanion.insert(
-        id: t.id,
-        ownerId: t.ownerId,
-        name: t.name,
-        phone: t.phone,
-        cccd: t.cccd,
-        dateOfBirth: t.dateOfBirth,
-        hometown: t.hometown,
-        roomId: t.roomId,
-        propertyId: t.propertyId,
-        startDate: t.startDate,
-        deposit: t.deposit,
-        isVerified: Value(t.isVerified),
-        isSynced: const Value(true),
-      ));
-    }
   }
 }

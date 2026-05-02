@@ -7,7 +7,13 @@ import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
+import 'package:quan_ly_nha_tro/core/widgets/section_header.dart';
+import 'package:quan_ly_nha_tro/core/widgets/labeled_field.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_date_picker.dart';
+import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 
 class AddTenantPage extends ConsumerStatefulWidget {
   final String roomId;
@@ -145,68 +151,69 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
         : _room == null
         ? const Center(child: Text('Không tìm thấy phòng'))
         : ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16, vertical: AppPadding.p20),
         children: [
-          _SectionHeader(label: 'THÔNG TIN CÁ NHÂN'),
-          SizedBox(height: 12),
-          _LabeledField(label: 'Họ và tên', controller: _name),
-          SizedBox(height: 12),
+          SectionHeader(icon: Icons.person_outline, label: 'THÔNG TIN CÁ NHÂN'),
+          SizedBox(height: AppHeight.h12),
+          LabeledField(label: 'Họ và tên', controller: _name, hint: 'Nhập họ và tên'),
+          SizedBox(height: AppHeight.h12),
           Row(
             children: [
-              Expanded(child: _LabeledField(label: 'Số điện thoại', controller: _phone, type: TextInputType.phone)),
-              SizedBox(width: 12),
-              Expanded(child: _DateField(label: 'Ngày sinh', controller: _dob)),
+              Expanded(child: LabeledField(label: 'Số điện thoại', controller: _phone, hint: '090...', keyboardType: TextInputType.phone)),
+              SizedBox(width: AppWidth.w12),
+              Expanded(child: AppDatePicker(label: 'Ngày sinh', controller: _dob, hint: 'dd/mm/yyyy')),
             ],
           ),
-          SizedBox(height: 12),
-          _LabeledField(label: 'Số CCCD', controller: _cccd, type: TextInputType.number),
-          SizedBox(height: 12),
-          _LabeledField(label: 'Quê quán', controller: _hometown),
-          SizedBox(height: 28),
+          SizedBox(height: AppHeight.h12),
+          LabeledField(label: 'Số CCCD', controller: _cccd, hint: 'Nhập số CCCD', keyboardType: TextInputType.number),
+          SizedBox(height: AppHeight.h12),
+          LabeledField(label: 'Quê quán', controller: _hometown, hint: 'Nhập quê quán'),
+          SizedBox(height: AppHeight.h24),
 
-          _SectionHeader(label: 'THÔNG TIN THUÊ PHÒNG'),
-          SizedBox(height: 12),
+          SectionHeader(icon: Icons.home_work_outlined, label: 'THÔNG TIN THUÊ PHÒNG'),
+          SizedBox(height: AppHeight.h12),
           Row(
             children: [
-              Expanded(child: _DateField(label: 'Ngày bắt đầu', controller: _startDate)),
-              SizedBox(width: 12),
+              Expanded(child: AppDatePicker(label: 'Ngày bắt đầu', controller: _startDate, hint: 'dd/mm/yyyy')),
+              SizedBox(width: AppWidth.w12),
               Expanded(
-                child: _LabeledField(
-                  label: 'Tiền cọc (VND)',
+                child: LabeledField(
+                  label: 'Tiền cọc (${AppStrings.currencySymbol})',
                   controller: _deposit,
-                  type: TextInputType.number,
+                  hint: '0',
+                  keyboardType: TextInputType.number,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 36),
+          SizedBox(height: AppHeight.h32),
         ],
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: const EdgeInsets.fromLTRB(AppPadding.p16, AppPadding.p8, AppPadding.p16, AppPadding.p16),
           child: Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => context.pop(),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                    padding: const EdgeInsets.symmetric(vertical: AppPadding.p12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.r50)),
                   ),
-                  child: Text('Hủy', style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w600)),
+                  child: Text('Hủy', style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.semiBold)),
                 ),
               ),
-              SizedBox(width: 12),
+              SizedBox(width: AppWidth.w12),
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: _isLoading || _room == null ? null : _save,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    minimumSize: const Size(0, 52),
+                    padding: const EdgeInsets.symmetric(vertical: AppPadding.p12),
+                    minimumSize: const Size(0, AppHeight.h52),
                   ),
-                  child: Text('Thêm người', style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
+                  child: Text('Thêm người', style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
                 ),
               ),
             ],
@@ -217,81 +224,3 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final String label;
-  const _SectionHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(width: 3, height: 16, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2))),
-        SizedBox(width: 8),
-        Text(label, style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
-      ],
-    );
-  }
-}
-
-class _LabeledField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final TextInputType type;
-  const _LabeledField({required this.label, required this.controller, this.type = TextInputType.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-        SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          keyboardType: type,
-          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-          decoration: InputDecoration(),
-        ),
-      ],
-    );
-  }
-}
-
-class _DateField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  const _DateField({required this.label, required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-        SizedBox(height: 6),
-        GestureDetector(
-          onTap: () async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime(1950),
-              lastDate: DateTime.now().add(const Duration(days: 365)),
-            );
-            if (picked != null) {
-              controller.text = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
-            }
-          },
-          child: AbsorbPointer(
-            child: TextField(
-              controller: controller,
-              style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600),
-              decoration: InputDecoration(
-                suffixIcon: Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.textTertiary),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

@@ -6,6 +6,12 @@ import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
+import 'package:quan_ly_nha_tro/core/widgets/detail_info_item.dart';
+import 'package:quan_ly_nha_tro/core/widgets/detail_section_card.dart';
+import 'package:quan_ly_nha_tro/features/tenants/presentation/widgets/tenant_widgets.dart';
 
 class TenantDetailPage extends ConsumerWidget {
   final String tenantId;
@@ -38,63 +44,58 @@ class TenantDetailPage extends ConsumerWidget {
           return roomAsync.when(
             data: (room) => ListView(
               children: [
-                // Profile card
+                // Profile header
                 Container(
                   color: AppColors.surfaceBright,
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(AppPadding.p24),
                   child: Column(
                     children: [
                       Stack(
                         alignment: Alignment.bottomRight,
                         children: [
-                          CircleAvatar(
-                            radius: 44,
-                            backgroundColor: AppColors.primaryLight,
-                            child: Text(tenant.name.isNotEmpty ? tenant.name[0] : '?',
-                                style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.w800, color: AppColors.primary)),
-                          ),
+                          TenantAvatarSection(name: tenant.name),
                           if (tenant.isVerified)
                             Container(
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(color: AppColors.emerald, shape: BoxShape.circle),
-                              child: Icon(Icons.check, color: Colors.white, size: 16),
+                              width: AppSize.s28,
+                              height: AppSize.s28,
+                              decoration: BoxDecoration(color: AppColors.emerald, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                              child: Icon(Icons.check, color: Colors.white, size: AppSize.s16),
                             ),
                         ],
                       ),
-                      SizedBox(height: 12),
-                      Text(tenant.name, style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w800)),
-                      SizedBox(height: 4),
+                      const SizedBox(height: AppHeight.h12),
+                      Text(tenant.name, style: GoogleFonts.manrope(fontSize: FontSize.s22, fontWeight: FontWeightManager.extraBold)),
+                      const SizedBox(height: AppHeight.h4),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.phone_outlined, size: 14, color: AppColors.textSecondary),
-                          SizedBox(width: 4),
-                          Text(tenant.phone, style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary)),
+                          Icon(Icons.phone_outlined, size: AppSize.s14, color: AppColors.textSecondary),
+                          const SizedBox(width: AppWidth.w4),
+                          Text(tenant.phone, style: GoogleFonts.manrope(fontSize: FontSize.s14, color: AppColors.textSecondary)),
                         ],
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: AppHeight.h10),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: AppPadding.p12, vertical: AppPadding.p4),
                         decoration: BoxDecoration(
                           color: tenant.isVerified ? AppColors.emeraldLight : AppColors.surfaceContainer,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(AppRadius.r20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
-                              width: 6, height: 6,
+                              width: AppSize.s6, height: AppSize.s6,
                               decoration: BoxDecoration(
                                 color: tenant.isVerified ? AppColors.emerald : AppColors.textTertiary,
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            SizedBox(width: 6),
+                            const SizedBox(width: AppWidth.w6),
                             Text(tenant.isVerified ? 'ĐÃ XÁC MINH' : 'CHƯA XÁC MINH',
                                 style: GoogleFonts.manrope(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: FontSize.s11,
+                                    fontWeight: FontWeightManager.bold,
                                     color: tenant.isVerified ? AppColors.emerald : AppColors.textTertiary)),
                           ],
                         ),
@@ -102,91 +103,67 @@ class TenantDetailPage extends ConsumerWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: AppHeight.h12),
 
                 // CCCD info
-                _SectionCard(
+                DetailSectionCard(
                   title: 'THÔNG TIN ĐỊNH DANH',
                   children: [
-                    _InfoItem(icon: Icons.badge_outlined, iconBg: AppColors.primaryLight, iconColor: AppColors.primary,
+                    DetailInfoItem(icon: Icons.badge_outlined, iconBg: AppColors.primaryLight, iconColor: AppColors.primary,
                         label: 'Số CCCD', value: tenant.cccd),
-                    _InfoItem(icon: Icons.cake_outlined, iconBg: AppColors.orangeLight, iconColor: AppColors.orange,
+                    DetailInfoItem(icon: Icons.cake_outlined, iconBg: AppColors.orangeLight, iconColor: AppColors.orange,
                         label: 'Ngày sinh', value: tenant.dateOfBirth),
-                    _InfoItem(icon: Icons.location_on_outlined, iconBg: AppColors.emeraldLight, iconColor: AppColors.emerald,
+                    DetailInfoItem(icon: Icons.location_on_outlined, iconBg: AppColors.emeraldLight, iconColor: AppColors.emerald,
                         label: 'Quê quán', value: tenant.hometown),
                   ],
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: AppHeight.h12),
 
                 // CCCD photos
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('ẢNH CCCD',
-                          style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                      SizedBox(height: 10),
+                          style: GoogleFonts.manrope(fontSize: FontSize.s11, fontWeight: FontWeightManager.bold, color: AppColors.textTertiary)),
+                      const SizedBox(height: AppHeight.h10),
                       Row(
                         children: [
-                          Expanded(child: _CccdPhoto(label: 'Mặt trước')),
-                          SizedBox(width: 12),
-                          Expanded(child: _CccdPhoto(label: 'Mặt sau', isEmpty: true)),
+                          Expanded(child: CccdUploadCard(label: 'MẶT TRƯỚC', hasImage: true)),
+                          const SizedBox(width: AppWidth.w12),
+                          Expanded(child: CccdUploadCard(label: 'MẶT SAU', hasImage: false)),
                         ],
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: AppHeight.h12),
 
                 // Rental info
                 if (room != null)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('THÔNG TIN THUÊ PHÒNG',
-                            style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                        SizedBox(height: 10),
-                        GestureDetector(
+                            style: GoogleFonts.manrope(fontSize: FontSize.s11, fontWeight: FontWeightManager.bold, color: AppColors.textTertiary)),
+                        const SizedBox(height: AppHeight.h10),
+                        TenantRoomInfoTile(
+                          room: room,
                           onTap: () => context.pushNamed(AppRoutes.roomDetail, pathParameters: {'id': room.id}),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(12)),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 40, height: 40,
-                                  decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(10)),
-                                  child: Icon(Icons.door_front_door_outlined, color: AppColors.primary, size: 20),
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('PHÒNG HIỆN TẠI',
-                                          style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                                      Text(room.name, style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primaryDark)),
-                                    ],
-                                  ),
-                                ),
-                                Icon(Icons.chevron_right, color: AppColors.primary),
-                              ],
-                            ),
-                          ),
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: AppHeight.h12),
                         Row(
                           children: [
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Ngày bắt đầu', style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
-                                  SizedBox(height: 4),
-                                  Text(DateTime.tryParse(tenant.startDate) != null ? tenant.startDate.split('T').first : tenant.startDate, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700)),
+                                  Text('Ngày bắt đầu', style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
+                                  const SizedBox(height: AppHeight.h4),
+                                  Text(DateTime.tryParse(tenant.startDate) != null ? tenant.startDate.split('T').first : tenant.startDate, style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold)),
                                 ],
                               ),
                             ),
@@ -194,9 +171,9 @@ class TenantDetailPage extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Tiền cọc', style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
-                                  SizedBox(height: 4),
-                                  Text(_fmt(tenant.deposit), style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                                  Text('Tiền cọc', style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
+                                  const SizedBox(height: AppHeight.h4),
+                                  Text(_fmt(tenant.deposit), style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold, color: AppColors.primary)),
                                 ],
                               ),
                             ),
@@ -205,32 +182,32 @@ class TenantDetailPage extends ConsumerWidget {
                       ],
                     ),
                   ),
-                SizedBox(height: 24),
+                const SizedBox(height: AppHeight.h24),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16),
                   child: Column(
                     children: [
                       ElevatedButton(
                         onPressed: () => context.pushNamed(AppRoutes.tenantEdit, pathParameters: {'id': tenant.id}),
-                        style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 52)),
+                        style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, AppHeight.h52)),
                         child: const Text('Sửa thông tin'),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: AppHeight.h10),
                       OutlinedButton(
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 52),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                          minimumSize: const Size(double.infinity, AppHeight.h52),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.r50)),
                           side: BorderSide(color: AppColors.surfaceContainer, width: 1.5),
                           foregroundColor: AppColors.textPrimary,
                         ),
-                        child: const Text('Liên hệ'),
+                        child: Text('Liên hệ', style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.semiBold)),
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 32),
+                const SizedBox(height: AppHeight.h32),
               ],
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -252,99 +229,5 @@ String _fmt(double value) {
     if (i > 0 && (s.length - i) % 3 == 0) result.write('.');
     result.write(s[i]);
   }
-  return '${result.toString()}đ';
-}
-
-class _SectionCard extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-  const _SectionCard({required this.title, required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-          SizedBox(height: 10),
-          Container(
-            decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(12)),
-            child: Column(children: children),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoItem extends StatelessWidget {
-  final IconData icon;
-  final Color iconBg;
-  final Color iconColor;
-  final String label;
-  final String value;
-  const _InfoItem({required this.icon, required this.iconBg, required this.iconColor, required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            width: 36, height: 36,
-            decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(8)),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: GoogleFonts.manrope(fontSize: 11, color: AppColors.textTertiary)),
-                Text(value, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CccdPhoto extends StatelessWidget {
-  final String label;
-  final bool isEmpty;
-  const _CccdPhoto({required this.label, this.isEmpty = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 100,
-      decoration: BoxDecoration(
-        color: isEmpty ? AppColors.surfaceContainer : AppColors.textPrimary,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Stack(
-        alignment: Alignment.bottomLeft,
-        children: [
-          if (isEmpty)
-            Center(child: Icon(Icons.image_outlined, color: AppColors.textTertiary, size: 32)),
-          Positioned(
-            bottom: 8,
-            left: 10,
-            child: Text(
-              label,
-              style: GoogleFonts.manrope(
-                  color: isEmpty ? AppColors.textSecondary : Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  return '${result.toString()}${AppStrings.currencySymbol}';
 }

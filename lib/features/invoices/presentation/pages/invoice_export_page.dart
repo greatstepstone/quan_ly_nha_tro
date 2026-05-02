@@ -6,10 +6,11 @@ import 'package:screenshot/screenshot.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:quan_ly_nha_tro/features/invoices/presentation/pages/export_helper.dart'; // conditional import: web=dart:html, mobile=share_plus
+import 'package:quan_ly_nha_tro/core/services/export_service.dart'; // conditional import: web=dart:html, mobile=share_plus
 
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 
 class InvoiceExportPage extends StatefulWidget {
   final Invoice invoice;
@@ -667,6 +668,6 @@ String _fmt(double value) {
     if (i > 0 && (s.length - i) % 3 == 0) result.write('.');
     result.write(s[i]);
   }
-  return '${result.toString()}đ';
+  return '${result.toString()}${AppStrings.currencySymbol}';
 }
 

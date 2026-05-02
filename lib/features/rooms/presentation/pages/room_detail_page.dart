@@ -7,6 +7,7 @@ import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class RoomDetailPage extends ConsumerWidget {
@@ -46,7 +47,6 @@ class RoomDetailPage extends ConsumerWidget {
                 
                 if (confirm == true) {
                   final roomRepo = ref.read(roomRepositoryProvider);
-                  final tenantRepo = ref.read(tenantRepositoryProvider);
                   
                   // In a stream-based UI, we might not need to fetch the room again
                   // but we need to know the tenantId to delete it too.
@@ -251,7 +251,7 @@ String _fmt(double value) {
     if (i > 0 && (s.length - i) % 3 == 0) result.write('.');
     result.write(s[i]);
   }
-  return '${result.toString()}đ';
+  return '${result.toString()}${AppStrings.currencySymbol}';
 }
 
 class _Section extends StatelessWidget {

@@ -7,6 +7,8 @@ import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/database/database.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 
 class MeterReadingDetailPage extends ConsumerStatefulWidget {
   final String roomId;
@@ -62,211 +64,58 @@ class _MeterReadingDetailPageState extends ConsumerState<MeterReadingDetailPage>
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppPadding.p16),
         children: [
-          // Room header
-          Text(_room!.name, style: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w800)),
-          Text('Kỳ ghi: ${_reading!.month}', style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary)),
-          const SizedBox(height: 16),
+          Text(_room!.name, style: GoogleFonts.manrope(fontSize: FontSize.s24, fontWeight: FontWeightManager.extraBold)),
+          Text('Kỳ ghi: ${_reading!.month}', style: GoogleFonts.manrope(fontSize: FontSize.s14, color: AppColors.textSecondary)),
+          const SizedBox(height: AppHeight.h16),
 
-          // Electric section
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(16)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 40, height: 40,
-                      decoration: BoxDecoration(color: AppColors.amberLight, shape: BoxShape.circle),
-                      child: Icon(Icons.bolt, color: AppColors.amber, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('ĐIỆN (KWH)', style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700)),
-                        Text('Sử dụng trong tháng', style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text('CHỈ SỐ CŨ', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                const SizedBox(height: 4),
-                Text('${_reading!.electricOld}', style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 12),
-                Text('CHỈ SỐ MỚI', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _electricCtrl,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(hintText: 'Nhập số điện mới...'),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('ẢNH CHỈ SỐ CŨ', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                          const SizedBox(height: 6),
-                          Container(
-                            height: 90,
-                            decoration: BoxDecoration(
-                              color: AppColors.textPrimary,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Center(child: Icon(Icons.query_builder, color: Colors.white38, size: 32)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('ẢNH CHỈ SỐ MỚI', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                          const SizedBox(height: 6),
-                          Container(
-                            height: 90,
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: AppColors.surfaceContainer, style: BorderStyle.solid),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 24),
-                                const SizedBox(height: 4),
-                                Text('Chụp ảnh', style: GoogleFonts.manrope(fontSize: 12, color: AppColors.primary)),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          _buildSection(
+            icon: Icons.bolt,
+            iconColor: AppColors.amber,
+            iconBg: AppColors.amberLight,
+            title: 'ĐIỆN (KWH)',
+            subtitle: 'Sử dụng trong tháng',
+            oldValue: _reading!.electricOld.toString(),
+            controller: _electricCtrl,
+            hint: 'Nhập số điện mới...',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppHeight.h16),
 
-          // Water section
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(16)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 40, height: 40,
-                      decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-                      child: Icon(Icons.water_drop, color: AppColors.primary, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('NƯỚC (M3)', style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700)),
-                        Text('Lượng nước tiêu thụ', style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text('CHỈ SỐ CŨ', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                const SizedBox(height: 4),
-                Text('${_reading!.waterOld}', style: GoogleFonts.manrope(fontSize: 28, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 12),
-                Text('CHỈ SỐ MỚI', style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _waterCtrl,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(hintText: 'Nhập số nước mới...'),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('ẢNH CHỈ SỐ CŨ', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                          const SizedBox(height: 6),
-                          Container(
-                            height: 90,
-                            decoration: BoxDecoration(color: const Color(0xFF1a2a4a), borderRadius: BorderRadius.circular(10)),
-                            child: const Center(child: Icon(Icons.water_drop_outlined, color: Colors.white38, size: 32)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('ẢNH CHỈ SỐ MỚI', style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-                          const SizedBox(height: 6),
-                          Container(
-                            height: 90,
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: AppColors.surfaceContainer, style: BorderStyle.solid),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 24),
-                                const SizedBox(height: 4),
-                                Text('Chụp ảnh', style: GoogleFonts.manrope(fontSize: 12, color: AppColors.primary)),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          _buildSection(
+            icon: Icons.water_drop,
+            iconColor: AppColors.primary,
+            iconBg: AppColors.primaryLight,
+            title: 'NƯỚC (M3)',
+            subtitle: 'Lượng nước tiêu thụ',
+            oldValue: _reading!.waterOld.toString(),
+            controller: _waterCtrl,
+            hint: 'Nhập số nước mới...',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppHeight.h16),
 
-          // Info note
           Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.all(AppPadding.p12),
+            decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(AppRadius.r12)),
             child: Row(
               children: [
-                Icon(Icons.info_outline, color: AppColors.primary, size: 18),
-                const SizedBox(width: 8),
+                Icon(Icons.info_outline, color: AppColors.primary, size: AppSize.s18),
+                const SizedBox(width: AppWidth.w8),
                 Expanded(
                   child: Text(
                     'Đảm bảo hình ảnh đồng hồ hiển thị rõ ràng để đối soát khi cần thiết.',
-                    style: GoogleFonts.manrope(fontSize: 12, color: AppColors.primaryDark),
+                    style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.primaryDark),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppHeight.h24),
         ],
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppPadding.p16),
           child: ElevatedButton.icon(
             icon: const Icon(Icons.save_outlined),
             label: const Text('Lưu chỉ số'),
@@ -294,9 +143,114 @@ class _MeterReadingDetailPageState extends ConsumerState<MeterReadingDetailPage>
               );
               context.pop();
             },
-            style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 52)),
+            style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, AppHeight.h52)),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSection({
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String title,
+    required String subtitle,
+    required String oldValue,
+    required TextEditingController controller,
+    required String hint,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(AppPadding.p16),
+      decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(AppRadius.r16)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: AppSize.s40,
+                height: AppSize.s40,
+                decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+                child: Icon(icon, color: iconColor, size: AppSize.s20),
+              ),
+              const SizedBox(width: AppWidth.w12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold)),
+                  Text(subtitle, style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textSecondary)),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: AppHeight.h16),
+          Text('CHỈ SỐ CŨ',
+              style: GoogleFonts.manrope(fontSize: FontSize.s11, fontWeight: FontWeightManager.bold, color: AppColors.textTertiary)),
+          const SizedBox(height: AppHeight.h4),
+          Text(oldValue, style: GoogleFonts.manrope(fontSize: FontSize.s28, fontWeight: FontWeightManager.extraBold)),
+          const SizedBox(height: AppHeight.h12),
+          Text('CHỈ SỐ MỚI',
+              style: GoogleFonts.manrope(fontSize: FontSize.s11, fontWeight: FontWeightManager.bold, color: AppColors.primary)),
+          const SizedBox(height: AppHeight.h6),
+          TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(hintText: hint),
+          ),
+          const SizedBox(height: AppHeight.h16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('ẢNH CHỈ SỐ CŨ',
+                        style: GoogleFonts.manrope(
+                            fontSize: FontSize.s10, fontWeight: FontWeightManager.bold, color: AppColors.textTertiary)),
+                    const SizedBox(height: AppHeight.h6),
+                    Container(
+                      height: 90,
+                      decoration: BoxDecoration(
+                        color: AppColors.textPrimary,
+                        borderRadius: BorderRadius.circular(AppRadius.r10),
+                      ),
+                      child: const Center(child: Icon(Icons.query_builder, color: Colors.white38, size: AppSize.s32)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppWidth.w12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('ẢNH CHỈ SỐ MỚI',
+                        style: GoogleFonts.manrope(
+                            fontSize: FontSize.s10, fontWeight: FontWeightManager.bold, color: AppColors.textTertiary)),
+                    const SizedBox(height: AppHeight.h6),
+                    Container(
+                      height: 90,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.r10),
+                        border: Border.all(color: AppColors.surfaceContainer),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: AppSize.s24),
+                          const SizedBox(height: AppHeight.h4),
+                          Text('Chụp ảnh', style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.primary)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

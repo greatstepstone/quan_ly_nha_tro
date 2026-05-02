@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/database/database.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
@@ -8,6 +11,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
+import 'package:quan_ly_nha_tro/core/widgets/section_header.dart';
+import 'package:quan_ly_nha_tro/core/widgets/labeled_field.dart';
+import 'package:quan_ly_nha_tro/core/widgets/price_field.dart';
+
 
 class EditPropertyPage extends ConsumerStatefulWidget {
   final String propertyId;
@@ -22,10 +29,10 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
   final _addressCtrl = TextEditingController();
   final _electricCtrl = TextEditingController();
   final _waterCtrl = TextEditingController();
-  final _internetCtrl = TextEditingController(text: '0');
-  final _trashCtrl = TextEditingController(text: '0');
-  final _otherCtrl = TextEditingController(text: '0');
-  final _otherNameCtrl = TextEditingController(text: 'Phí khác');
+  final _internetCtrl = TextEditingController(text: AppStrings.zero);
+  final _trashCtrl = TextEditingController(text: AppStrings.zero);
+  final _otherCtrl = TextEditingController(text: AppStrings.zero);
+  final _otherNameCtrl = TextEditingController(text: AppStrings.otherFee);
 
   bool _isLoading = true;
   Property? _property;
@@ -50,9 +57,9 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
       _existingServices = services;
       
       for (final srv in services) {
-        if (srv.name.toLowerCase() == 'internet') {
+        if (srv.name.toLowerCase() == AppStrings.internet.toLowerCase()) {
           _internetCtrl.text = srv.price.toString();
-        } else if (srv.name.toLowerCase() == 'rác') {
+        } else if (srv.name.toLowerCase() == AppStrings.trash.toLowerCase()) {
           _trashCtrl.text = srv.price.toString();
         } else {
           _otherCtrl.text = srv.price.toString();
@@ -71,7 +78,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
   Future<void> _saveChanges() async {
     if (_nameCtrl.text.isEmpty || _addressCtrl.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập tên và địa chỉ nhà trọ')),
+        SnackBar(content: Text(AppStrings.emptyFieldsError)),
       );
       return;
     }
@@ -100,7 +107,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
       await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
         id: 'SRV_INT_${DateTime.now().millisecondsSinceEpoch}',
         propertyId: widget.propertyId,
-        name: 'Internet',
+        name: AppStrings.internet,
         type: BillingType.fixed,
         price: internetPrice,
       ));
@@ -111,7 +118,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
       await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
         id: 'SRV_TRASH_${DateTime.now().millisecondsSinceEpoch}',
         propertyId: widget.propertyId,
-        name: 'Rác',
+        name: AppStrings.trash,
         type: BillingType.perPerson,
         price: trashPrice,
       ));
@@ -132,7 +139,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cập nhật nhà trọ thành công!')),
+         SnackBar(content: Text(AppStrings.editPropertySuccess)),
       );
       context.pop();
     }
@@ -142,7 +149,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Đang tải...')),
+        appBar: AppBar(title: Text(AppStrings.loading)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -150,7 +157,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('Sửa cấu hình nhà trọ'),
+        title: Text(AppStrings.editProperty),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
@@ -159,51 +166,59 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
       body: ListView(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppPadding.p16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionHeader(icon: Icons.info_outline, label: 'THÔNG TIN CƠ BẢN'),
-                const SizedBox(height: 12),
-                _LabeledField(label: 'Tên nhà trọ', controller: _nameCtrl, hint: 'Ví dụ: Azure House - Quận 1'),
-                const SizedBox(height: 12),
-                _LabeledField(label: 'Địa chỉ chi tiết', controller: _addressCtrl, hint: 'Số nhà, tên đường, phường/xã...', maxLines: 3),
-                const SizedBox(height: 24),
+                SectionHeader(icon: Icons.info_outline, label: AppStrings.basicInfo),
+                const SizedBox(height: AppHeight.h12),
+                LabeledField(label: AppStrings.propertyName, controller: _nameCtrl, hint: AppStrings.propertyNameHint),
+                const SizedBox(height: AppHeight.h12),
+                LabeledField(label: AppStrings.propertyAddress, controller: _addressCtrl, hint: AppStrings.propertyAddressHint, maxLines: 3),
+                const SizedBox(height: AppHeight.h24),
 
-                _SectionHeader(icon: Icons.monetization_on_outlined, label: 'CẤU HÌNH ĐƠN GIÁ CHỤNG'),
-                const SizedBox(height: 16),
-                _PriceField(icon: Icons.bolt, iconColor: const Color(0xFFf59e0b), iconBg: const Color(0xFFFEF3C7), label: 'Giá điện', unit: 'PER KWH', controller: _electricCtrl),
-                const SizedBox(height: 12),
-                _PriceField(icon: Icons.water_drop, iconColor: const Color(0xFF3b82f6), iconBg: const Color(0xFFdbeafe), label: 'Giá nước', unit: 'PER M3', controller: _waterCtrl),
-                const SizedBox(height: 12),
-                _PriceField(icon: Icons.wifi, iconColor: const Color(0xFF8b5cf6), iconBg: const Color(0xFFede9fe), label: 'Phí internet', unit: 'MONTHLY', controller: _internetCtrl),
-                const SizedBox(height: 12),
-                _PriceField(icon: Icons.delete_outline, iconColor: AppColors.emerald, iconBg: AppColors.emeraldLight, label: 'Phí rác', unit: 'FIXED', controller: _trashCtrl),
-                const SizedBox(height: 12),
-                _PriceField(
+                SectionHeader(icon: Icons.monetization_on_outlined, label: AppStrings.commonPriceConfig),
+                const SizedBox(height: AppHeight.h16),
+                PriceField(icon: Icons.bolt, iconColor: AppColors.amber, iconBg: AppColors.amberLight, label: AppStrings.electricity, unit: AppStrings.perKwh, controller: _electricCtrl),
+                const SizedBox(height: AppHeight.h12),
+                PriceField(icon: Icons.water_drop, iconColor: AppColors.chartBlue, iconBg: AppColors.primaryLight, label: AppStrings.water, unit: AppStrings.perM3, controller: _waterCtrl),
+                const SizedBox(height: AppHeight.h12),
+                PriceField(icon: Icons.wifi, iconColor: const Color(0xFF8b5cf6), iconBg: const Color(0xFFede9fe), label: AppStrings.internet, unit: AppStrings.monthly, controller: _internetCtrl),
+                const SizedBox(height: AppHeight.h12),
+                PriceField(icon: Icons.delete_outline, iconColor: AppColors.emerald, iconBg: AppColors.emeraldLight, label: AppStrings.trash, unit: AppStrings.fixed, controller: _trashCtrl),
+                const SizedBox(height: AppHeight.h12),
+                PriceField(
                   icon: Icons.more_horiz_rounded, 
                   iconColor: AppColors.textSecondary, 
                   iconBg: AppColors.surfaceContainer, 
-                  label: 'Phí khác', 
-                  unit: 'FIXED', 
+                  label: AppStrings.otherFee, 
+                  unit: AppStrings.fixed, 
                   controller: _otherCtrl,
                   labelController: _otherNameCtrl,
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: AppHeight.h24),
               ],
+
             ),
           ),
         ],
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppPadding.p16),
           child: ElevatedButton.icon(
             icon: const Icon(Icons.save_outlined),
-            label: const Text('Lưu thay đổi'),
+            label: Text(AppStrings.saveChanges),
             onPressed: _saveChanges,
             style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 52),
+              minimumSize: const Size(double.infinity, AppHeight.h52),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.r12),
+              ),
+              textStyle: GoogleFonts.manrope(
+                fontSize: FontSize.s16,
+                fontWeight: FontWeightManager.bold,
+              ),
             ),
           ),
         ),
@@ -212,125 +227,4 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  const _SectionHeader({required this.icon, required this.label});
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: AppColors.primary, size: 16),
-        const SizedBox(width: 6),
-        Text(label,
-            style: GoogleFonts.manrope(
-                fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
-      ],
-    );
-  }
-}
-
-class _LabeledField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String hint;
-  final int maxLines;
-  const _LabeledField({required this.label, required this.controller, required this.hint, this.maxLines = 1});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-        const SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          decoration: InputDecoration(hintText: hint),
-        ),
-      ],
-    );
-  }
-}
-
-class _PriceField extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final Color iconBg;
-  final String label;
-  final String unit;
-  final TextEditingController controller;
-  final TextEditingController? labelController;
-
-  const _PriceField({
-    required this.icon,
-    required this.iconColor,
-    required this.iconBg,
-    required this.label,
-    required this.unit,
-    required this.controller,
-    this.labelController,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceBright,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: iconColor, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (labelController != null)
-                  TextField(
-                    controller: labelController,
-                    style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600),
-                    decoration: InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      hintText: label,
-                    ),
-                  )
-                else
-                  Text(label, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 4),
-                TextField(
-                  controller: controller,
-                  keyboardType: TextInputType.number,
-                  style: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w600),
-                  decoration: const InputDecoration(
-                    suffixText: 'đ',
-                    filled: false,
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                    isDense: true,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(unit, style: GoogleFonts.manrope(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
-        ],
-      ),
-    );
-  }
-}

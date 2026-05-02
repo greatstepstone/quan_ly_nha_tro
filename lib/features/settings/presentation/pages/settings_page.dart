@@ -9,7 +9,6 @@ import 'package:quan_ly_nha_tro/core/providers/locale_provider.dart';
 import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
-import 'package:quan_ly_nha_tro/core/database/database.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -144,7 +143,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         );
 
                         if (confirm == true) {
-                          if (!mounted) return;
+                          if (!context.mounted) return;
+
                           
                           showDialog(
                             context: context,
@@ -156,14 +156,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             await ref.read(propertyRepositoryProvider).syncProperties();
                             await ref.read(roomRepositoryProvider).syncAllRooms();
                             
-                            if (!mounted) return;
+                            if (!context.mounted) return;
+
                             Navigator.pop(context); // Close loading
                             
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Đã đồng bộ dữ liệu thành công!')),
                             );
                           } catch (e) {
-                            if (!mounted) return;
+                            if (!context.mounted) return;
+
                             Navigator.pop(context); // Close loading
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Lỗi đồng bộ: $e'), backgroundColor: AppColors.red),

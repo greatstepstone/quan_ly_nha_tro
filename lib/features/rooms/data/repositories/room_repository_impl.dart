@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
+
 import 'package:quan_ly_nha_tro/core/database/database.dart';
 import 'package:quan_ly_nha_tro/core/database/daos/room_dao.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
@@ -55,9 +57,11 @@ class RoomRepositoryImpl implements RoomRepository {
         id: Value(room.id),
         isSynced: const Value(true),
       ));
-      print('✅ Sync success (room): ${room.name}');
+      debugPrint('✅ Sync success (room): ${room.name}');
+
     } catch (e) {
-      print('❌ Sync error (room) - ${room.name}: $e');
+      debugPrint('❌ Sync error (room) - ${room.name}: $e');
+
     }
   }
 
@@ -81,7 +85,8 @@ class RoomRepositoryImpl implements RoomRepository {
         isSynced: const Value(true),
       ));
     } catch (e) {
-      print('Sync error (save room): $e');
+      debugPrint('Sync error (save room): $e');
+
     }
   }
 
@@ -94,7 +99,8 @@ class RoomRepositoryImpl implements RoomRepository {
       // Hard delete
       await localDataSource.hardDeleteRoom(id);
     } catch (e) {
-      print('Sync error (delete room): $e');
+      debugPrint('Sync error (delete room): $e');
+
     }
   }
 
@@ -103,71 +109,106 @@ class RoomRepositoryImpl implements RoomRepository {
     // Lấy dữ liệu remote
     final remoteData = await remoteDataSource.getRoomsByProperty(propertyId);
     
-    for (var r in remoteData) {
-      await localDataSource.insertRoom(RoomsCompanion.insert(
-        id: r.id,
-        ownerId: r.ownerId,
-        propertyId: r.propertyId,
-        name: r.name,
-        status: r.status,
-        rentPrice: r.rentPrice,
-        tenantId: Value(r.tenantId),
-        isSynced: const Value(true),
-      ));
-    }
+    await localDataSource.db.batch((batch) {
+      for (var r in remoteData) {
+        batch.insert(
+          localDataSource.rooms,
+          RoomsCompanion.insert(
+            id: r.id,
+            ownerId: r.ownerId,
+            propertyId: r.propertyId,
+            name: r.name,
+            status: r.status,
+            rentPrice: r.rentPrice,
+            tenantId: Value(r.tenantId),
+            isSynced: const Value(true),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+    });
   }
+
 
   @override
   Future<void> syncAllRooms() async {
     // 1. PUSH DELETIONS
     final deleted = await localDataSource.getDeletedRooms();
-    for (var r in deleted) {
-      try {
-        await remoteDataSource.deleteRoom(r.id);
-        await localDataSource.hardDeleteRoom(r.id);
-      } catch (e) {
-        print('Error syncing deleted room ${r.id}: $e');
+    if (deleted.isNotEmpty) {
+      for (var r in deleted) {
+        try {
+          await remoteDataSource.deleteRoom(r.id);
+        } catch (e) {
+          debugPrint('Error syncing deleted room ${r.id}: $e');
+
+        }
       }
+      
+      // Batch hard delete locally
+      await localDataSource.db.batch((batch) {
+        for (var r in deleted) {
+          batch.deleteWhere(localDataSource.rooms, (t) => t.id.equals(r.id));
+        }
+      });
     }
+
 
     // 2. PUSH UPDATES/INSERTS
     final unsynced = await localDataSource.getUnsyncedRooms();
-    for (var r in unsynced) {
-      try {
-        await remoteDataSource.upsertRoom(r);
-        await localDataSource.updateRoom(RoomsCompanion(
-          id: Value(r.id),
-          isSynced: const Value(true),
-        ));
-      } catch (e) {
-        print('Error syncing room ${r.id}: $e');
+    if (unsynced.isNotEmpty) {
+      for (var r in unsynced) {
+        try {
+          await remoteDataSource.upsertRoom(r);
+        } catch (e) {
+          debugPrint('Error syncing room ${r.id}: $e');
+
+        }
       }
+      
+      // Batch update sync status locally
+      await localDataSource.db.batch((batch) {
+        for (var r in unsynced) {
+          batch.update(localDataSource.rooms,
+            RoomsCompanion(id: Value(r.id), isSynced: const Value(true)),
+            where: (t) => t.id.equals(r.id),
+          );
+        }
+      });
     }
+
 
     // 3. PULL
     final remoteData = await remoteDataSource.getAllRooms();
     final remoteIds = remoteData.map((r) => r.id).toSet();
     final localData = await localDataSource.getAllRooms();
 
-    // Xóa các bản ghi local không tồn tại trên Remote (nếu đã được sync)
-    for (var lr in localData) {
-      if (lr.isSynced && !remoteIds.contains(lr.id)) {
-        await localDataSource.hardDeleteRoom(lr.id);
+    // Perform local updates in a single batch
+    await localDataSource.db.batch((batch) {
+      // Remove local records that don't exist on remote
+      for (var lr in localData) {
+        if (lr.isSynced && !remoteIds.contains(lr.id)) {
+          batch.deleteWhere(localDataSource.rooms, (t) => t.id.equals(lr.id));
+        }
       }
-    }
+      
+      // Insert/Update from remote
+      for (var r in remoteData) {
+        batch.insert(
+          localDataSource.rooms,
+          RoomsCompanion.insert(
+            id: r.id,
+            ownerId: r.ownerId,
+            propertyId: r.propertyId,
+            name: r.name,
+            status: r.status,
+            rentPrice: r.rentPrice,
+            tenantId: Value(r.tenantId),
+            isSynced: const Value(true),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+    });
 
-    // Cập nhật/Thêm mới từ Remote
-    for (var r in remoteData) {
-      await localDataSource.insertRoom(RoomsCompanion.insert(
-        id: r.id,
-        ownerId: r.ownerId,
-        propertyId: r.propertyId,
-        name: r.name,
-        status: r.status,
-        rentPrice: r.rentPrice,
-        tenantId: Value(r.tenantId),
-        isSynced: const Value(true),
-      ));
-    }
   }
 }

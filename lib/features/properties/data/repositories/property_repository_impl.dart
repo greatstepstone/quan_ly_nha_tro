@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
+
 import 'package:quan_ly_nha_tro/core/database/database.dart';
 import 'package:quan_ly_nha_tro/core/database/daos/property_dao.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
@@ -102,28 +104,48 @@ class PropertyRepositoryImpl implements PropertyRepository {
   Future<void> syncProperties() async {
     // 1. PUSH DELETIONS
     final deleted = await localDataSource.getDeletedProperties();
-    for (var p in deleted) {
-      try {
-        await remoteDataSource.deleteProperty(p.id);
-        await localDataSource.hardDeleteProperty(p.id);
-      } catch (e) {
-        print('Error syncing deleted property ${p.id}: $e');
+    if (deleted.isNotEmpty) {
+      for (var p in deleted) {
+        try {
+          await remoteDataSource.deleteProperty(p.id);
+        } catch (e) {
+          debugPrint('Error syncing deleted property ${p.id}: $e');
+
+        }
       }
+      
+      // Batch hard delete locally
+      await localDataSource.db.batch((batch) {
+        for (var p in deleted) {
+          batch.deleteWhere(localDataSource.properties, (t) => t.id.equals(p.id));
+        }
+      });
     }
+
 
     // 2. PUSH UPDATES/INSERTS
     final unsynced = await localDataSource.getUnsyncedProperties();
-    for (var p in unsynced) {
-      try {
-        await remoteDataSource.upsertProperty(p);
-        await localDataSource.updateProperty(PropertiesCompanion(
-          id: Value(p.id),
-          isSynced: const Value(true),
-        ));
-      } catch (e) {
-        print('Error syncing property ${p.id}: $e');
+    if (unsynced.isNotEmpty) {
+      for (var p in unsynced) {
+        try {
+          await remoteDataSource.upsertProperty(p);
+        } catch (e) {
+          debugPrint('Error syncing property ${p.id}: $e');
+
+        }
       }
+      
+      // Batch update sync status locally
+      await localDataSource.db.batch((batch) {
+        for (var p in unsynced) {
+          batch.update(localDataSource.properties, 
+            PropertiesCompanion(id: Value(p.id), isSynced: const Value(true)),
+            where: (t) => t.id.equals(p.id),
+          );
+        }
+      });
     }
+
 
     // 3. PULL
     try {
@@ -132,30 +154,39 @@ class PropertyRepositoryImpl implements PropertyRepository {
       
       final localData = await localDataSource.getAllProperties();
       
-      // Xóa các bản ghi local đã bị xóa trên remote (nếu đã sync)
-      for (var lp in localData) {
-        if (lp.isSynced && !remoteIds.contains(lp.id)) {
-          await localDataSource.hardDeleteProperty(lp.id);
+      // Perform local updates in a single batch
+      await localDataSource.db.batch((batch) {
+        // Remove local records that don't exist on remote
+        for (var lp in localData) {
+          if (lp.isSynced && !remoteIds.contains(lp.id)) {
+            batch.deleteWhere(localDataSource.properties, (t) => t.id.equals(lp.id));
+          }
         }
-      }
+        
+        // Insert/Update from remote
+        for (var p in remoteData) {
+          batch.insert(
+            localDataSource.properties,
+            PropertiesCompanion.insert(
+              id: p.id,
+              ownerId: p.ownerId,
+              name: p.name,
+              address: p.address,
+              totalRooms: p.totalRooms,
+              electricityPrice: p.electricityPrice,
+              waterPrice: p.waterPrice,
+              waterBillingType: p.waterBillingType,
+              status: Value(p.status),
+              isSynced: const Value(true),
+            ),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+      });
 
-      // Cập nhật/Thêm mới từ Remote
-      for (var p in remoteData) {
-        await localDataSource.insertProperty(PropertiesCompanion.insert(
-          id: p.id,
-          ownerId: p.ownerId,
-          name: p.name,
-          address: p.address,
-          totalRooms: p.totalRooms,
-          electricityPrice: p.electricityPrice,
-          waterPrice: p.waterPrice,
-          waterBillingType: p.waterBillingType,
-          status: Value(p.status),
-          isSynced: const Value(true),
-        ));
-      }
     } catch (e) {
-      print('Error pulling properties from remote: $e');
+      debugPrint('Error pulling properties from remote: $e');
+
     }
   }
 }

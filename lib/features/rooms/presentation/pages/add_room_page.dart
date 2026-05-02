@@ -1,18 +1,21 @@
-import 'package:quan_ly_nha_tro/features/rooms/presentation/widgets/room_form_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/meter_reading_providers.dart';
 import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
 import 'package:quan_ly_nha_tro/core/widgets/error_dialog.dart';
+import 'package:quan_ly_nha_tro/features/rooms/presentation/widgets/room_form_widgets.dart';
+import 'package:quan_ly_nha_tro/features/rooms/presentation/widgets/add_room_form_widgets.dart';
 
 class AddRoomPage extends ConsumerStatefulWidget {
   final String? propertyId;
@@ -22,29 +25,7 @@ class AddRoomPage extends ConsumerStatefulWidget {
   ConsumerState<AddRoomPage> createState() => _AddRoomPageState();
 }
 
-// Simple model to hold one tenant's form data
-class _TenantForm {
-  final nameCtrl = TextEditingController();
-  final phoneCtrl = TextEditingController();
-  final cccdCtrl = TextEditingController();
-  final dateOfBirthCtrl = TextEditingController();
-  final hometownCtrl = TextEditingController();
-  final depositCtrl = TextEditingController(text: '0');
-  final startDateCtrl = TextEditingController(text: '${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}');
-
-  void dispose() {
-    nameCtrl.dispose();
-    phoneCtrl.dispose();
-    cccdCtrl.dispose();
-    dateOfBirthCtrl.dispose();
-    hometownCtrl.dispose();
-    depositCtrl.dispose();
-    startDateCtrl.dispose();
-  }
-}
-
 class _AddRoomPageState extends ConsumerState<AddRoomPage> {
-  // ── Room fields ──
   final _roomName = TextEditingController();
   final _rentPrice = TextEditingController();
   final _electricOld = TextEditingController(text: '0');
@@ -56,11 +37,9 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
   bool _propertiesLoaded = false;
 
   DateTime _startDate = DateTime.now();
-  String? _waterMode; // 'byMeter' | 'perPerson' | 'fixed'
+  String? _waterMode; 
 
-  // ── Tenants ──
-  final List<_TenantForm> _tenants = [];
-
+  final List<TenantFormModel> _tenants = [];
   bool _isSaving = false;
 
   @override
@@ -83,7 +62,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       _properties = props;
       _propertiesLoaded = true;
       
-      // Kiểm tra xem propertyId từ widget có tồn tại trong danh sách của owner không
       final propFromWidget = widget.propertyId != null 
           ? props.where((p) => p.id == widget.propertyId).firstOrNull 
           : null;
@@ -119,7 +97,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     });
   }
 
-  void _addTenant() => setState(() => _tenants.add(_TenantForm()));
+  void _addTenant() => setState(() => _tenants.add(TenantFormModel()));
 
   void _removeTenant(int index) {
     _tenants[index].dispose();
@@ -167,11 +145,9 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
 
       String? firstTenantId;
       if (hasTenants) {
-        // Dự đoán ID của tenant đầu tiên để gán vào Room
         firstTenantId = const Uuid().v4();
       }
 
-      // 1. Insert Room trước để các bảng khác tham chiếu (FK)
       final room = Room(
         id: roomId,
         ownerId: ownerId,
@@ -183,13 +159,10 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       );
       await ref.read(roomRepositoryProvider).addRoom(room);
 
-      // 2. Insert tenants
       for (int i = 0; i < _tenants.length; i++) {
         final t = _tenants[i];
         if (t.nameCtrl.text.trim().isEmpty) continue;
         
-        // Sử dụng ID đã dự đoán ở bước 1 cho tenant đầu tiên, 
-        // hoặc tạo ID mới cho các tenant sau.
         final tenantId = (i == 0 && firstTenantId != null) ? firstTenantId : const Uuid().v4();
         
         final tenant = Tenant(
@@ -208,7 +181,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
         await ref.read(tenantRepositoryProvider).addTenant(tenant);
       }
 
-      // 3. Insert initial meter reading
       final electricOld = int.tryParse(_electricOld.text) ?? 0;
       final waterOld = int.tryParse(_waterOld.text) ?? 0;
       final reading = MeterReading(
@@ -236,7 +208,6 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
           stackTrace: stackTrace,
         );
       }
-      debugPrint('Error adding room: $e');
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -261,13 +232,12 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('Dữ liệu trong list: ${_properties.map((p) => p.id).toList()}');
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
         title: const Text('Thêm phòng mới'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -276,8 +246,8 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
             child: Text(
               'Lưu',
               style: GoogleFonts.manrope(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
+                fontSize: FontSize.s15,
+                fontWeight: FontWeightManager.bold,
                 color: _isSaving ? AppColors.textTertiary : AppColors.primary,
               ),
             ),
@@ -287,51 +257,44 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       body: !_propertiesLoaded
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+              padding: const EdgeInsets.fromLTRB(AppPadding.p16, AppPadding.p16, AppPadding.p16, 120),
               children: [
-                // ── Section: Thông tin phòng ──
                 RoomSectionCard(
                   icon: Icons.bed_outlined,
                   title: 'Thông tin phòng',
                   child: Column(
                     children: [
-                      // Property dropdown
-                      RoomFieldLabel(label: 'TÊN NHÀ'),
-                      SizedBox(height: 6),
+                      const RoomFieldLabel(label: 'TÊN NHÀ'),
+                      const SizedBox(height: AppHeight.h6),
                       if (_properties.isEmpty)
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(AppPadding.p12),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceContainer,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(AppRadius.r12),
                           ),
                           child: Text(
                             'Chưa có nhà trọ nào. Hãy thêm nhà trọ trước.',
-                            style: GoogleFonts.manrope(
-                                fontSize: 13, color: AppColors.textSecondary),
+                            style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary),
                           ),
                         )
                       else
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          padding: const EdgeInsets.symmetric(horizontal: AppPadding.p14),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceContainer,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(AppRadius.r12),
                           ),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
-                              value: _properties.any(
-                                (p) => p.id == _selectedPropertyId) 
+                              value: _properties.any((p) => p.id == _selectedPropertyId) 
                                 ? _selectedPropertyId : null,
                               isExpanded: true,
-                              icon: Icon(Icons.arrow_drop_down,
-                                  color: AppColors.textSecondary),
+                              icon: Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
                               items: _properties
                                   .map((p) => DropdownMenuItem(
                                         value: p.id,
-                                        child: Text(p.name,
-                                            style: GoogleFonts.manrope(
-                                                fontSize: 14)),
+                                        child: Text(p.name, style: GoogleFonts.manrope(fontSize: FontSize.s14)),
                                       ))
                                   .toList(),
                               onChanged: (v) {
@@ -340,38 +303,32 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                             ),
                           ),
                         ),
-                      SizedBox(height: 14),
+                      const SizedBox(height: AppHeight.h14),
 
-                      // Room name
-                      RoomFieldLabel(label: 'TÊN PHÒNG'),
-                      SizedBox(height: 6),
+                      const RoomFieldLabel(label: 'TÊN PHÒNG'),
+                      const SizedBox(height: AppHeight.h6),
                       RoomTextField(ctrl: _roomName, hint: '101'),
-                      SizedBox(height: 14),
+                      const SizedBox(height: AppHeight.h14),
 
-                      // Start date
-                      RoomFieldLabel(label: 'NGÀY BẮT ĐẦU THUÊ'),
-                      SizedBox(height: 6),
+                      const RoomFieldLabel(label: 'NGÀY BẮT ĐẦU THUÊ'),
+                      const SizedBox(height: AppHeight.h6),
                       GestureDetector(
                         onTap: _pickStartDate,
                         child: Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 14),
+                          padding: const EdgeInsets.symmetric(horizontal: AppPadding.p14, vertical: AppPadding.p14),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceContainer,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(AppRadius.r12),
                           ),
                           child: Row(
                             children: [
                               Text(
                                 _fmtDate(_startDate),
-                                style: GoogleFonts.manrope(
-                                    fontSize: 14,
-                                    color: AppColors.textPrimary),
+                                style: GoogleFonts.manrope(fontSize: FontSize.s14, color: AppColors.textPrimary),
                               ),
                               const Spacer(),
-                              Icon(Icons.calendar_today_outlined,
-                                  size: 16, color: AppColors.textSecondary),
+                              Icon(Icons.calendar_today_outlined, size: AppSize.s16, color: AppColors.textSecondary),
                             ],
                           ),
                         ),
@@ -379,31 +336,28 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                     ],
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: AppHeight.h16),
 
-                // ── Section: Thông tin người thuê ──
                 RoomSectionCard(
                   icon: Icons.people_outline_rounded,
                   title: 'Thông tin người thuê',
                   action: GestureDetector(
                     onTap: _addTenant,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: AppPadding.p12, vertical: AppPadding.p6),
                       decoration: BoxDecoration(
                         color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(50),
+                        borderRadius: BorderRadius.circular(AppRadius.r50),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.add,
-                              size: 14, color: AppColors.primary),
-                          SizedBox(width: 4),
+                          Icon(Icons.add, size: AppSize.s14, color: AppColors.primary),
+                          const SizedBox(width: AppWidth.w4),
                           Text('Thêm',
                               style: GoogleFonts.manrope(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: FontSize.s13,
+                                  fontWeight: FontWeightManager.bold,
                                   color: AppColors.primary)),
                         ],
                       ),
@@ -411,18 +365,15 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                   ),
                   child: _tenants.isEmpty
                       ? Padding(
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.symmetric(vertical: AppPadding.p8),
                           child: Text(
                             'Chưa có người thuê. Nhấn + Thêm để thêm.',
-                            style: GoogleFonts.manrope(
-                                fontSize: 13,
-                                color: AppColors.textSecondary),
+                            style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary),
                           ),
                         )
                       : Column(
                           children: List.generate(_tenants.length, (i) {
-                            return _TenantCard(
+                            return TenantFormCard(
                               index: i,
                               form: _tenants[i],
                               onRemove: () => _removeTenant(i),
@@ -430,119 +381,93 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                           }),
                         ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: AppHeight.h16),
 
-                // ── Section: Chi tiết thuê phòng ──
                 RoomSectionCard(
                   icon: Icons.receipt_long_outlined,
                   title: 'Chi tiết thuê phòng',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RoomFieldLabel(label: 'GIÁ THUÊ PHÒNG (đ/THÁNG)'),
-                      SizedBox(height: 6),
+                      RoomFieldLabel(label: 'GIÁ THUÊ PHÒNG (${AppStrings.currencySymbol}/${AppStrings.month.toUpperCase()})'),
+                      const SizedBox(height: AppHeight.h6),
                       RoomTextField(
                         ctrl: _rentPrice,
                         hint: '0',
                         keyboardType: TextInputType.number,
-                        suffix: 'VND',
+                        suffix: AppStrings.currencySymbol,
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: AppHeight.h16),
 
-                      // Electric
                       Row(
                         children: [
                           Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: AppColors.amberLight,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(Icons.bolt,
-                                color: AppColors.amber, size: 16),
+                            width: AppSize.s28,
+                            height: AppSize.s28,
+                            decoration: BoxDecoration(color: AppColors.amberLight, shape: BoxShape.circle),
+                            child: Icon(Icons.bolt, color: AppColors.amber, size: AppSize.s16),
                           ),
-                          SizedBox(width: 8),
-                          Text('Điện',
-                              style: GoogleFonts.manrope(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600)),
+                          const SizedBox(width: AppWidth.w8),
+                          Text('Điện', style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold)),
                           const Spacer(),
                           if (_selectedProperty != null)
                             Text(
-                              '${fmtNum(_selectedProperty!.electricityPrice)}đ/kWh',
-                              style: GoogleFonts.manrope(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary),
+                              '${fmtNum(_selectedProperty!.electricityPrice)}${AppStrings.currencySymbol}/kWh',
+                              style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textSecondary),
                             ),
                         ],
                       ),
-                      SizedBox(height: 8),
-                      RoomFieldLabel(label: 'CHỈ SỐ ĐIỆN HIỆN TẠI'),
-                      SizedBox(height: 6),
+                      const SizedBox(height: AppHeight.h8),
+                      const RoomFieldLabel(label: 'CHỈ SỐ ĐIỆN HIỆN TẠI'),
+                      const SizedBox(height: AppHeight.h6),
                       RoomTextField(
                         ctrl: _electricOld,
                         hint: '0',
                         keyboardType: TextInputType.number,
                         suffix: 'kWh',
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: AppHeight.h16),
 
-                      // Water
                       Row(
                         children: [
                           Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryLight,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(Icons.water_drop_outlined,
-                                color: AppColors.primary, size: 16),
+                            width: AppSize.s28,
+                            height: AppSize.s28,
+                            decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
+                            child: Icon(Icons.water_drop_outlined, color: AppColors.primary, size: AppSize.s16),
                           ),
-                          SizedBox(width: 8),
-                          Text('Nước',
-                              style: GoogleFonts.manrope(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600)),
+                          const SizedBox(width: AppWidth.w8),
+                          Text('Nước', style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold)),
                           const Spacer(),
                           if (_selectedProperty != null)
                             Text(
-                              '${fmtNum(_selectedProperty!.waterPrice)}đ/m³',
-                              style: GoogleFonts.manrope(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary),
+                              '${fmtNum(_selectedProperty!.waterPrice)}${AppStrings.currencySymbol}/m³',
+                              style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textSecondary),
                             ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: AppHeight.h8),
 
-                      // Water mode toggle
                       Row(
                         children: [
                           RoomModeChip(
                             label: 'Theo khối',
                             isActive: _waterMode == 'byMeter',
-                            onTap: () =>
-                                setState(() => _waterMode = 'byMeter'),
+                            onTap: () => setState(() => _waterMode = 'byMeter'),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: AppWidth.w8),
                           RoomModeChip(
                             label: 'Theo người',
                             isActive: _waterMode == 'perPerson',
-                            onTap: () =>
-                                setState(() => _waterMode = 'perPerson'),
+                            onTap: () => setState(() => _waterMode = 'perPerson'),
                           ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: AppHeight.h8),
                       RoomFieldLabel(
-                        label: _waterMode == 'byMeter'
-                            ? 'CHỈ SỐ NƯỚC HIỆN TẠI'
-                            : 'SỐ NGƯỜI HIỆN TẠI',
+                        label: _waterMode == 'byMeter' ? 'CHỈ SỐ NƯỚC HIỆN TẠI' : 'SỐ NGƯỜI HIỆN TẠI',
                       ),
-                      SizedBox(height: 6),
+                      const SizedBox(height: AppHeight.h6),
                       RoomTextField(
                         ctrl: _waterOld,
                         hint: '0',
@@ -556,22 +481,20 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
             ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: const EdgeInsets.fromLTRB(AppPadding.p16, AppPadding.p8, AppPadding.p16, AppPadding.p16),
           child: ElevatedButton.icon(
             icon: _isSaving
-                ? SizedBox(
+                ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2),
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                   )
-                : Icon(Icons.save_outlined),
+                : const Icon(Icons.save_outlined),
             label: const Text('Hoàn tất & Lưu phòng'),
             onPressed: _isSaving ? null : _save,
             style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 52),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14)),
+              minimumSize: const Size(double.infinity, AppHeight.h52),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.r14)),
             ),
           ),
         ),
@@ -579,116 +502,3 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
     );
   }
 }
-
-// ── Tenant card ────────────────────────────────────────────────────────────
-
-class _TenantCard extends StatelessWidget {
-  final int index;
-  final _TenantForm form;
-  final VoidCallback onRemove;
-  const _TenantCard(
-      {required this.index, required this.form, required this.onRemove});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.surfaceContainer),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: Text(
-                  'Người thuê #${index + 1}',
-                  style: GoogleFonts.manrope(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary),
-                ),
-              ),
-              const Spacer(),
-              GestureDetector(
-                onTap: onRemove,
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                      color: AppColors.redLight, shape: BoxShape.circle),
-                  child:
-                      Icon(Icons.delete_outline, color: AppColors.red, size: 16),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12),
-
-          RoomFieldLabel(label: 'HỌ VÀ TÊN'),
-          SizedBox(height: 6),
-          RoomTextField(ctrl: form.nameCtrl, hint: 'Nhập tên'),
-          SizedBox(height: 10),
-
-          RoomFieldLabel(label: 'SỐ ĐIỆN THOẠI'),
-          SizedBox(height: 6),
-          RoomTextField(
-              ctrl: form.phoneCtrl,
-              hint: '090...',
-              keyboardType: TextInputType.phone),
-          SizedBox(height: 10),
-
-          RoomFieldLabel(label: 'CCCD / CMND'),
-          SizedBox(height: 6),
-          RoomTextField(ctrl: form.cccdCtrl, hint: 'Nhập số CCCD'),
-          SizedBox(height: 10),
-
-          // CCCD photos
-          Row(
-            children: [
-              Expanded(child: PhotoSlot(label: 'MẶT TRƯỚC CCCD')),
-              SizedBox(width: 10),
-              Expanded(child: PhotoSlot(label: 'MẶT SAU CCCD')),
-            ],
-          ),
-
-          RoomFieldLabel(label: 'NGÀY SINH'),
-          SizedBox(height: 6),
-          RoomTextField(ctrl: form.dateOfBirthCtrl, hint: 'dd/mm/yyyy'),
-          SizedBox(height: 10),
-
-          RoomFieldLabel(label: 'QUÊ QUÁN'),
-          SizedBox(height: 6),
-          RoomTextField(ctrl: form.hometownCtrl, hint: 'Nhập quê quán'),
-          SizedBox(height: 10),
-
-          RoomFieldLabel(label: 'NGÀY BẮT ĐẦU THUÊ (dd/mm/yyyy)'),
-          SizedBox(height: 6),
-          RoomTextField(ctrl: form.startDateCtrl, hint: 'dd/mm/yyyy'),
-          SizedBox(height: 10),
-
-          RoomFieldLabel(label: 'TIỀN CỌC (VND)'),
-          SizedBox(height: 6),
-          RoomTextField(
-              ctrl: form.depositCtrl,
-              hint: '0',
-              keyboardType: TextInputType.number,
-              suffix: 'đ'),
-          SizedBox(height: 10),
-        ],
-      ),
-    );
-  }
-}
-

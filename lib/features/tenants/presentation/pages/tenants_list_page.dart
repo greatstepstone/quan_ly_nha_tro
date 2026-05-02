@@ -5,8 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
-import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_error_view.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_filter_chip.dart';
+import 'package:quan_ly_nha_tro/features/tenants/presentation/widgets/tenant_list_widgets.dart';
 
 class TenantsListPage extends ConsumerWidget {
   const TenantsListPage({super.key});
@@ -22,14 +25,14 @@ class TenantsListPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Khách Thuê'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
       ),
       body: filteredTenantsAsync.when(
         data: (tenants) {
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppPadding.p16),
             children: [
               // Search bar
               TextField(
@@ -39,32 +42,32 @@ class TenantsListPage extends ConsumerWidget {
                   prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
                   suffixIcon: query.isNotEmpty 
                     ? IconButton(
-                        icon: Icon(Icons.clear, size: 18), 
+                        icon: const Icon(Icons.clear, size: AppSize.s18), 
                         onPressed: () => ref.read(tenantSearchQueryProvider.notifier).state = ''
                       ) 
                     : null,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: AppHeight.h12),
 
               // Filter chips
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _FilterChip(
+                    AppFilterChip(
                       label: 'Tất cả', 
                       isActive: filterIndex == 0, 
                       onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 0
                     ),
-                    SizedBox(width: 8),
-                    _FilterChip(
+                    const SizedBox(width: AppWidth.w8),
+                    AppFilterChip(
                       label: 'Đang thuê', 
                       isActive: filterIndex == 1, 
                       onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 1
                     ),
-                    SizedBox(width: 8),
-                    _FilterChip(
+                    const SizedBox(width: AppWidth.w8),
+                    AppFilterChip(
                       label: 'Đã trả phòng', 
                       isActive: filterIndex == 2, 
                       onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 2
@@ -72,12 +75,12 @@ class TenantsListPage extends ConsumerWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: AppHeight.h16),
 
               // Tenant list
               if (tenants.isEmpty)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  padding: const EdgeInsets.symmetric(vertical: AppPadding.p32),
                   child: Center(
                     child: Text(
                       query.isEmpty ? 'Chưa có khách thuê' : 'Không tìm thấy khách thuê', 
@@ -86,275 +89,25 @@ class TenantsListPage extends ConsumerWidget {
                   ),
                 )
               else
-                ...tenants.map((Tenant t) => _TenantCard(tenant: t)),
+                ...tenants.map((Tenant t) => TenantListItemCard(tenant: t)),
 
               // Add new card
-              SizedBox(height: 12),
-              _AddTenantCard(onTap: () => context.pushNamed(AppRoutes.roomAdd)),
-              SizedBox(height: 16),
+              const SizedBox(height: AppHeight.h12),
+              AddNewTenantCard(onTap: () => context.pushNamed(AppRoutes.roomAdd)),
+              const SizedBox(height: AppHeight.h16),
 
               // Stats banner
-              _TenantStatsBanner(count: tenants.length),
-              SizedBox(height: 24),
+              TenantStatsBanner(count: tenants.length),
+              const SizedBox(height: AppHeight.h24),
             ],
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Lỗi tải khách thuê: $err')),
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-  const _FilterChip({required this.label, required this.isActive, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : AppColors.surfaceBright,
-          borderRadius: BorderRadius.circular(50),
-        ),
-        child: Text(label,
-            style: GoogleFonts.manrope(
-                fontSize: 13, fontWeight: FontWeight.w600,
-                color: isActive ? Colors.white : AppColors.textSecondary)),
-      ),
-    );
-  }
-}
-
-class _TenantCard extends ConsumerWidget {
-  final Tenant tenant;
-  const _TenantCard({required this.tenant});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final roomAsync = ref.watch(roomDetailProvider(tenant.roomId));
-
-    return roomAsync.when(
-      data: (room) => GestureDetector(
-        onTap: () => context.pushNamed(AppRoutes.tenantDetail, pathParameters: {'id': tenant.id}),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceBright,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.04), blurRadius: 6)],
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 26,
-                    backgroundColor: AppColors.primaryLight,
-                    child: Text(
-                      tenant.name.isNotEmpty ? tenant.name[0] : '?',
-                      style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.primary),
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(tenant.name,
-                            style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
-                        SizedBox(height: 2),
-                        Text(tenant.phone,
-                            style: GoogleFonts.manrope(fontSize: 13, color: AppColors.textSecondary)),
-                      ],
-                    ),
-                  ),
-                  _VerifiedBadge(verified: tenant.isVerified),
-                ],
-              ),
-              if (room != null) ...[
-                SizedBox(height: 10),
-                Divider(height: 1, color: AppColors.surface),
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today_outlined, size: 13, color: AppColors.textTertiary),
-                    SizedBox(width: 4),
-                    Text('Từ: ${tenant.startDate}',
-                        style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
-                    const Spacer(),
-                    Icon(Icons.account_balance_wallet_outlined, size: 13, color: AppColors.textTertiary),
-                    SizedBox(width: 4),
-                    Text('Cọc: ${_fmt(tenant.deposit)}',
-                        style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary)),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.door_front_door_outlined, size: 14, color: AppColors.primary),
-                    SizedBox(width: 6),
-                    Text(room.name,
-                        style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
-                    const Spacer(),
-                    Icon(Icons.chevron_right, size: 16, color: AppColors.textTertiary),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      loading: () => SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
-      error: (err, _) => Center(child: Text('Lỗi tải phòng: $err')),
-    );
-  }
-}
-
-class _VerifiedBadge extends StatelessWidget {
-  final bool verified;
-  const _VerifiedBadge({required this.verified});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: verified ? AppColors.emeraldLight : AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: verified ? AppColors.emerald : AppColors.textTertiary,
-              shape: BoxShape.circle,
-            ),
-          ),
-          SizedBox(width: 4),
-          Text(
-            verified ? 'ĐÃ XÁC MINH' : 'CHƯA XÁC MINH',
-            style: GoogleFonts.manrope(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: verified ? AppColors.emerald : AppColors.textTertiary),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AddTenantCard extends StatelessWidget {
-  final VoidCallback onTap;
-  const _AddTenantCard({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceBright,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.surfaceContainer),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-              child: Icon(Icons.add, color: AppColors.primary, size: 24),
-            ),
-            SizedBox(height: 10),
-            Text('Thêm khách mới',
-                style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary)),
-          ],
+        error: (err, stack) => AppErrorView(
+          error: err,
+          onRetry: () => ref.invalidate(filteredTenantsProvider),
         ),
       ),
     );
   }
 }
-
-class _TenantStatsBanner extends StatelessWidget {
-  final int count;
-  const _TenantStatsBanner({required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF19a1e6), Color(0xFF0d7ab5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Quản lý chuyên nghiệp',
-                    style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
-                SizedBox(height: 4),
-                Text('Tất cả thông tin khách thuê, hợp đồng và thanh toán được quản lý tập trung.',
-                    style: GoogleFonts.manrope(color: Colors.white70, fontSize: 12)),
-                SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('$count', style: GoogleFonts.manrope(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800)),
-                          Text('KHÁCH THUÊ', style: GoogleFonts.manrope(color: Colors.white60, fontSize: 11)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('85%', style: GoogleFonts.manrope(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800)),
-                          Text('LẤP ĐẦY', style: GoogleFonts.manrope(color: Colors.white60, fontSize: 11)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-String _fmt(double value) {
-  final v = value.toInt();
-  final s = v.toString();
-  final result = StringBuffer();
-  for (int i = 0; i < s.length; i++) {
-    if (i > 0 && (s.length - i) % 3 == 0) result.write('.');
-    result.write(s[i]);
-  }
-  return '${result.toString()}đ';
-}
-

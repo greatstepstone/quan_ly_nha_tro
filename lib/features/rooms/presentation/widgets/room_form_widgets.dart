@@ -1,29 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 
 class RoomSectionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final Widget child;
   final Widget? action;
-  const RoomSectionCard(
-      {super.key,
-      required this.icon,
-      required this.title,
-      required this.child,
-      this.action});
+
+  const RoomSectionCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.child,
+    this.action,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppPadding.p16),
       decoration: BoxDecoration(
         color: AppColors.surfaceBright,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.r16),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04), blurRadius: 8)
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: AppShadowBlur.b8,
+          ),
         ],
       ),
       child: Column(
@@ -31,17 +37,21 @@ class RoomSectionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.primary),
-              SizedBox(width: 8),
+              Icon(icon, size: AppSize.s18, color: AppColors.primary),
+              const SizedBox(width: AppWidth.w8),
               Expanded(
-                child: Text(title,
-                    style: GoogleFonts.manrope(
-                        fontSize: 15, fontWeight: FontWeight.w700)),
+                child: Text(
+                  title,
+                  style: GoogleFonts.manrope(
+                    fontSize: FontSize.s15,
+                    fontWeight: FontWeightManager.bold,
+                  ),
+                ),
               ),
               if (action != null) action!,
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: AppHeight.h16),
           child,
         ],
       ),
@@ -55,12 +65,15 @@ class RoomFieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(label,
-        style: GoogleFonts.manrope(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.4,
-            color: AppColors.textSecondary));
+    return Text(
+      label,
+      style: GoogleFonts.manrope(
+        fontSize: FontSize.s11,
+        fontWeight: FontWeightManager.bold,
+        letterSpacing: 0.4,
+        color: AppColors.textSecondary,
+      ),
+    );
   }
 }
 
@@ -69,6 +82,7 @@ class RoomTextField extends StatelessWidget {
   final String hint;
   final TextInputType keyboardType;
   final String? suffix;
+
   const RoomTextField({
     super.key,
     required this.ctrl,
@@ -87,7 +101,9 @@ class RoomTextField extends StatelessWidget {
         fillColor: AppColors.surfaceContainer,
         suffixText: suffix,
         suffixStyle: GoogleFonts.manrope(
-            fontSize: 13, color: AppColors.textTertiary),
+          fontSize: FontSize.s13,
+          color: AppColors.textTertiary,
+        ),
       ),
     );
   }
@@ -97,8 +113,13 @@ class RoomModeChip extends StatelessWidget {
   final String label;
   final bool isActive;
   final VoidCallback onTap;
-  const RoomModeChip(
-      {super.key, required this.label, required this.isActive, required this.onTap});
+
+  const RoomModeChip({
+    super.key,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -106,19 +127,17 @@ class RoomModeChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16, vertical: AppPadding.p8),
         decoration: BoxDecoration(
           color: isActive ? AppColors.primary : AppColors.surfaceContainer,
-          borderRadius: BorderRadius.circular(50),
-          border: Border.all(
-              color: isActive ? AppColors.primary : Colors.transparent),
+          borderRadius: BorderRadius.circular(AppRadius.r50),
+          border: Border.all(color: isActive ? AppColors.primary : Colors.transparent),
         ),
         child: Text(
           label,
           style: GoogleFonts.manrope(
-            fontSize: 13,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+            fontSize: FontSize.s13,
+            fontWeight: isActive ? FontWeightManager.bold : FontWeightManager.medium,
             color: isActive ? Colors.white : AppColors.textSecondary,
           ),
         ),
@@ -136,31 +155,32 @@ class PhotoSlot extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: GoogleFonts.manrope(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
-                letterSpacing: 0.3)),
-        SizedBox(height: 6),
+        Text(
+          label,
+          style: GoogleFonts.manrope(
+            fontSize: FontSize.s10,
+            fontWeight: FontWeightManager.bold,
+            color: AppColors.textSecondary,
+            letterSpacing: 0.3,
+          ),
+        ),
+        const SizedBox(height: AppHeight.h6),
         Container(
-          height: 90,
+          height: AppHeight.h90,
           decoration: BoxDecoration(
             color: AppColors.surfaceContainer,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-                color: AppColors.surfaceContainer,
-                style: BorderStyle.solid),
+            borderRadius: BorderRadius.circular(AppRadius.r10),
+            border: Border.all(color: AppColors.surfaceContainer),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.camera_alt_outlined,
-                  color: AppColors.textTertiary, size: 24),
-              SizedBox(height: 4),
-              Text('Tải lên',
-                  style: GoogleFonts.manrope(
-                      fontSize: 11, color: AppColors.textTertiary)),
+              Icon(Icons.camera_alt_outlined, color: AppColors.textTertiary, size: AppSize.s24),
+              const SizedBox(height: AppHeight.h4),
+              Text(
+                'Tải lên',
+                style: GoogleFonts.manrope(fontSize: FontSize.s11, color: AppColors.textTertiary),
+              ),
             ],
           ),
         ),

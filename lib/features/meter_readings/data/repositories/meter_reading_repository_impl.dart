@@ -2,8 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:quan_ly_nha_tro/core/database/database.dart';
 import 'package:quan_ly_nha_tro/core/database/daos/meter_reading_dao.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
-import 'package:quan_ly_nha_tro/features/meter_reading/data/data_sources/meter_reading_remote_data_source.dart';
-import 'package:quan_ly_nha_tro/features/meter_reading/data/repositories/meter_reading_repository.dart';
+import 'package:quan_ly_nha_tro/features/meter_readings/data/data_sources/meter_reading_remote_data_source.dart';
+import 'package:quan_ly_nha_tro/features/meter_readings/data/repositories/meter_reading_repository.dart';
 
 class MeterReadingRepositoryImpl implements MeterReadingRepository {
   final MeterReadingDao localDataSource;
@@ -193,6 +193,62 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
       await localDataSource.hardDeleteMeterReading(id);
     } catch (e) {
       print('Sync error (delete reading): $e');
+    }
+  }
+
+  @override
+  Future<void> syncReadings(String roomId) async {
+    // 1. PUSH DELETIONS
+    final deleted = await localDataSource.getDeletedMeterReadings();
+    for (var r in deleted) {
+      try {
+        await remoteDataSource.deleteReading(r.id);
+        await localDataSource.hardDeleteMeterReading(r.id);
+      } catch (e) {
+        print('Error syncing deleted meter reading ${r.id}: $e');
+      }
+    }
+
+    // 2. PUSH UPDATES/INSERTS
+    final unsynced = await localDataSource.getUnsyncedMeterReadings();
+    for (var r in unsynced) {
+      try {
+        await remoteDataSource.upsertReading(r);
+        await localDataSource.updateMeterReading(MeterReadingsCompanion(
+          id: Value(r.id),
+          isSynced: const Value(true),
+        ));
+      } catch (e) {
+        print('Error syncing meter reading ${r.id}: $e');
+      }
+    }
+
+    // 3. PULL
+    final remoteData = await remoteDataSource.getReadingsByRoom(roomId);
+    final remoteIds = remoteData.map((r) => r.id).toSet();
+    final localData = await localDataSource.getMeterReadingsByRoom(roomId);
+
+    // Remove local records that were deleted on the server
+    for (var lr in localData) {
+      if (lr.roomId == roomId && lr.isSynced && !remoteIds.contains(lr.id)) {
+        await localDataSource.hardDeleteMeterReading(lr.id);
+      }
+    }
+
+    // Insert or update remote records
+    for (var r in remoteData) {
+      await localDataSource.insertMeterReading(MeterReadingsCompanion.insert(
+        id: r.id,
+        ownerId: r.ownerId,
+        roomId: r.roomId,
+        month: r.month,
+        electricOld: r.electricOld,
+        electricNew: Value(r.electricNew),
+        waterOld: r.waterOld,
+        waterNew: Value(r.waterNew),
+        isRecorded: Value(r.isRecorded),
+        isSynced: const Value(true),
+      ));
     }
   }
 }

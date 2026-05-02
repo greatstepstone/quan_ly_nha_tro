@@ -134,3 +134,16 @@ class OnboardingStates extends Table {
   @override
   Set<Column> get primaryKey => {userId};
 }
+
+/// Row class for the [OnboardingStates] Drift table.
+/// Lives here (not in models.dart) because it is a database infrastructure type,
+/// not a business domain model.
+class OnboardingState {
+  final String userId;
+  final bool hasCompletedOnboarding;
+
+  const OnboardingState({
+    required this.userId,
+    required this.hasCompletedOnboarding,
+  });
+}

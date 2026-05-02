@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
-import 'package:quan_ly_nha_tro/features/meter_reading/data/data_sources/meter_reading_remote_data_source.dart';
-import 'package:quan_ly_nha_tro/features/meter_reading/data/repositories/meter_reading_repository.dart';
-import 'package:quan_ly_nha_tro/features/meter_reading/data/repositories/meter_reading_repository_impl.dart';
+import 'package:quan_ly_nha_tro/features/meter_readings/data/data_sources/meter_reading_remote_data_source.dart';
+import 'package:quan_ly_nha_tro/features/meter_readings/data/repositories/meter_reading_repository.dart';
+import 'package:quan_ly_nha_tro/features/meter_readings/data/repositories/meter_reading_repository_impl.dart';
 import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
 
 final meterReadingRemoteDataSourceProvider = Provider<MeterReadingRemoteDataSource>((ref) {

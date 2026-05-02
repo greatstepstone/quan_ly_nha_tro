@@ -5,6 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/widgets/section_header.dart';
+import 'package:quan_ly_nha_tro/core/widgets/labeled_field.dart';
+import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 
 class EditRoomPage extends ConsumerStatefulWidget {
   final String roomId;
@@ -104,46 +109,47 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
           : _room == null
               ? const Center(child: Text('Không tìm thấy phòng'))
               : ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16, vertical: AppPadding.p20),
                   children: [
-                    _SectionHeader(label: 'THÔNG TIN CƠ BẢN'),
-                    SizedBox(height: 12),
-                    _LabeledField(label: 'Tên / Mã phòng', controller: _name),
-                    SizedBox(height: 16),
-                    _SectionHeader(label: 'THÔNG TIN THUÊ'),
-                    SizedBox(height: 12),
-                    _LabeledField(
-                      label: 'Giá thuê (VND/tháng)', 
+                    SectionHeader(icon: Icons.info_outline, label: 'THÔNG TIN CƠ BẢN'),
+                    SizedBox(height: AppHeight.h12),
+                    LabeledField(label: 'Tên / Mã phòng', controller: _name, hint: 'Nhập tên phòng'),
+                    SizedBox(height: AppHeight.h24),
+                    SectionHeader(icon: Icons.receipt_long_outlined, label: 'THÔNG TIN THUÊ'),
+                    SizedBox(height: AppHeight.h12),
+                    LabeledField(
+                      label: 'Giá thuê (${AppStrings.currencySymbol}/${AppStrings.month})', 
                       controller: _rentPrice, 
-                      type: TextInputType.number
+                      hint: '0',
+                      keyboardType: TextInputType.number
                     ),
                   ],
                 ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: const EdgeInsets.fromLTRB(AppPadding.p16, AppPadding.p8, AppPadding.p16, AppPadding.p16),
           child: Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => context.pop(),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                    padding: const EdgeInsets.symmetric(vertical: AppPadding.p12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.r50)),
                   ),
-                  child: Text('Hủy', style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w600)),
+                  child: Text('Hủy', style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.semiBold)),
                 ),
               ),
-              SizedBox(width: 12),
+              SizedBox(width: AppWidth.w12),
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: _isLoading || _room == null ? null : _save,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    minimumSize: const Size(0, 52),
+                    padding: const EdgeInsets.symmetric(vertical: AppPadding.p12),
+                    minimumSize: const Size(0, AppHeight.h52),
                   ),
-                  child: Text('Lưu thay đổi', style: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700)),
+                  child: Text('Lưu thay đổi', style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
                 ),
               ),
             ],
@@ -154,42 +160,3 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final String label;
-  const _SectionHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(width: 3, height: 16, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2))),
-        SizedBox(width: 8),
-        Text(label, style: GoogleFonts.manrope(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
-      ],
-    );
-  }
-}
-
-class _LabeledField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final TextInputType type;
-  const _LabeledField({required this.label, required this.controller, this.type = TextInputType.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-        SizedBox(height: 6),
-        TextField(
-          controller: controller,
-          keyboardType: type,
-          style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600),
-          decoration: InputDecoration(),
-        ),
-      ],
-    );
-  }
-}

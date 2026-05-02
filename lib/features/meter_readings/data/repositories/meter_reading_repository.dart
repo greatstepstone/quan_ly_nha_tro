@@ -7,4 +7,5 @@ abstract class MeterReadingRepository {
   Future<void> addReading(MeterReading reading);
   Future<void> saveMeterReading(MeterReading reading);
   Future<void> deleteReading(String id);
+  Future<void> syncReadings(String roomId);
 }
