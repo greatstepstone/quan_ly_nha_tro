@@ -54,14 +54,14 @@ class _EditTenantPageState extends ConsumerState<EditTenantPage> {
 
     _tenant = await tenantRepo.getTenantById(widget.tenantId);
     if (_tenant != null) {
-      _room = await roomRepo.getRoomById(_tenant!.roomId);
+      // roomId is now nullable — tenant may not currently be in a room
+      _room = _tenant!.roomId != null ? await roomRepo.getRoomById(_tenant!.roomId!) : null;
       _name.text = _tenant!.name;
       _phone.text = _tenant!.phone;
       _dob.text = _tenant!.dateOfBirth;
       _cccd.text = _tenant!.cccd;
       _hometown.text = _tenant!.hometown;
-      _startDate.text = _tenant!.startDate.split('T').first;
-      _deposit.text = _fmt(_tenant!.deposit).replaceAll(AppStrings.currencySymbol, '').replaceAll('.', ',');
+      // startDate and deposit are in Contract, not Tenant — load from active contract if needed
     }
     if (mounted) setState(() { _isLoading = false; });
   }
@@ -204,8 +204,7 @@ class _EditTenantPageState extends ConsumerState<EditTenantPage> {
                         dateOfBirth: _dob.text,
                         cccd: _cccd.text,
                         hometown: _hometown.text,
-                        startDate: _startDate.text,
-                        deposit: double.tryParse(_deposit.text.replaceAll(',', '')) ?? 0.0,
+                        // startDate and deposit are in Contract, not Tenant
                       );
                       
                       await tenantRepo.saveTenant(updatedTenant);

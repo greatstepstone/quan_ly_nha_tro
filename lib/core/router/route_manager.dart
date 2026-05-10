@@ -7,6 +7,8 @@ class AppRoutes {
   static const String home = 'home';
   static const String reports = 'reports';
   static const String settings = 'settings';
+  static const String signUp = 'sign_up';
+
   
   static const String properties = 'properties';
   static const String propertyAdd = 'property_add';
@@ -21,6 +23,12 @@ class AppRoutes {
   static const String tenantAdd = 'tenant_add';
   static const String tenantDetail = 'tenant_detail';
   static const String tenantEdit = 'tenant_edit';
+
+  static const String contracts = 'contracts';
+  static const String contractDetail = 'contract_detail';
+  static const String contractAdd = 'contract_add';
+
+  // Error Dialog
   
   static const String meterReadings = 'meter_readings';
   static const String meterReadingDetail = 'meter_reading_detail';
@@ -39,6 +47,8 @@ class AppRoutes {
   static const String homePath = '/';
   static const String reportsPath = '/reports';
   static const String settingsPath = '/settings';
+  static const String signUpPath = '/sign-up';
+
   
   static const String propertiesPath = '/properties';
   static const String propertyAddPath = '/properties/add';
@@ -53,6 +63,10 @@ class AppRoutes {
   static const String tenantAddPath = '/rooms/:id/add-tenant';
   static const String tenantDetailPath = '/tenants/:id';
   static const String tenantEditPath = '/tenants/:id/edit';
+  
+  static const String contractsPath = '/contracts';
+  static const String contractDetailPath = '/contracts/:id';
+  static const String contractAddPath = '/contracts/add';
   
   static const String meterReadingsPath = '/meter-readings';
   static const String meterReadingDetailPath = '/meter-readings/:roomId';

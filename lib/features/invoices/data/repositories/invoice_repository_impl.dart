@@ -116,7 +116,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     if (invoice.status == InvoiceStatus.paid) {
       await NotificationService().cancelNotification(notificationId);
       await NotificationService().cancelNotification(notificationId + 1);
-    } else if (invoice.dueDate != null && (invoice.status == InvoiceStatus.waitingPayment || invoice.status == InvoiceStatus.sent)) {
+    } else if (invoice.dueDate != null && invoice.status == InvoiceStatus.unpaid) {
       final dueDate = DateTime.parse(invoice.dueDate!);
       // Fetch room name for better notification
       final room = await roomDao.getRoomById(invoice.roomId);

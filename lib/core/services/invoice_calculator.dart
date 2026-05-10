@@ -18,37 +18,35 @@ class InvoiceCalculator {
   }
 
   /// Tính tiền nước dựa trên loại hình thanh toán
+  /// perPerson removed: use fixed type and adjust price manually
   static double calculateWaterFee({
     required BillingType type,
     required int oldIndex,
     required int? newIndex,
     required double price,
-    required int tenantCount,
+    required int tenantCount, // kept for API compatibility, unused now
   }) {
     switch (type) {
       case BillingType.byMeter:
         if (newIndex == null || newIndex < oldIndex) return 0;
         return (newIndex - oldIndex) * price;
-      case BillingType.perPerson:
-        return tenantCount * price;
       case BillingType.fixed:
         return price;
     }
   }
 
   /// Tính phí dịch vụ đi kèm
+  /// perPerson removed: use fixed type and adjust price manually
   static double calculateServiceFee({
     required BillingType type,
     required double price,
-    required int tenantCount,
+    required int tenantCount, // kept for API compatibility, unused now
   }) {
     switch (type) {
-      case BillingType.perPerson:
-        return tenantCount * price;
       case BillingType.fixed:
         return price;
       case BillingType.byMeter:
-        return 0; // Dịch vụ khác thường không dùng đồng hồ riêng lẻ ở cấp độ này
+        return 0;
     }
   }
 }

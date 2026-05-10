@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/features/reports/presentation/widgets/report_widgets.dart';
 
 class VacancyTab extends StatelessWidget {
@@ -14,20 +15,20 @@ class VacancyTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppPadding.p16),
       children: [
-        const Row(
+        Row(
           children: [
             Expanded(
               child: StatCard(
-                label: 'Tỷ lệ lấp đầy',
+                label: AppStrings.occupancyRate,
                 value: '92%',
-                trend: '+2.1% so với tháng trước',
+                trend: '+2.1% ${AppStrings.vsLastMonth}',
                 icon: Icons.home_outlined,
               ),
             ),
             SizedBox(width: AppWidth.w12),
             Expanded(
               child: StatCard(
-                label: 'Phòng trống',
+                label: AppStrings.homeRoomsSuffix,
                 value: '4',
                 trend: '',
                 icon: Icons.door_front_door_outlined,
@@ -46,7 +47,7 @@ class VacancyTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Phân bổ tỷ lệ phòng',
+                AppStrings.roomDistribution,
                 style: GoogleFonts.manrope(
                   fontSize: FontSize.s15,
                   fontWeight: FontWeightManager.bold,
@@ -110,13 +111,13 @@ class VacancyTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppHeight.h32),
-              VacancyProgressBar(label: 'Đã thuê', percent: 0.60, color: AppColors.primary),
+              VacancyProgressBar(label: AppStrings.filterRented, percent: 0.60, color: AppColors.primary),
               const SizedBox(height: AppHeight.h10),
-              VacancyProgressBar(label: 'Đặt cọc', percent: 0.20, color: AppColors.amber),
+              VacancyProgressBar(label: AppStrings.depositLabel, percent: 0.20, color: AppColors.amber),
               const SizedBox(height: AppHeight.h10),
-              VacancyProgressBar(label: 'Trống', percent: 0.15, color: AppColors.emerald),
+              VacancyProgressBar(label: AppStrings.filterEmpty, percent: 0.15, color: AppColors.emerald),
               const SizedBox(height: AppHeight.h10),
-              VacancyProgressBar(label: 'Sửa chữa', percent: 0.05, color: AppColors.red),
+              VacancyProgressBar(label: AppStrings.filterMaintenance, percent: 0.05, color: AppColors.red),
             ],
           ),
         ),

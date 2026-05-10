@@ -3,23 +3,25 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 
-class AuthEmailField extends StatelessWidget {
+class AuthTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
   final IconData icon;
+  final TextInputType keyboardType;
 
-  const AuthEmailField({
+  const AuthTextField({
     super.key,
     required this.controller,
     required this.hint,
     required this.icon,
+    this.keyboardType = TextInputType.text,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      keyboardType: TextInputType.emailAddress,
+      keyboardType: keyboardType,
       style: GoogleFonts.manrope(fontSize: FontSize.s14),
       decoration: InputDecoration(
         hintText: hint,
@@ -27,6 +29,15 @@ class AuthEmailField extends StatelessWidget {
       ),
     );
   }
+}
+
+class AuthEmailField extends AuthTextField {
+  const AuthEmailField({
+    super.key,
+    required super.controller,
+    required super.hint,
+    required super.icon,
+  }) : super(keyboardType: TextInputType.emailAddress);
 }
 
 class AuthPasswordField extends StatefulWidget {

@@ -28,7 +28,10 @@ class TenantListItemCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final roomAsync = ref.watch(roomDetailProvider(tenant.roomId));
+    // roomId is nullable — tenant may not currently be renting
+    final roomAsync = tenant.roomId != null
+        ? ref.watch(roomDetailProvider(tenant.roomId!))
+        : const AsyncValue<Room?>.data(null);
 
     return roomAsync.when(
       data: (room) => GestureDetector(
@@ -94,24 +97,6 @@ class TenantListItemCard extends ConsumerWidget {
                 const SizedBox(height: AppHeight.h10),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today_outlined, size: AppSize.s13, color: AppColors.textTertiary),
-                    const SizedBox(width: AppWidth.w4),
-                    Text(
-                      'Từ: ${tenant.startDate}',
-                      style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textSecondary),
-                    ),
-                    const Spacer(),
-                    Icon(Icons.account_balance_wallet_outlined, size: AppSize.s13, color: AppColors.textTertiary),
-                    const SizedBox(width: AppWidth.w4),
-                    Text(
-                      'Cọc: ${_fmt(tenant.deposit)}',
-                      style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppHeight.h8),
-                Row(
-                  children: [
                     Icon(Icons.door_front_door_outlined, size: AppSize.s14, color: AppColors.primary),
                     const SizedBox(width: AppWidth.w6),
                     Text(
@@ -123,6 +108,7 @@ class TenantListItemCard extends ConsumerWidget {
                       ),
                     ),
                     const Spacer(),
+                    // startDate and deposit now in Contract — view in contract detail
                     Icon(Icons.chevron_right, size: AppSize.s16, color: AppColors.textTertiary),
                   ],
                 ),
@@ -135,7 +121,7 @@ class TenantListItemCard extends ConsumerWidget {
       error: (err, _) => Padding(
         padding: const EdgeInsets.all(AppPadding.p8),
         child: Text(
-          'Lỗi tải phòng: $err',
+          '${AppStrings.invoiceLoadRoomsError}$err',
           style: TextStyle(color: AppColors.red, fontSize: FontSize.s12),
         ),
       ),
@@ -168,7 +154,7 @@ class VerifiedBadge extends StatelessWidget {
           ),
           const SizedBox(width: AppWidth.w4),
           Text(
-            verified ? 'ĐÃ XÁC MINH' : 'CHƯA XÁC MINH',
+            verified ? AppStrings.verified : AppStrings.unverified,
             style: GoogleFonts.manrope(
               fontSize: FontSize.s10,
               fontWeight: FontWeightManager.bold,
@@ -181,105 +167,3 @@ class VerifiedBadge extends StatelessWidget {
   }
 }
 
-class AddNewTenantCard extends StatelessWidget {
-  final VoidCallback onTap;
-  const AddNewTenantCard({super.key, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppPadding.p24),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceBright,
-          borderRadius: BorderRadius.circular(AppRadius.r12),
-          border: Border.all(color: AppColors.surfaceContainer),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: AppSize.s48,
-              height: AppSize.s48,
-              decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-              child: Icon(Icons.add, color: AppColors.primary, size: AppSize.s24),
-            ),
-            const SizedBox(height: AppHeight.h10),
-            Text(
-              'Thêm khách mới',
-              style: GoogleFonts.manrope(
-                fontSize: FontSize.s15,
-                fontWeight: FontWeightManager.bold,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class TenantStatsBanner extends StatelessWidget {
-  final int count;
-  const TenantStatsBanner({super.key, required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppPadding.p20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF19a1e6), Color(0xFF0d7ab5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.r16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF19a1e6).withValues(alpha: 0.3),
-            blurRadius: AppShadowBlur.b12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Quản lý chuyên nghiệp',
-            style: GoogleFonts.manrope(color: Colors.white, fontWeight: FontWeightManager.bold, fontSize: FontSize.s16),
-          ),
-          const SizedBox(height: AppHeight.h4),
-          Text(
-            'Tất cả thông tin khách thuê, hợp đồng và thanh toán được quản lý tập trung.',
-            style: GoogleFonts.manrope(color: Colors.white70, fontSize: FontSize.s12),
-          ),
-          const SizedBox(height: AppHeight.h16),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('$count', style: GoogleFonts.manrope(color: Colors.white, fontSize: FontSize.s28, fontWeight: FontWeightManager.extraBold)),
-                    Text('KHÁCH THUÊ', style: GoogleFonts.manrope(color: Colors.white60, fontSize: FontSize.s11)),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('85%', style: GoogleFonts.manrope(color: Colors.white, fontSize: FontSize.s28, fontWeight: FontWeightManager.extraBold)),
-                    Text('LẤP ĐẦY', style: GoogleFonts.manrope(color: Colors.white60, fontSize: FontSize.s11)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}

@@ -3,16 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 
 class ErrorDialog extends StatefulWidget {
-  final String title;
+  final String? title;
   final String message;
   final dynamic error;
   final StackTrace? stackTrace;
 
   const ErrorDialog({
     super.key,
-    this.title = 'Đã có lỗi xảy ra',
+    this.title,
     required this.message,
     this.error,
     this.stackTrace,
@@ -20,7 +21,7 @@ class ErrorDialog extends StatefulWidget {
 
   static Future<void> show(
     BuildContext context, {
-    String title = 'Đã có lỗi xảy ra',
+    String? title,
     required String message,
     dynamic error,
     StackTrace? stackTrace,
@@ -29,7 +30,7 @@ class ErrorDialog extends StatefulWidget {
       context: context,
       barrierDismissible: true,
       builder: (context) => ErrorDialog(
-        title: title,
+        title: title ?? AppStrings.errorTitle,
         message: message,
         error: error,
         stackTrace: stackTrace,
@@ -46,15 +47,15 @@ class _ErrorDialogState extends State<ErrorDialog> {
 
   String get _fullErrorLog {
     final buffer = StringBuffer();
-    buffer.writeln('--- ERROR REPORT ---');
-    buffer.writeln('Title: ${widget.title}');
-    buffer.writeln('Message: ${widget.message}');
-    buffer.writeln('Timestamp: ${DateTime.now()}');
+    buffer.writeln(AppStrings.errorReportHeader);
+    buffer.writeln('${AppStrings.errorReportTitle}: ${widget.title ?? AppStrings.errorTitle}');
+    buffer.writeln('${AppStrings.errorReportMessage}: ${widget.message}');
+    buffer.writeln('${AppStrings.errorReportTimestamp}: ${DateTime.now()}');
     if (widget.error != null) {
-      buffer.writeln('Technical Details: ${widget.error}');
+      buffer.writeln('${AppStrings.errorReportTechnicalDetails}: ${widget.error}');
     }
     if (widget.stackTrace != null) {
-      buffer.writeln('Stack Trace:\n${widget.stackTrace}');
+      buffer.writeln('${AppStrings.errorReportStackTrace}:\n${widget.stackTrace}');
     }
     buffer.writeln('---------------------');
     return buffer.toString();
@@ -100,7 +101,7 @@ class _ErrorDialogState extends State<ErrorDialog> {
                   
                   // Title
                   Text(
-                    widget.title,
+                    widget.title ?? AppStrings.errorTitle,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.manrope(
                       fontSize: 20,
@@ -133,7 +134,7 @@ class _ErrorDialogState extends State<ErrorDialog> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              _showDetails ? 'Ẩn chi tiết kỹ thuật' : 'Xem chi tiết kỹ thuật',
+                              _showDetails ? AppStrings.hideTechnicalDetails : AppStrings.showTechnicalDetails,
                               style: GoogleFonts.manrope(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
@@ -194,14 +195,14 @@ class _ErrorDialogState extends State<ErrorDialog> {
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: _fullErrorLog));
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Đã sao chép log lỗi vào bộ nhớ tạm'),
+                              SnackBar(
+                                content: Text(AppStrings.copyLogSuccess),
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
                           },
                           icon: const Icon(Icons.copy_rounded, size: 18),
-                          label: const Text('Sao chép'),
+                          label: Text(AppStrings.copy),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -214,10 +215,10 @@ class _ErrorDialogState extends State<ErrorDialog> {
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            Share.share(_fullErrorLog, subject: 'Lỗi ứng dụng Quản Lý Nhà Trọ');
+                            Share.share(_fullErrorLog, subject: AppStrings.appErrorReportSubject);
                           },
                           icon: const Icon(Icons.send_rounded, size: 18),
-                          label: const Text('Gửi báo cáo'),
+                          label: Text(AppStrings.sendReport),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
@@ -237,7 +238,7 @@ class _ErrorDialogState extends State<ErrorDialog> {
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text(
-                        'Đóng',
+                        AppStrings.close,
                         style: GoogleFonts.manrope(
                           fontWeight: FontWeight.w700,
                           color: AppColors.textTertiary,

@@ -10,9 +10,10 @@ import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/widgets/app_add_card.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_search_bar.dart';
 import 'package:quan_ly_nha_tro/core/widgets/app_error_view.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_stats_banner.dart';
 import 'package:quan_ly_nha_tro/features/properties/presentation/widgets/property_card.dart';
-import 'package:quan_ly_nha_tro/features/properties/presentation/widgets/property_stats_banner.dart';
 
 
 
@@ -41,9 +42,6 @@ class _PropertiesListPageState extends ConsumerState<PropertiesListPage> {
           icon: Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
-        actions: [
-          IconButton(icon: Icon(Icons.tune_rounded), onPressed: () {}),
-        ],
       ),
       body: allPropertiesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -62,13 +60,10 @@ class _PropertiesListPageState extends ConsumerState<PropertiesListPage> {
             padding: const EdgeInsets.all(AppPadding.p16),
             children: [
               // Search
-              TextField(
+              AppSearchBar(
                 controller: _search,
+                hintText: AppStrings.searchPropertyHint,
                 onChanged: (v) => setState(() => _query = v),
-                decoration: InputDecoration(
-                  hintText: AppStrings.searchPropertyHint,
-                  prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
-                ),
               ),
               const SizedBox(height: AppHeight.h16),
 
@@ -96,11 +91,24 @@ class _PropertiesListPageState extends ConsumerState<PropertiesListPage> {
                 buttonLabel: AppStrings.addNowBtn,
                 onTap: () => context.pushNamed(AppRoutes.propertyAdd),
                 icon: Icons.home_outlined,
+                style: AppAddCardStyle.subtle,
               ),
               const SizedBox(height: AppHeight.h16),
 
               // Stats banner
-              PropertyStatsBanner(properties: properties),
+              AppStatsBanner(
+                title: AppStrings.quickStats,
+                stats: [
+                  StatItem(
+                    value: properties.length.toString().padLeft(2, '0'),
+                    label: AppStrings.totalProperties,
+                  ),
+                  StatItem(
+                    value: '${properties.fold(0, (s, p) => s + p.totalRooms)}',
+                    label: AppStrings.totalRoomsLabel,
+                  ),
+                ],
+              ),
               const SizedBox(height: AppHeight.h24),
             ],
           );

@@ -7,6 +7,7 @@ import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/invoice_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/contract_providers.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
@@ -22,6 +23,7 @@ class HomeManagementSection extends ConsumerWidget {
     final roomsAsync = ref.watch(allRoomsProvider);
     final tenantsAsync = ref.watch(allTenantsProvider);
     final invoicesAsync = ref.watch(allInvoicesProvider);
+    final contractsAsync = ref.watch(allContractsProvider);
 
     return Column(
       children: [
@@ -84,6 +86,24 @@ class HomeManagementSection extends ConsumerWidget {
                 error: (_, _) => const _ErrorManagementCard(),
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: AppHeight.h12),
+        Row(
+          children: [
+            Expanded(
+              child: contractsAsync.when(
+                data: (contracts) => _ManagementCard(
+                  icon: Icons.description_outlined,
+                  title: AppStrings.contracts,
+                  subtitle: '${contracts.length} ${AppStrings.homeTenantsSuffix}',
+                  onTap: () => context.pushNamed(AppRoutes.contracts),
+                ),
+                loading: () => const _LoadingManagementCard(),
+                error: (_, _) => const _ErrorManagementCard(),
+              ),
+            ),
+            const Expanded(child: SizedBox()),
           ],
         ),
       ],

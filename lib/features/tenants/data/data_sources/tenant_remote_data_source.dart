@@ -1,6 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 
+/// Remote data source for [Tenant].
+/// startDate and deposit are NO LONGER part of Tenant — they live in the
+/// contracts table. This source only maps fields that still belong to Tenant.
 class TenantRemoteDataSource {
   final SupabaseClient _client;
 
@@ -11,7 +14,7 @@ class TenantRemoteDataSource {
         .from('tenants')
         .select()
         .eq('property_id', propertyId);
-    
+
     return (response as List).map((json) => _mapToTenant(json)).toList();
   }
 
@@ -30,12 +33,12 @@ class TenantRemoteDataSource {
       name: json['name'],
       phone: json['phone'],
       cccd: json['cccd'],
-      dateOfBirth: json['date_of_birth'],
-      hometown: json['hometown'],
+      dateOfBirth: json['date_of_birth'] ?? '',
+      hometown: json['hometown'] ?? '',
+      // nullable caches
       roomId: json['room_id'],
       propertyId: json['property_id'],
-      startDate: json['start_date'],
-      deposit: (json['deposit'] as num).toDouble(),
+      // startDate and deposit removed — now in Contracts
       isVerified: json['is_verified'] ?? false,
     );
   }
@@ -49,10 +52,9 @@ class TenantRemoteDataSource {
       'cccd': t.cccd,
       'date_of_birth': t.dateOfBirth,
       'hometown': t.hometown,
-      'room_id': t.roomId,
-      'property_id': t.propertyId,
-      'start_date': t.startDate,
-      'deposit': t.deposit,
+      'room_id': t.roomId,       // nullable
+      'property_id': t.propertyId, // nullable
+      // start_date and deposit removed — write to contracts table instead
       'is_verified': t.isVerified,
     };
   }

@@ -10,13 +10,14 @@ import 'package:quan_ly_nha_tro/core/database/daos/tenant_dao.dart';
 import 'package:quan_ly_nha_tro/core/database/daos/meter_reading_dao.dart';
 import 'package:quan_ly_nha_tro/core/database/daos/invoice_dao.dart';
 import 'package:quan_ly_nha_tro/core/database/daos/service_dao.dart';
+import 'package:quan_ly_nha_tro/core/database/daos/contract_dao.dart';
 
 part 'database.g.dart';
 
 @DriftDatabase(
   tables: [
-    Users, Properties, Services, Rooms, Tenants, 
-    MeterReadings, Invoices, OnboardingStates
+    Users, Properties, Services, Rooms, Tenants,
+    MeterReadings, Invoices, OnboardingStates, Contracts
   ],
   daos: [
     UserDao,
@@ -26,13 +27,14 @@ part 'database.g.dart';
     MeterReadingDao,
     InvoiceDao,
     ServiceDao,
+    ContractDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -44,6 +46,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 3) {
         // Add isSynced column to properties table
         await m.addColumn(properties, properties.isSynced);
+      }
+      if (from < 4) {
+        // Create the contracts table
+        await m.createTable(contracts);
       }
     },
   );

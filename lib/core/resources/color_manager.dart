@@ -27,10 +27,38 @@ class AppColors {
   static Color get textPrimary => isDark ? const Color(0xFFf8fafc) : const Color(0xFF0f172a);
   static Color get textSecondary => isDark ? const Color(0xFF94a3b8) : const Color(0xFF64748b);
   static Color get textTertiary => isDark ? const Color(0xFF64748b) : const Color(0xFF94a3b8);
+  static Color get divider => isDark ? const Color(0xFF334155) : const Color(0xFFe2e8f0);
 
   // Chart
   static Color get chartBlue => const Color(0xFF3b82f6);
   static Color get chartGreen => const Color(0xFF10b981);
   static Color get chartGray => const Color(0xFF94a3b8);
   static Color get chartLightGray => isDark ? const Color(0xFF334155) : const Color(0xFFcbd5e1);
+
+  // ── Add Card palette (blue frequency scale) ─────────────────────────────
+  // subtle  → barely-tinted blue  (low frequency,    e.g. add property)
+  // light   → soft azure          (medium frequency,  e.g. add room)
+  // filled  → solid primary blue  (high frequency,    e.g. add tenant)
+
+  // subtle
+  static Color get addCardSubtleBg =>
+      isDark ? const Color(0xFF1e3a5f) : const Color(0xFFEBF5FD);
+  static Color get addCardSubtleBorder =>
+      isDark ? const Color(0xFF2d5a8e) : const Color(0xFFBFE3F7);
+  static Color get addCardSubtleIconCircle =>
+      isDark ? const Color(0xFF244a76) : primaryLight; // primaryLight is 0xFFd1eefc in light
+
+  // light
+  static Color get addCardLightBg =>
+      isDark ? const Color(0xFF163652) : primaryLight;
+  static Color get addCardLightIconCircle =>
+      isDark ? const Color(0xFF1c4a6e) : const Color(0xFF9FD4F4);
+  static Color get addCardLightIcon =>
+      isDark ? const Color(0xFF7dcef5) : primaryDark;
+  static Color get addCardLightTitle =>
+      isDark ? const Color(0xFF9fd8f5) : primaryDark;
+  static Color get addCardLightDesc =>
+      isDark ? const Color(0xFF5bafd9) : const Color(0xFF1a6e9e);
+  static Color get addCardLightButton =>
+      isDark ? primary : primaryDark;
 }

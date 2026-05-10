@@ -151,9 +151,7 @@ class RoomDetailPage extends ConsumerWidget {
                             Divider(height: 1, color: AppColors.surface),
                             _InfoRow(icon: Icons.phone_outlined, label: 'Điện thoại', value: tenant.phone),
                             Divider(height: 1, color: AppColors.surface),
-                            _InfoRow(icon: Icons.calendar_today_outlined, label: 'Ngày bắt đầu', value: tenant.startDate),
-                            Divider(height: 1, color: AppColors.surface),
-                            _InfoRow(icon: Icons.savings_outlined, label: 'Tiền cọc', value: _fmt(tenant.deposit), valueColor: AppColors.primary),
+                            // startDate and deposit moved to Contract — view via Contracts tab
                           ],
                         ),
                       ),

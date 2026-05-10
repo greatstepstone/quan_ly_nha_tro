@@ -7,8 +7,9 @@ import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
-import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/core/providers/contract_providers.dart';
 import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/widgets/section_header.dart';
 import 'package:quan_ly_nha_tro/core/widgets/labeled_field.dart';
 import 'package:quan_ly_nha_tro/core/widgets/app_date_picker.dart';
@@ -77,8 +78,10 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
       setState(() => _isLoading = true);
       final tenantRepo = ref.read(tenantRepositoryProvider);
       final roomRepo = ref.read(roomRepositoryProvider);
+      final contractRepo = ref.read(contractRepositoryProvider);
       
       final tenantId = const Uuid().v4();
+      final contractId = const Uuid().v4();
       final user = ref.read(currentUserProvider);
       if (user == null) {
         if (!mounted) return;
@@ -100,8 +103,7 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
         dateOfBirth: _dob.text.trim(),
         cccd: _cccd.text.trim(),
         hometown: _hometown.text.trim(),
-        startDate: _startDate.text.trim(),
-        deposit: double.tryParse(_deposit.text.replaceAll(',', '').replaceAll('.', '')) ?? 0.0,
+        // startDate and deposit live in Contract, not Tenant
       );
       
       await tenantRepo.addTenant(newTenant);
@@ -116,6 +118,19 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
         rentPrice: _room!.rentPrice,
       );
       await roomRepo.saveRoom(updatedRoom);
+
+      final depositValue = double.tryParse(_deposit.text.replaceAll(',', '').replaceAll('.', '')) ?? 0.0;
+      final newContract = Contract(
+        id: contractId,
+        ownerId: ownerId,
+        roomId: _room!.id,
+        tenantId: tenantId,
+        propertyId: _room!.propertyId,
+        rentPrice: _room!.rentPrice,
+        deposit: depositValue,
+        startDate: _startDate.text.trim(),
+      );
+      await contractRepo.saveContract(newContract);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

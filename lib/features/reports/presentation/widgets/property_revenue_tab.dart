@@ -29,7 +29,7 @@ class PropertyRevenueTab extends StatelessWidget {
       .fold(0.0, (s, i) => s + i.totalAmount);
 
   double get _pendingTotal => invoices
-      .where((i) => i.status == InvoiceStatus.waitingPayment || i.status == InvoiceStatus.sent)
+      .where((i) => i.status == InvoiceStatus.unpaid)
       .fold(0.0, (s, i) => s + i.totalAmount);
 
   double get _overdueTotal => invoices
@@ -57,7 +57,7 @@ class PropertyRevenueTab extends StatelessWidget {
           children: [
             Expanded(
               child: KpiCard(
-                label: 'Đã thu',
+                label: AppStrings.invoiceFilterPaid,
                 value: _fmt(_totalPaid),
                 icon: Icons.check_circle_outline,
                 iconColor: AppColors.emerald,
@@ -67,7 +67,7 @@ class PropertyRevenueTab extends StatelessWidget {
             const SizedBox(width: AppWidth.w10),
             Expanded(
               child: KpiCard(
-                label: 'Chờ thanh toán',
+                label: AppStrings.invoiceFilterWaitingPayment,
                 value: _fmt(_pendingTotal),
                 icon: Icons.hourglass_top_rounded,
                 iconColor: AppColors.orange,
@@ -77,7 +77,7 @@ class PropertyRevenueTab extends StatelessWidget {
             const SizedBox(width: AppWidth.w10),
             Expanded(
               child: KpiCard(
-                label: 'Quá hạn',
+                label: AppStrings.invoiceFilterOverdue,
                 value: _fmt(_overdueTotal),
                 icon: Icons.warning_amber_rounded,
                 iconColor: AppColors.red,
@@ -97,7 +97,7 @@ class PropertyRevenueTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Doanh thu theo tháng',
+              Text(AppStrings.revenueByMonth,
                   style: GoogleFonts.manrope(fontSize: FontSize.s14, color: AppColors.textSecondary)),
               const SizedBox(height: AppHeight.h4),
               Text(
@@ -110,7 +110,7 @@ class PropertyRevenueTab extends StatelessWidget {
                   children: [
                     Icon(Icons.trending_up, color: AppColors.emerald, size: AppSize.s14),
                     const SizedBox(width: AppWidth.w4),
-                    Text('Tổng tất cả thời gian',
+                    Text(AppStrings.totalAllTime,
                         style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.emerald)),
                   ],
                 ),
@@ -130,15 +130,15 @@ class PropertyRevenueTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Tổng hợp hóa đơn',
+              Text(AppStrings.invoiceSummary,
                   style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
               const SizedBox(height: AppHeight.h16),
               RevenueRow(
                 icon: Icons.check_circle_outline,
                 iconBg: AppColors.emeraldLight,
                 iconColor: AppColors.emerald,
-                label: 'Đã thu',
-                subtitle: '${invoices.where((i) => i.status == InvoiceStatus.paid).length} hóa đơn',
+                label: AppStrings.invoiceFilterPaid,
+                subtitle: '${invoices.where((i) => i.status == InvoiceStatus.paid).length} ${AppStrings.invoiceCountSuffix}',
                 value: _fmt(_totalPaid),
                 valueColor: AppColors.emerald,
               ),
@@ -147,8 +147,8 @@ class PropertyRevenueTab extends StatelessWidget {
                 icon: Icons.hourglass_top_rounded,
                 iconBg: AppColors.orangeLight,
                 iconColor: AppColors.orange,
-                label: 'Chờ thanh toán',
-                subtitle: '${invoices.where((i) => i.status == InvoiceStatus.waitingPayment || i.status == InvoiceStatus.sent).length} hóa đơn',
+                label: AppStrings.invoiceFilterWaitingPayment,
+                subtitle: '${invoices.where((i) => i.status == InvoiceStatus.unpaid).length} ${AppStrings.invoiceCountSuffix}',
                 value: _fmt(_pendingTotal),
                 valueColor: AppColors.orange,
               ),
@@ -158,8 +158,8 @@ class PropertyRevenueTab extends StatelessWidget {
                   icon: Icons.warning_amber_rounded,
                   iconBg: AppColors.redLight,
                   iconColor: AppColors.red,
-                  label: 'Quá hạn',
-                  subtitle: '${invoices.where((i) => i.status == InvoiceStatus.overdue).length} hóa đơn',
+                  label: AppStrings.invoiceFilterOverdue,
+                  subtitle: '${invoices.where((i) => i.status == InvoiceStatus.overdue).length} ${AppStrings.invoiceCountSuffix}',
                   value: _fmt(_overdueTotal),
                   valueColor: AppColors.red,
                 ),

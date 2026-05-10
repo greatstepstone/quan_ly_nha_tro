@@ -7,6 +7,7 @@ import 'package:quan_ly_nha_tro/core/providers/theme_provider.dart';
 import 'package:quan_ly_nha_tro/core/providers/locale_provider.dart';
 import 'package:quan_ly_nha_tro/core/services/notification_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -16,10 +17,13 @@ void main() async {
   // Cấu hình Google Fonts để sử dụng offline (dùng assets đã tải về)
   GoogleFonts.config.allowRuntimeFetching = false;
   
+  // Load biến môi trường
+  await dotenv.load(fileName: ".env");
+
   // Khởi tạo Supabase
   await Supabase.initialize(
-    url: 'https://rliehmqaahnvpdtxptkx.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaWVobXFhYWhudnBkdHhwdGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMDU2MzEsImV4cCI6MjA5MTU4MTYzMX0.oXST4v6553-0Kk-lR9uopM1zMuCikDeX9PK_HXaYEeE',
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
 
   runApp(

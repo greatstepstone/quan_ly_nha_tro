@@ -24,7 +24,7 @@ class CostsTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Tổng chi phí',
+                AppStrings.totalCosts,
                 style: GoogleFonts.manrope(
                   fontSize: FontSize.s14,
                   color: AppColors.textSecondary,
@@ -38,13 +38,13 @@ class CostsTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppHeight.h16),
-              CostRow(label: 'Bảo trì & Sửa chữa', value: '20.250.000${AppStrings.currencySymbol}'),
+              CostRow(label: AppStrings.maintenanceAndRepair, value: '20.250.000${AppStrings.currencySymbol}'),
               Divider(height: AppHeight.h16, color: AppColors.surface),
-              CostRow(label: 'Tiền điện', value: '13.500.000${AppStrings.currencySymbol}'),
+              CostRow(label: AppStrings.invoiceElectricCost, value: '13.500.000${AppStrings.currencySymbol}'),
               Divider(height: AppHeight.h16, color: AppColors.surface),
-              CostRow(label: 'Tiền nước', value: '6.750.000${AppStrings.currencySymbol}'),
+              CostRow(label: AppStrings.invoiceWaterCost, value: '6.750.000${AppStrings.currencySymbol}'),
               Divider(height: AppHeight.h16, color: AppColors.surface),
-              CostRow(label: 'Chi phí khác', value: '4.500.000${AppStrings.currencySymbol}'),
+              CostRow(label: AppStrings.costOther, value: '4.500.000${AppStrings.currencySymbol}'),
             ],
           ),
         ),

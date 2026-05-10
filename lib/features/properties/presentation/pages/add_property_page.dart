@@ -146,7 +146,7 @@ class _AddPropertyPageState extends ConsumerState<AddPropertyPage> {
                     id: const Uuid().v4(),
                     propertyId: propertyId,
                     name: 'Rác',
-                    type: BillingType.perPerson,
+                    type: BillingType.fixed,
                     price: trashPrice,
                   ));
                 }

@@ -85,7 +85,7 @@ class AppErrorView extends StatelessWidget {
                 );
               },
               child: Text(
-                'Chi tiết lỗi',
+                AppStrings.showTechnicalDetails,
                 style: GoogleFonts.manrope(
                   fontSize: FontSize.s12,
                   color: AppColors.textTertiary,

@@ -124,8 +124,8 @@ class InvoiceEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final msg = filterStatus == null
-        ? 'Chưa có hóa đơn nào. Nhấn + để tạo hóa đơn.'
-        : 'Không có hóa đơn ở trạng thái "${filterStatus!.label}".';
+        ? AppStrings.invoiceEmptyStateAll
+        : '${AppStrings.invoiceEmptyStateFilterPrefix}${filterStatus!.label}${AppStrings.invoiceEmptyStateFilterSuffix}';
     return Container(
       padding: const EdgeInsets.symmetric(vertical: AppPadding.p48, horizontal: AppPadding.p24),
       child: Column(
@@ -143,7 +143,7 @@ class InvoiceEmptyState extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onCreateTap,
               icon: const Icon(Icons.add),
-              label: const Text('Tạo hóa đơn'),
+              label: Text(AppStrings.invoiceCreateBtnLabel),
             ),
           ],
         ],

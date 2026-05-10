@@ -20,18 +20,18 @@ class RevenueTab extends StatelessWidget {
           children: [
             Expanded(
               child: StatCard(
-                label: '+5.2% so với tháng trước',
+                label: '+5.2% ${AppStrings.vsLastMonth}',
                 value: '15M ${AppStrings.currencySymbol}',
-                trend: '+5.2% so với tháng trước',
+                trend: '+5.2% ${AppStrings.vsLastMonth}',
                 icon: Icons.receipt_long_outlined,
               ),
             ),
             SizedBox(width: AppWidth.w12),
             Expanded(
               child: StatCard(
-                label: '+2.1% so với năm trước',
+                label: '+2.1% ${AppStrings.vsLastYear}',
                 value: '92%',
-                trend: '+2.1% so với năm trước',
+                trend: '+2.1% ${AppStrings.vsLastYear}',
                 icon: Icons.home_outlined,
               ),
             ),
@@ -50,7 +50,7 @@ class RevenueTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Doanh thu hàng tháng',
+                AppStrings.monthlyRevenue,
                 style: GoogleFonts.manrope(
                   fontSize: FontSize.s14,
                   color: AppColors.textSecondary,
@@ -65,7 +65,7 @@ class RevenueTab extends StatelessWidget {
                 ),
               ),
               Text(
-                'Năm 2024 ',
+                '${AppStrings.yearLabel} 2024 ',
                 style: GoogleFonts.manrope(
                   fontSize: FontSize.s13,
                   color: AppColors.textSecondary,
@@ -73,7 +73,7 @@ class RevenueTab extends StatelessWidget {
               ),
               const SizedBox(height: AppHeight.h4),
               Text(
-                'Doanh thu hàng tháng',
+                AppStrings.monthlyRevenue,
                 style: GoogleFonts.manrope(
                   fontSize: FontSize.s13,
                   color: AppColors.emerald,
@@ -104,7 +104,7 @@ class RevenueTab extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Phân bổ chi phí',
+                          AppStrings.costAllocation,
                           style: GoogleFonts.manrope(
                             fontSize: FontSize.s14,
                             color: AppColors.textSecondary,
@@ -124,13 +124,13 @@ class RevenueTab extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppHeight.h16),
-              PieLegendItem(color: AppColors.primary, label: 'Bảo trì', percent: '45%'),
+              PieLegendItem(color: AppColors.primary, label: AppStrings.maintenance, percent: '45%'),
               const SizedBox(height: AppHeight.h8),
-              PieLegendItem(color: AppColors.chartBlue, label: 'Điện', percent: '30%'),
+              PieLegendItem(color: AppColors.chartBlue, label: AppStrings.electricity, percent: '30%'),
               const SizedBox(height: AppHeight.h8),
-              PieLegendItem(color: AppColors.chartGray, label: 'Nước', percent: '15%'),
+              PieLegendItem(color: AppColors.chartGray, label: AppStrings.water, percent: '15%'),
               const SizedBox(height: AppHeight.h8),
-              PieLegendItem(color: AppColors.chartLightGray, label: 'Khác', percent: '10%'),
+              PieLegendItem(color: AppColors.chartLightGray, label: AppStrings.otherFee, percent: '10%'),
             ],
           ),
         ),
@@ -151,7 +151,7 @@ class RevenueTab extends StatelessWidget {
                 const SizedBox(width: AppWidth.w12),
                 Expanded(
                   child: Text(
-                    'Xem báo cáo theo nhà trọ',
+                    AppStrings.viewPropertyReport,
                     style: TextStyle(
                       fontSize: FontSize.s14,
                       fontWeight: FontWeightManager.bold,

@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/contract_providers.dart';
+import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -39,7 +41,10 @@ class TenantDetailPage extends ConsumerWidget {
             );
           }
 
-          final roomAsync = ref.watch(roomDetailProvider(tenant.roomId));
+          // roomId is nullable — tenant may not currently be renting
+          final roomAsync = tenant.roomId != null
+              ? ref.watch(roomDetailProvider(tenant.roomId!))
+              : const AsyncValue<Room?>.data(null);
 
           return roomAsync.when(
             data: (room) => ListView(
@@ -155,29 +160,78 @@ class TenantDetailPage extends ConsumerWidget {
                           onTap: () => context.pushNamed(AppRoutes.roomDetail, pathParameters: {'id': room.id}),
                         ),
                         const SizedBox(height: AppHeight.h12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Ngày bắt đầu', style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
-                                  const SizedBox(height: AppHeight.h4),
-                                  Text(DateTime.tryParse(tenant.startDate) != null ? tenant.startDate.split('T').first : tenant.startDate, style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold)),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Tiền cọc', style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
-                                  const SizedBox(height: AppHeight.h4),
-                                  Text(_fmt(tenant.deposit), style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold, color: AppColors.primary)),
-                                ],
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: AppHeight.h12),
+                        ref.watch(contractsByTenantProvider(tenant.id)).when(
+                          data: (contracts) {
+                            if (contracts.isEmpty) {
+                              return Text('Chưa có hợp đồng nào.', style: GoogleFonts.manrope(color: AppColors.textSecondary));
+                            }
+                            final activeContract = contracts.firstWhere((c) => c.status == ContractStatus.active, orElse: () => contracts.first);
+                            
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Ngày bắt đầu', style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
+                                          const SizedBox(height: AppHeight.h4),
+                                          Text(DateTime.tryParse(activeContract.startDate) != null ? activeContract.startDate.split('T').first : activeContract.startDate, style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold)),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Tiền cọc', style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
+                                          const SizedBox(height: AppHeight.h4),
+                                          Text(_fmt(activeContract.deposit), style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold, color: AppColors.primary)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppHeight.h12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Tiền thuê (Hợp đồng)', style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
+                                          const SizedBox(height: AppHeight.h4),
+                                          Text(_fmt(activeContract.rentPrice), style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold)),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Trạng thái HĐ', style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
+                                          const SizedBox(height: AppHeight.h4),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: activeContract.status == ContractStatus.active ? AppColors.emeraldLight : AppColors.surfaceContainer,
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Text(activeContract.status.label, style: GoogleFonts.manrope(fontSize: FontSize.s12, fontWeight: FontWeightManager.bold, color: activeContract.status == ContractStatus.active ? AppColors.emerald : AppColors.textSecondary)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (err, _) => Text('Lỗi tải hợp đồng: $err'),
                         ),
                       ],
                     ),

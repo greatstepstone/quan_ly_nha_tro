@@ -11,6 +11,7 @@ import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/contract_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/meter_reading_providers.dart';
 import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
 import 'package:quan_ly_nha_tro/core/widgets/error_dialog.dart';
@@ -77,9 +78,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       if (_selectedProperty != null) {
         _waterMode = _selectedProperty?.waterBillingType == BillingType.byMeter
             ? 'byMeter'
-            : (_selectedProperty?.waterBillingType == BillingType.perPerson
-                ? 'perPerson'
-                : 'fixed');
+            : 'fixed';
       }
     });
   }
@@ -91,9 +90,7 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
       _selectedProperty = prop;
       _waterMode = prop.waterBillingType == BillingType.byMeter
           ? 'byMeter'
-          : (prop.waterBillingType == BillingType.perPerson
-              ? 'perPerson'
-              : 'fixed');
+          : 'fixed';
     });
   }
 
@@ -175,10 +172,26 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
           hometown: t.hometownCtrl.text.trim(),
           roomId: roomId,
           propertyId: propId,
-          startDate: t.startDateCtrl.text.trim(),
-          deposit: double.tryParse(t.depositCtrl.text.replaceAll('.', '')) ?? 0,
+          // startDate and deposit moved to Contract
         );
         await ref.read(tenantRepositoryProvider).addTenant(tenant);
+
+        // Auto-create contract for this tenant
+        final startDateStr = t.startDateCtrl.text.trim().isNotEmpty
+            ? t.startDateCtrl.text.trim()
+            : _startDate.toIso8601String().split('T')[0];
+        final contract = Contract(
+          id: const Uuid().v4(),
+          ownerId: ownerId,
+          propertyId: propId,
+          roomId: roomId,
+          tenantId: tenantId,
+          rentPrice: double.tryParse(_rentPrice.text.replaceAll('.', '')) ?? 0,
+          deposit: double.tryParse(t.depositCtrl.text.replaceAll('.', '')) ?? 0,
+          startDate: startDateStr,
+          status: ContractStatus.active,
+        );
+        await ref.read(contractRepositoryProvider).saveContract(contract);
       }
 
       final electricOld = int.tryParse(_electricOld.text) ?? 0;
@@ -457,9 +470,9 @@ class _AddRoomPageState extends ConsumerState<AddRoomPage> {
                           ),
                           const SizedBox(width: AppWidth.w8),
                           RoomModeChip(
-                            label: 'Theo người',
-                            isActive: _waterMode == 'perPerson',
-                            onTap: () => setState(() => _waterMode = 'perPerson'),
+                            label: 'Cố định',
+                            isActive: _waterMode == 'fixed',
+                            onTap: () => setState(() => _waterMode = 'fixed'),
                           ),
                         ],
                       ),

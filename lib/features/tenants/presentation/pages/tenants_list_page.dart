@@ -5,11 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/widgets/app_error_view.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_search_bar.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_add_card.dart';
 import 'package:quan_ly_nha_tro/core/widgets/app_filter_chip.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_stats_banner.dart';
 import 'package:quan_ly_nha_tro/features/tenants/presentation/widgets/tenant_list_widgets.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 
 class TenantsListPage extends ConsumerWidget {
   const TenantsListPage({super.key});
@@ -23,7 +28,7 @@ class TenantsListPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('Khách Thuê'),
+        title: Text(AppStrings.tenants),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
@@ -35,18 +40,12 @@ class TenantsListPage extends ConsumerWidget {
             padding: const EdgeInsets.all(AppPadding.p16),
             children: [
               // Search bar
-              TextField(
+              AppSearchBar(
+                hintText: AppStrings.searchTenantHint,
                 onChanged: (v) => ref.read(tenantSearchQueryProvider.notifier).state = v,
-                decoration: InputDecoration(
-                  hintText: 'Tìm kiếm khách thuê...',
-                  prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
-                  suffixIcon: query.isNotEmpty 
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, size: AppSize.s18), 
-                        onPressed: () => ref.read(tenantSearchQueryProvider.notifier).state = ''
-                      ) 
+                onClear: query.isNotEmpty
+                    ? () => ref.read(tenantSearchQueryProvider.notifier).state = ''
                     : null,
-                ),
               ),
               const SizedBox(height: AppHeight.h12),
 
@@ -56,19 +55,19 @@ class TenantsListPage extends ConsumerWidget {
                 child: Row(
                   children: [
                     AppFilterChip(
-                      label: 'Tất cả', 
+                      label: AppStrings.filterAll, 
                       isActive: filterIndex == 0, 
                       onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 0
                     ),
                     const SizedBox(width: AppWidth.w8),
                     AppFilterChip(
-                      label: 'Đang thuê', 
+                      label: AppStrings.filterRented, 
                       isActive: filterIndex == 1, 
                       onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 1
                     ),
                     const SizedBox(width: AppWidth.w8),
                     AppFilterChip(
-                      label: 'Đã trả phòng', 
+                      label: AppStrings.filterCheckedOut, 
                       isActive: filterIndex == 2, 
                       onTap: () => ref.read(tenantFilterIndexProvider.notifier).state = 2
                     ),
@@ -83,7 +82,7 @@ class TenantsListPage extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(vertical: AppPadding.p32),
                   child: Center(
                     child: Text(
-                      query.isEmpty ? 'Chưa có khách thuê' : 'Không tìm thấy khách thuê', 
+                      query.isEmpty ? AppStrings.noTenantsYet : AppStrings.noTenantsFound, 
                       style: GoogleFonts.manrope(color: AppColors.textSecondary)
                     ),
                   ),
@@ -93,11 +92,36 @@ class TenantsListPage extends ConsumerWidget {
 
               // Add new card
               const SizedBox(height: AppHeight.h12),
-              AddNewTenantCard(onTap: () => context.pushNamed(AppRoutes.roomAdd)),
+              AppAddCard(
+                title: AppStrings.addNewTenantTitle,
+                description: AppStrings.addNewTenantDesc,
+                buttonLabel: AppStrings.addNowBtn,
+                icon: Icons.person_add_outlined,
+                style: AppAddCardStyle.filled,
+                onTap: () => context.pushNamed(AppRoutes.roomAdd),
+              ),
               const SizedBox(height: AppHeight.h16),
 
               // Stats banner
-              TenantStatsBanner(count: tenants.length),
+              AppStatsBanner(
+                title: AppStrings.managementProfessional,
+                subtitle: AppStrings.managementProfessionalDesc,
+                stats: [
+                  StatItem(value: '${tenants.length}', label: AppStrings.tenants.toUpperCase()),
+                  StatItem(
+                    value: ref.watch(allRoomsProvider).when(
+                          data: (rooms) {
+                            final total = rooms.length;
+                            final occupied = rooms.where((r) => r.isOccupied).length;
+                            return total > 0 ? '${(occupied / total * 100).round()}%' : '0%';
+                          },
+                          loading: () => '--%',
+                          error: (err, _) => '!!%',
+                        ),
+                    label: AppStrings.occupancyRate.toUpperCase(),
+                  ),
+                ],
+              ),
               const SizedBox(height: AppHeight.h24),
             ],
           );

@@ -76,10 +76,11 @@ class Tenants extends Table {
   TextColumn get cccd => text()();
   TextColumn get dateOfBirth => text()();
   TextColumn get hometown => text()();
-  TextColumn get roomId => text().references(Rooms, #id)();
-  TextColumn get propertyId => text().references(Properties, #id)();
-  TextColumn get startDate => text()();
-  RealColumn get deposit => real()();
+  /// Denormalized cache from contracts. Null when tenant is not renting.
+  TextColumn get roomId => text().references(Rooms, #id).nullable()();
+  /// Denormalized cache from contracts. Null when tenant is not renting.
+  TextColumn get propertyId => text().references(Properties, #id).nullable()();
+  // startDate and deposit removed — now live in Contracts table
   BoolColumn get isVerified => boolean().withDefault(const Constant(false))();
   BoolColumn get isSynced => boolean().withDefault(const Constant(true))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
@@ -113,6 +114,8 @@ class Invoices extends Table {
   TextColumn get id => text()();
   TextColumn get ownerId => text().references(Users, #id)();
   TextColumn get roomId => text().references(Rooms, #id)();
+  /// Links this invoice to the contract active at time of creation.
+  TextColumn get contractId => text().references(Contracts, #id).nullable()();
   TextColumn get month => text()();
   RealColumn get totalAmount => real()();
   TextColumn get status => textEnum<InvoiceStatus>()();
@@ -146,4 +149,27 @@ class OnboardingState {
     required this.userId,
     required this.hasCompletedOnboarding,
   });
+}
+
+@UseRowClass(Contract)
+@TableIndex(name: 'contract_room', columns: {#roomId})
+@TableIndex(name: 'contract_tenant', columns: {#tenantId})
+@TableIndex(name: 'contract_owner', columns: {#ownerId})
+class Contracts extends Table {
+  TextColumn get id => text()();
+  TextColumn get ownerId => text().references(Users, #id)();
+  TextColumn get roomId => text().references(Rooms, #id)();
+  TextColumn get tenantId => text().references(Tenants, #id)();
+  TextColumn get propertyId => text().references(Properties, #id)();
+  RealColumn get rentPrice => real()();
+  RealColumn get deposit => real()();
+  TextColumn get startDate => text()();
+  TextColumn get endDate => text().nullable()();
+  TextColumn get status => textEnum<ContractStatus>().withDefault(const Constant('active'))();
+  TextColumn get notes => text().nullable()();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(true))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }

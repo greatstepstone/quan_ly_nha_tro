@@ -9,7 +9,10 @@ import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 import 'package:quan_ly_nha_tro/core/widgets/app_error_view.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_search_bar.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_add_card.dart';
 import 'package:quan_ly_nha_tro/core/widgets/app_filter_chip.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_stats_banner.dart';
 import 'package:quan_ly_nha_tro/features/rooms/presentation/widgets/room_list_widgets.dart';
 
 class RoomsListPage extends ConsumerStatefulWidget {
@@ -54,19 +57,16 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
 
           return Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16),
+                child: AppSearchBar(
+                  hintText: AppStrings.searchRoomHint,
+                  onChanged: (v) => setState(() => _query = v),
+                ),
+              ),
               _RoomFilterBar(
                 selectedFilter: _filter,
                 onFilterChanged: (status) => setState(() => _filter = status),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16),
-                child: TextField(
-                  onChanged: (v) => setState(() => _query = v),
-                  decoration: InputDecoration(
-                    hintText: AppStrings.searchRoomHint,
-                    prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
-                  ),
-                ),
               ),
               const SizedBox(height: AppHeight.h12),
               Expanded(
@@ -81,16 +81,28 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
                         onTap: () => context.pushNamed(AppRoutes.roomDetail, pathParameters: {'id': room.id}),
                       );
                     } else if (index == filteredRooms.length) {
-                      return AddRoomActionCard(
+                      return AppAddCard(
+                        title: AppStrings.addNewRoomTitle,
+                        description: AppStrings.addNewRoomDesc,
+                        buttonLabel: AppStrings.addNowBtn,
+                        icon: Icons.home_outlined,
+                        style: AppAddCardStyle.light,
                         onTap: () => context.pushNamed(
-                          AppRoutes.roomAdd, 
+                          AppRoutes.roomAdd,
                           queryParameters: widget.propertyId != null ? {'propertyId': widget.propertyId!} : const {}
                         ),
                       );
                     } else if (index == filteredRooms.length + 1) {
+                      final pct = total > 0 ? (occupied / total * 100).round() : 0;
                       return Padding(
                         padding: const EdgeInsets.only(top: AppPadding.p16),
-                        child: RoomQuickStatsBanner(occupied: occupied, total: total),
+                        child: AppStatsBanner(
+                          title: AppStrings.quickStats,
+                          stats: [
+                            StatItem(value: '$occupied/$total', label: AppStrings.occupiedRoomsLabel),
+                            StatItem(value: '$pct%', label: AppStrings.occupancyRate),
+                          ],
+                        ),
                       );
                     } else {
                       return const SizedBox(height: 40);

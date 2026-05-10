@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:uuid/uuid.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
@@ -105,7 +106,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
     final internetPrice = double.tryParse(_internetCtrl.text) ?? 0;
     if (internetPrice > 0) {
       await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
-        id: 'SRV_INT_${DateTime.now().millisecondsSinceEpoch}',
+        id: const Uuid().v4(),
         propertyId: widget.propertyId,
         name: AppStrings.internet,
         type: BillingType.fixed,
@@ -116,10 +117,10 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
     final trashPrice = double.tryParse(_trashCtrl.text) ?? 0;
     if (trashPrice > 0) {
       await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
-        id: 'SRV_TRASH_${DateTime.now().millisecondsSinceEpoch}',
+        id: const Uuid().v4(),
         propertyId: widget.propertyId,
         name: AppStrings.trash,
-        type: BillingType.perPerson,
+        type: BillingType.fixed,
         price: trashPrice,
       ));
     }
@@ -127,7 +128,7 @@ class _EditPropertyPageState extends ConsumerState<EditPropertyPage> {
     final otherPrice = double.tryParse(_otherCtrl.text) ?? 0;
     if (otherPrice > 0) {
       await ref.read(serviceDaoProvider).insertService(ServicesCompanion.insert(
-        id: 'SRV_OTH_${DateTime.now().millisecondsSinceEpoch}',
+        id: const Uuid().v4(),
         propertyId: widget.propertyId,
         name: _otherNameCtrl.text.isNotEmpty ? _otherNameCtrl.text : 'Phí khác',
         type: BillingType.fixed,

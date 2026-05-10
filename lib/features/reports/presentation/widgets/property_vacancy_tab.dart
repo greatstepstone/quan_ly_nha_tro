@@ -31,9 +31,8 @@ class PropertyVacancyTab extends StatelessWidget {
     final total = rooms.length;
     final rented = _count(RoomStatus.rented);
     final empty = _count(RoomStatus.empty);
-    final deposited = _count(RoomStatus.deposited);
     final maintenance = _count(RoomStatus.maintenance);
-    final occupancyRate = total > 0 ? (rented + deposited) / total : 0.0;
+    final occupancyRate = total > 0 ? rented / total : 0.0;
 
     return ListView(
       padding: const EdgeInsets.all(AppPadding.p16),
@@ -42,7 +41,7 @@ class PropertyVacancyTab extends StatelessWidget {
           children: [
             Expanded(
               child: KpiCard(
-                label: 'Tỷ lệ lấp đầy',
+                label: AppStrings.occupancyRate,
                 value: '${(occupancyRate * 100).toStringAsFixed(0)}%',
                 icon: Icons.home_outlined,
                 iconColor: AppColors.primary,
@@ -52,7 +51,7 @@ class PropertyVacancyTab extends StatelessWidget {
             const SizedBox(width: AppWidth.w10),
             Expanded(
               child: KpiCard(
-                label: 'Phòng trống',
+                label: AppStrings.homeRoomsSuffix,
                 value: '$empty',
                 icon: Icons.door_front_door_outlined,
                 iconColor: AppColors.textSecondary,
@@ -62,7 +61,7 @@ class PropertyVacancyTab extends StatelessWidget {
             const SizedBox(width: AppWidth.w10),
             Expanded(
               child: KpiCard(
-                label: 'Tổng phòng',
+                label: AppStrings.totalRoomsLabel,
                 value: '$total',
                 icon: Icons.grid_view_outlined,
                 iconColor: AppColors.amber,
@@ -82,20 +81,18 @@ class PropertyVacancyTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Phân bổ trạng thái phòng',
+              Text(AppStrings.roomStatusDistribution,
                   style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
               const SizedBox(height: AppHeight.h16),
               if (total == 0)
-                Text('Chưa có phòng nào.',
+                Text(AppStrings.noRoomYet,
                     style: GoogleFonts.manrope(fontSize: FontSize.s14, color: AppColors.textSecondary))
               else ...[
-                PropertyVacancyBar(label: 'Đã thuê', count: rented, total: total, color: AppColors.primary),
+                PropertyVacancyBar(label: AppStrings.filterRented, count: rented, total: total, color: AppColors.primary),
                 const SizedBox(height: AppHeight.h12),
-                PropertyVacancyBar(label: 'Đặt cọc', count: deposited, total: total, color: AppColors.amber),
+                PropertyVacancyBar(label: AppStrings.filterEmpty, count: empty, total: total, color: AppColors.emerald),
                 const SizedBox(height: AppHeight.h12),
-                PropertyVacancyBar(label: 'Trống', count: empty, total: total, color: AppColors.emerald),
-                const SizedBox(height: AppHeight.h12),
-                PropertyVacancyBar(label: 'Bảo trì', count: maintenance, total: total, color: AppColors.red),
+                PropertyVacancyBar(label: AppStrings.maintenance, count: maintenance, total: total, color: AppColors.red),
               ],
             ],
           ),
@@ -111,16 +108,16 @@ class PropertyVacancyTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Thông tin nhà trọ',
+              Text(AppStrings.propertyInfo,
                   style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
               const SizedBox(height: AppHeight.h12),
-              PropertyInfoRow(icon: Icons.location_on_outlined, label: 'Địa chỉ', value: property.address),
+              PropertyInfoRow(icon: Icons.location_on_outlined, label: AppStrings.propertyAddress, value: property.address),
               const SizedBox(height: AppHeight.h8),
-              PropertyInfoRow(icon: Icons.bolt, label: 'Giá điện', value: '${_fmt(property.electricityPrice)}/kWh'),
+              PropertyInfoRow(icon: Icons.bolt, label: AppStrings.electricityPrice, value: '${_fmt(property.electricityPrice)}/kWh'),
               const SizedBox(height: AppHeight.h8),
-              PropertyInfoRow(icon: Icons.water_drop_outlined, label: 'Giá nước', value: '${_fmt(property.waterPrice)}/m³'),
+              PropertyInfoRow(icon: Icons.water_drop_outlined, label: AppStrings.waterPrice, value: '${_fmt(property.waterPrice)}/m³'),
               const SizedBox(height: AppHeight.h8),
-              PropertyInfoRow(icon: Icons.water_drop_outlined, label: 'Loại tính nước', value: property.waterBillingType.label),
+              PropertyInfoRow(icon: Icons.water_drop_outlined, label: AppStrings.billingSystem, value: property.waterBillingType.label),
             ],
           ),
         ),

@@ -16,6 +16,8 @@ import 'package:quan_ly_nha_tro/core/providers/meter_reading_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/invoice_providers.dart';
 import 'package:quan_ly_nha_tro/features/invoices/presentation/pages/invoice_export_page.dart';
 import 'package:quan_ly_nha_tro/features/invoices/presentation/widgets/invoice_form_widgets.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+
 
 class CreateInvoicePage extends ConsumerStatefulWidget {
   final String roomId;
@@ -122,7 +124,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
     
     final ownerId = ref.watch(currentUserProvider)?.id;
     if (ownerId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng đăng nhập lại')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppStrings.invoiceLoginRequired)));
       return;
     }
 
@@ -154,7 +156,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
         roomId: widget.roomId,
         month: _currentMonth,
         totalAmount: _total,
-        status: InvoiceStatus.waitingPayment,
+        status: InvoiceStatus.unpaid,
         dueDate: dueDate,
       );
       
@@ -163,7 +165,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã lưu hóa đơn ${_room?.name ?? ''} tháng $_currentMonth!'),
+            content: Text('${AppStrings.invoiceSaveSuccess}${_room?.name ?? ''} ${AppStrings.monthSuffix} $_currentMonth!'),
             backgroundColor: AppColors.emerald,
           ),
         );
@@ -173,7 +175,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
       debugPrint('Error saving invoice: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e'), backgroundColor: AppColors.red),
+          SnackBar(content: Text('${AppStrings.invoiceSaveError}$e'), backgroundColor: AppColors.red),
         );
       }
     } finally {
@@ -196,7 +198,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('Lập hóa đơn'),
+        title: Text(AppStrings.invoiceTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
@@ -206,7 +208,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
           ? const Center(child: CircularProgressIndicator())
           : _room == null
               ? Center(
-                  child: Text('Không tìm thấy phòng.',
+                  child: Text(AppStrings.invoiceRoomNotFound,
                       style: GoogleFonts.manrope(fontSize: FontSize.s16, color: AppColors.textSecondary)),
                 )
               : _buildBody(),
@@ -235,7 +237,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('THÔNG TIN PHÒNG',
+                    Text(AppStrings.invoiceRoomInfo,
                         style: GoogleFonts.manrope(
                             fontSize: FontSize.s10, fontWeight: FontWeightManager.bold, color: AppColors.primary)),
                     Text(_room!.name, style: GoogleFonts.manrope(fontSize: FontSize.s18, fontWeight: FontWeightManager.extraBold)),
@@ -255,8 +257,8 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                       Row(
                         children: [
                           Icon(Icons.person_outline, size: AppSize.s14, color: AppColors.textSecondary),
-                          SizedBox(width: AppWidth.w4),
-                          Text('Khách thuê: ${_tenant!.name}',
+                          const SizedBox(width: AppWidth.w4),
+                          Text('${AppStrings.invoiceTenantLabel}${_tenant!.name}',
                               style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
                         ],
                       ),
@@ -268,7 +270,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                         borderRadius: BorderRadius.circular(AppRadius.r50),
                       ),
                       child: Text(
-                        'Tháng $_currentMonth',
+                        '${AppStrings.monthSuffix} $_currentMonth',
                         style: GoogleFonts.manrope(
                             fontSize: FontSize.s12, fontWeight: FontWeightManager.semiBold, color: AppColors.primary),
                       ),
@@ -284,32 +286,32 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
         InvoiceCard(
           icon: Icons.bolt,
           iconColor: AppColors.primary,
-          title: 'Điện & Nước',
+          title: AppStrings.invoiceElectricityWater,
           child: Column(
             children: [
               Row(
                 children: [
-                  Expanded(child: InvoiceInputField('Chỉ số điện cũ', _electricOldCtrl, suffix: 'kWh')),
-                  SizedBox(width: AppWidth.w12),
-                  Expanded(child: InvoiceInputField('Chỉ số điện mới', _electricNewCtrl, suffix: 'kWh')),
+                  Expanded(child: InvoiceInputField(AppStrings.invoiceElectricOld, _electricOldCtrl, suffix: 'kWh')),
+                  const SizedBox(width: AppWidth.w12),
+                  Expanded(child: InvoiceInputField(AppStrings.invoiceElectricNew, _electricNewCtrl, suffix: 'kWh')),
                 ],
               ),
               SizedBox(height: AppHeight.h8),
               InvoiceCostRow(
-                label: 'Tiền điện (${fmtDouble(_property?.electricityPrice ?? 3500)}/kWh)',
+                label: '${AppStrings.invoiceElectricCost} (${fmtDouble(_property?.electricityPrice ?? 3500)}/kWh)',
                 value: _electricCost,
               ),
               const SizedBox(height: AppHeight.h12),
               Row(
                 children: [
-                  Expanded(child: InvoiceInputField('Chỉ số nước cũ', _waterOldCtrl, suffix: 'm³')),
+                  Expanded(child: InvoiceInputField(AppStrings.invoiceWaterOld, _waterOldCtrl, suffix: 'm³')),
                   const SizedBox(width: AppWidth.w12),
-                  Expanded(child: InvoiceInputField('Chỉ số nước mới', _waterNewCtrl, suffix: 'm³')),
+                  Expanded(child: InvoiceInputField(AppStrings.invoiceWaterNew, _waterNewCtrl, suffix: 'm³')),
                 ],
               ),
               const SizedBox(height: AppHeight.h8),
               InvoiceCostRow(
-                label: 'Tiền nước (${fmtDouble(_property?.waterPrice ?? 15000)}/m³)',
+                label: '${AppStrings.invoiceWaterCost} (${fmtDouble(_property?.waterPrice ?? 15000)}/m³)',
                 value: _waterCost,
               ),
             ],
@@ -320,12 +322,12 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
         InvoiceCard(
           icon: Icons.layers_outlined,
           iconColor: AppColors.emerald,
-          title: 'Tiền phòng & Dịch vụ',
+          title: AppStrings.invoiceRentServices,
           child: Column(
             children: [
               InvoiceServiceRow(
                 icon: Icons.bed_outlined,
-                label: 'Tiền phòng tháng $_currentMonth',
+                label: '${AppStrings.homeRooms} ${AppStrings.monthSuffix} $_currentMonth',
                 value: _rentPrice,
                 isHighlight: true,
               ),
@@ -348,12 +350,12 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
         InvoiceCard(
           icon: Icons.edit_note_rounded,
           iconColor: AppColors.textSecondary,
-          title: 'Ghi chú',
+          title: AppStrings.invoiceNotes,
           child: TextField(
             controller: _noteCtrl,
             maxLines: 3,
-            decoration: const InputDecoration(
-              hintText: 'Nhập ghi chú cho hóa đơn này...',
+            decoration: InputDecoration(
+              hintText: AppStrings.invoiceNotesHint,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
@@ -377,7 +379,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Tổng số tiền cần thanh toán',
+                    Text(AppStrings.invoiceTotalAmountToPay,
                         style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
                     const SizedBox(height: AppHeight.h4),
                     StatefulBuilder(
@@ -406,11 +408,11 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
             Expanded(
               child: OutlinedButton.icon(
                 icon: const Icon(Icons.share_outlined),
-                label: const Text('Xuất hóa đơn'),
+                label: Text(AppStrings.invoiceExportBtn),
                 onPressed: () {
                   if (_existingInvoice == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Vui lòng lưu hóa đơn trước khi xuất!')),
+                      SnackBar(content: Text(AppStrings.invoiceMustSaveBeforeExport)),
                     );
                     return;
                   }
@@ -448,7 +450,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
                         height: 18,
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Icon(Icons.save_outlined),
-                label: Text(_existingInvoice != null ? 'Cập nhật hóa đơn' : 'Lưu hóa đơn'),
+                label: Text(_existingInvoice != null ? AppStrings.invoiceUpdateBtn : AppStrings.invoiceSaveBtn),
                 onPressed: _isSaving ? null : _saveInvoice,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: AppPadding.p14),

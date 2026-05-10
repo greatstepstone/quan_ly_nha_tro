@@ -21,11 +21,10 @@ class PropertyInvoiceTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final total = invoices.length;
     final statusGroups = [
-      (InvoiceStatus.paid, 'Đã thu', AppColors.emerald),
-      (InvoiceStatus.waitingPayment, 'Chờ thanh toán', AppColors.orange),
-      (InvoiceStatus.sent, 'Đã gửi', AppColors.primary),
-      (InvoiceStatus.overdue, 'Quá hạn', AppColors.red),
-      (InvoiceStatus.notCreated, 'Chưa lập', AppColors.textTertiary),
+      (InvoiceStatus.paid,       'Đã thu',           AppColors.emerald),
+      (InvoiceStatus.unpaid,      'Chờ thanh toán',   AppColors.orange),
+      (InvoiceStatus.overdue,     'Quá hạn',          AppColors.red),
+      (InvoiceStatus.notCreated,  'Chưa lập',         AppColors.textTertiary),
     ];
 
     return ListView(

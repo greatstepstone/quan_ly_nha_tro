@@ -12,6 +12,8 @@ import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/widgets/app_filter_chip.dart';
 import 'package:quan_ly_nha_tro/features/invoices/presentation/widgets/invoice_status_widgets.dart';
+import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+
 
 class InvoiceStatusPage extends StatelessWidget {
   const InvoiceStatusPage({super.key});
@@ -21,7 +23,7 @@ class InvoiceStatusPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('Trạng thái hóa đơn'),
+        title: Text(AppStrings.invoiceStatusTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
@@ -116,31 +118,31 @@ class _FilterBar extends ConsumerWidget {
       child: Row(
         children: [
           AppFilterChip(
-            label: 'Tất cả',
+            label: AppStrings.invoiceFilterAll,
             isActive: filterStatus == null,
             onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = null,
           ),
           const SizedBox(width: AppWidth.w8),
           AppFilterChip(
-            label: 'Chưa lập',
+            label: AppStrings.invoiceFilterNotCreated,
             isActive: filterStatus == InvoiceStatus.notCreated,
             onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.notCreated,
           ),
           const SizedBox(width: AppWidth.w8),
           AppFilterChip(
-            label: 'Chờ thanh toán',
-            isActive: filterStatus == InvoiceStatus.waitingPayment,
-            onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.waitingPayment,
+            label: AppStrings.invoiceFilterWaitingPayment,
+            isActive: filterStatus == InvoiceStatus.unpaid,
+            onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.unpaid,
           ),
           const SizedBox(width: AppWidth.w8),
           AppFilterChip(
-            label: 'Đã thu',
+            label: AppStrings.invoiceFilterPaid,
             isActive: filterStatus == InvoiceStatus.paid,
             onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.paid,
           ),
           const SizedBox(width: AppWidth.w8),
           AppFilterChip(
-            label: 'Quá hạn',
+            label: AppStrings.invoiceFilterOverdue,
             isActive: filterStatus == InvoiceStatus.overdue,
             onTap: () => ref.read(invoiceFilterStatusProvider.notifier).state = InvoiceStatus.overdue,
           ),
@@ -177,7 +179,7 @@ class _HeaderSection extends ConsumerWidget {
             child: Row(
               children: [
                 Text(
-                  'THÁNG ${selectedMonth.month.toString().padLeft(2, '0')}/${selectedMonth.year}',
+                  '${AppStrings.monthSuffix.toUpperCase()} ${selectedMonth.month.toString().padLeft(2, '0')}/${selectedMonth.year}',
                   style: GoogleFonts.manrope(
                       fontSize: FontSize.s12,
                       fontWeight: FontWeightManager.bold,
@@ -189,7 +191,7 @@ class _HeaderSection extends ConsumerWidget {
           ),
           const Spacer(),
           filteredInvoicesAsync.whenData((invoices) => Text(
-                '${invoices.length} hóa đơn',
+                '${invoices.length} ${AppStrings.invoiceCountSuffix}',
                 style: GoogleFonts.manrope(
                     fontSize: FontSize.s12,
                     fontWeight: FontWeightManager.semiBold,
@@ -238,11 +240,11 @@ class _InvoiceListSection extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Lỗi tải phòng: $e')),
+          error: (e, _) => Center(child: Text('${AppStrings.invoiceLoadRoomsError}$e')),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Lỗi tải hóa đơn: $e')),
+      error: (e, _) => Center(child: Text('${AppStrings.invoiceLoadInvoicesError}$e')),
     );
   }
 }

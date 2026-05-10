@@ -11,6 +11,8 @@ import 'package:quan_ly_nha_tro/features/auth/presentation/widgets/auth_text_fie
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/feature_flags.dart';
+
 
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -257,46 +259,73 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                         
                         // Email/Password section
-                        const Divider(),
-                        const SizedBox(height: AppHeight.h16),
-                        AuthEmailField(
-                          controller: _emailController,
-                          hint: AppStrings.loginEmailHint,
-                          icon: Icons.email_outlined,
-                        ),
-                        const SizedBox(height: AppHeight.h12),
-                        AuthPasswordField(
-                          controller: _passwordController,
-                          hint: AppStrings.loginPassword,
-                        ),
-                        const SizedBox(height: AppHeight.h20),
-                        SocialAuthButton(
-                          label: AppStrings.loginEmailSignIn,
-                          icon: Icons.login_rounded,
-                          color: AppColors.primary,
-                          textColor: Colors.white,
-                          onPressed: _handleEmailSignIn,
-                        ),
+                        if (FeatureFlags.enablePasswordAuth) ...[
+                          const Divider(),
+                          const SizedBox(height: AppHeight.h16),
+                          AuthEmailField(
+                            controller: _emailController,
+                            hint: AppStrings.loginEmailHint,
+                            icon: Icons.email_outlined,
+                          ),
+                          const SizedBox(height: AppHeight.h12),
+                          AuthPasswordField(
+                            controller: _passwordController,
+                            hint: AppStrings.loginPassword,
+                          ),
+                          const SizedBox(height: AppHeight.h20),
+                          SocialAuthButton(
+                            label: AppStrings.loginEmailSignIn,
+                            icon: Icons.login_rounded,
+                            color: AppColors.primary,
+                            textColor: Colors.white,
+                            onPressed: _handleEmailSignIn,
+                          ),
+                          const SizedBox(height: AppHeight.h16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                AppStrings.signUpNoAccountYet,
+                                style: GoogleFonts.manrope(
+                                  fontSize: FontSize.s13,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => context.pushNamed(AppRoutes.signUp),
+                                child: Text(
+                                  AppStrings.signUpCreateOne,
+                                  style: GoogleFonts.manrope(
+                                    fontSize: FontSize.s13,
+                                    fontWeight: FontWeightManager.bold,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
 
-                        
                         const SizedBox(height: AppHeight.h16),
                         
                         // Dev Bypass
-                        InkWell(
-                          onTap: () {
-                            _emailController.text = 'dev_tester@example.com';
-                            _passwordController.text = 'developer123';
-                            _handleEmailSignIn();
-                          },
-                          child: Text(
-                            AppStrings.loginQuickDev,
-                            style: GoogleFonts.manrope(
-                              fontSize: FontSize.s12,
-                              color: AppColors.primary.withValues(alpha: 0.5),
-                              fontWeight: FontWeightManager.semiBold,
+                        if (FeatureFlags.enablePasswordAuth)
+                          InkWell(
+                            onTap: () {
+                              _emailController.text = 'dev_tester@example.com';
+                              _passwordController.text = 'developer123';
+                              _handleEmailSignIn();
+                            },
+                            child: Text(
+                              AppStrings.loginQuickDev,
+                              style: GoogleFonts.manrope(
+                                fontSize: FontSize.s12,
+                                color: AppColors.primary.withValues(alpha: 0.5),
+                                fontWeight: FontWeightManager.semiBold,
+                              ),
                             ),
                           ),
-                        ),
+
                         
                         const SizedBox(height: AppHeight.h24),
                         

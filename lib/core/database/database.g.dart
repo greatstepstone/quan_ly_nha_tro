@@ -1542,9 +1542,9 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, Tenant> {
   late final GeneratedColumn<String> roomId = GeneratedColumn<String>(
     'room_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES rooms (id)',
     ),
@@ -1556,34 +1556,12 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, Tenant> {
   late final GeneratedColumn<String> propertyId = GeneratedColumn<String>(
     'property_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES properties (id)',
     ),
-  );
-  static const VerificationMeta _startDateMeta = const VerificationMeta(
-    'startDate',
-  );
-  @override
-  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
-    'start_date',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _depositMeta = const VerificationMeta(
-    'deposit',
-  );
-  @override
-  late final GeneratedColumn<double> deposit = GeneratedColumn<double>(
-    'deposit',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: true,
   );
   static const VerificationMeta _isVerifiedMeta = const VerificationMeta(
     'isVerified',
@@ -1641,8 +1619,6 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, Tenant> {
     hometown,
     roomId,
     propertyId,
-    startDate,
-    deposit,
     isVerified,
     isSynced,
     isDeleted,
@@ -1720,32 +1696,12 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, Tenant> {
         _roomIdMeta,
         roomId.isAcceptableOrUnknown(data['room_id']!, _roomIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_roomIdMeta);
     }
     if (data.containsKey('property_id')) {
       context.handle(
         _propertyIdMeta,
         propertyId.isAcceptableOrUnknown(data['property_id']!, _propertyIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_propertyIdMeta);
-    }
-    if (data.containsKey('start_date')) {
-      context.handle(
-        _startDateMeta,
-        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_startDateMeta);
-    }
-    if (data.containsKey('deposit')) {
-      context.handle(
-        _depositMeta,
-        deposit.isAcceptableOrUnknown(data['deposit']!, _depositMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_depositMeta);
     }
     if (data.containsKey('is_verified')) {
       context.handle(
@@ -1809,26 +1765,14 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, Tenant> {
             DriftSqlType.string,
             data['${effectivePrefix}hometown'],
           )!,
-      roomId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}room_id'],
-          )!,
-      propertyId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}property_id'],
-          )!,
-      startDate:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}start_date'],
-          )!,
-      deposit:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.double,
-            data['${effectivePrefix}deposit'],
-          )!,
+      roomId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}room_id'],
+      ),
+      propertyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}property_id'],
+      ),
       isVerified:
           attachedDatabase.typeMapping.read(
             DriftSqlType.bool,
@@ -1861,10 +1805,8 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
   final Value<String> cccd;
   final Value<String> dateOfBirth;
   final Value<String> hometown;
-  final Value<String> roomId;
-  final Value<String> propertyId;
-  final Value<String> startDate;
-  final Value<double> deposit;
+  final Value<String?> roomId;
+  final Value<String?> propertyId;
   final Value<bool> isVerified;
   final Value<bool> isSynced;
   final Value<bool> isDeleted;
@@ -1879,8 +1821,6 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
     this.hometown = const Value.absent(),
     this.roomId = const Value.absent(),
     this.propertyId = const Value.absent(),
-    this.startDate = const Value.absent(),
-    this.deposit = const Value.absent(),
     this.isVerified = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
@@ -1894,10 +1834,8 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
     required String cccd,
     required String dateOfBirth,
     required String hometown,
-    required String roomId,
-    required String propertyId,
-    required String startDate,
-    required double deposit,
+    this.roomId = const Value.absent(),
+    this.propertyId = const Value.absent(),
     this.isVerified = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
@@ -1908,11 +1846,7 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
        phone = Value(phone),
        cccd = Value(cccd),
        dateOfBirth = Value(dateOfBirth),
-       hometown = Value(hometown),
-       roomId = Value(roomId),
-       propertyId = Value(propertyId),
-       startDate = Value(startDate),
-       deposit = Value(deposit);
+       hometown = Value(hometown);
   static Insertable<Tenant> custom({
     Expression<String>? id,
     Expression<String>? ownerId,
@@ -1923,8 +1857,6 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
     Expression<String>? hometown,
     Expression<String>? roomId,
     Expression<String>? propertyId,
-    Expression<String>? startDate,
-    Expression<double>? deposit,
     Expression<bool>? isVerified,
     Expression<bool>? isSynced,
     Expression<bool>? isDeleted,
@@ -1940,8 +1872,6 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
       if (hometown != null) 'hometown': hometown,
       if (roomId != null) 'room_id': roomId,
       if (propertyId != null) 'property_id': propertyId,
-      if (startDate != null) 'start_date': startDate,
-      if (deposit != null) 'deposit': deposit,
       if (isVerified != null) 'is_verified': isVerified,
       if (isSynced != null) 'is_synced': isSynced,
       if (isDeleted != null) 'is_deleted': isDeleted,
@@ -1957,10 +1887,8 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
     Value<String>? cccd,
     Value<String>? dateOfBirth,
     Value<String>? hometown,
-    Value<String>? roomId,
-    Value<String>? propertyId,
-    Value<String>? startDate,
-    Value<double>? deposit,
+    Value<String?>? roomId,
+    Value<String?>? propertyId,
     Value<bool>? isVerified,
     Value<bool>? isSynced,
     Value<bool>? isDeleted,
@@ -1976,8 +1904,6 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
       hometown: hometown ?? this.hometown,
       roomId: roomId ?? this.roomId,
       propertyId: propertyId ?? this.propertyId,
-      startDate: startDate ?? this.startDate,
-      deposit: deposit ?? this.deposit,
       isVerified: isVerified ?? this.isVerified,
       isSynced: isSynced ?? this.isSynced,
       isDeleted: isDeleted ?? this.isDeleted,
@@ -2015,12 +1941,6 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
     if (propertyId.present) {
       map['property_id'] = Variable<String>(propertyId.value);
     }
-    if (startDate.present) {
-      map['start_date'] = Variable<String>(startDate.value);
-    }
-    if (deposit.present) {
-      map['deposit'] = Variable<double>(deposit.value);
-    }
     if (isVerified.present) {
       map['is_verified'] = Variable<bool>(isVerified.value);
     }
@@ -2048,8 +1968,6 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
           ..write('hometown: $hometown, ')
           ..write('roomId: $roomId, ')
           ..write('propertyId: $propertyId, ')
-          ..write('startDate: $startDate, ')
-          ..write('deposit: $deposit, ')
           ..write('isVerified: $isVerified, ')
           ..write('isSynced: $isSynced, ')
           ..write('isDeleted: $isDeleted, ')
@@ -2544,6 +2462,560 @@ class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
   }
 }
 
+class $ContractsTable extends Contracts
+    with TableInfo<$ContractsTable, Contract> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ContractsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES users (id)',
+    ),
+  );
+  static const VerificationMeta _roomIdMeta = const VerificationMeta('roomId');
+  @override
+  late final GeneratedColumn<String> roomId = GeneratedColumn<String>(
+    'room_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES rooms (id)',
+    ),
+  );
+  static const VerificationMeta _tenantIdMeta = const VerificationMeta(
+    'tenantId',
+  );
+  @override
+  late final GeneratedColumn<String> tenantId = GeneratedColumn<String>(
+    'tenant_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES tenants (id)',
+    ),
+  );
+  static const VerificationMeta _propertyIdMeta = const VerificationMeta(
+    'propertyId',
+  );
+  @override
+  late final GeneratedColumn<String> propertyId = GeneratedColumn<String>(
+    'property_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES properties (id)',
+    ),
+  );
+  static const VerificationMeta _rentPriceMeta = const VerificationMeta(
+    'rentPrice',
+  );
+  @override
+  late final GeneratedColumn<double> rentPrice = GeneratedColumn<double>(
+    'rent_price',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _depositMeta = const VerificationMeta(
+    'deposit',
+  );
+  @override
+  late final GeneratedColumn<double> deposit = GeneratedColumn<double>(
+    'deposit',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startDateMeta = const VerificationMeta(
+    'startDate',
+  );
+  @override
+  late final GeneratedColumn<String> startDate = GeneratedColumn<String>(
+    'start_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endDateMeta = const VerificationMeta(
+    'endDate',
+  );
+  @override
+  late final GeneratedColumn<String> endDate = GeneratedColumn<String>(
+    'end_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<ContractStatus, String> status =
+      GeneratedColumn<String>(
+        'status',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('active'),
+      ).withConverter<ContractStatus>($ContractsTable.$converterstatus);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerId,
+    roomId,
+    tenantId,
+    propertyId,
+    rentPrice,
+    deposit,
+    startDate,
+    endDate,
+    status,
+    notes,
+    isSynced,
+    isDeleted,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'contracts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Contract> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('room_id')) {
+      context.handle(
+        _roomIdMeta,
+        roomId.isAcceptableOrUnknown(data['room_id']!, _roomIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roomIdMeta);
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(
+        _tenantIdMeta,
+        tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tenantIdMeta);
+    }
+    if (data.containsKey('property_id')) {
+      context.handle(
+        _propertyIdMeta,
+        propertyId.isAcceptableOrUnknown(data['property_id']!, _propertyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_propertyIdMeta);
+    }
+    if (data.containsKey('rent_price')) {
+      context.handle(
+        _rentPriceMeta,
+        rentPrice.isAcceptableOrUnknown(data['rent_price']!, _rentPriceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rentPriceMeta);
+    }
+    if (data.containsKey('deposit')) {
+      context.handle(
+        _depositMeta,
+        deposit.isAcceptableOrUnknown(data['deposit']!, _depositMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_depositMeta);
+    }
+    if (data.containsKey('start_date')) {
+      context.handle(
+        _startDateMeta,
+        startDate.isAcceptableOrUnknown(data['start_date']!, _startDateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMeta);
+    }
+    if (data.containsKey('end_date')) {
+      context.handle(
+        _endDateMeta,
+        endDate.isAcceptableOrUnknown(data['end_date']!, _endDateMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Contract map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Contract(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
+      ownerId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}owner_id'],
+          )!,
+      roomId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}room_id'],
+          )!,
+      tenantId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}tenant_id'],
+          )!,
+      propertyId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}property_id'],
+          )!,
+      rentPrice:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.double,
+            data['${effectivePrefix}rent_price'],
+          )!,
+      deposit:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.double,
+            data['${effectivePrefix}deposit'],
+          )!,
+      startDate:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}start_date'],
+          )!,
+      endDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}end_date'],
+      ),
+      status: $ContractsTable.$converterstatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}status'],
+        )!,
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      isSynced:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_synced'],
+          )!,
+      isDeleted:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_deleted'],
+          )!,
+    );
+  }
+
+  @override
+  $ContractsTable createAlias(String alias) {
+    return $ContractsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<ContractStatus, String, String> $converterstatus =
+      const EnumNameConverter<ContractStatus>(ContractStatus.values);
+}
+
+class ContractsCompanion extends UpdateCompanion<Contract> {
+  final Value<String> id;
+  final Value<String> ownerId;
+  final Value<String> roomId;
+  final Value<String> tenantId;
+  final Value<String> propertyId;
+  final Value<double> rentPrice;
+  final Value<double> deposit;
+  final Value<String> startDate;
+  final Value<String?> endDate;
+  final Value<ContractStatus> status;
+  final Value<String?> notes;
+  final Value<bool> isSynced;
+  final Value<bool> isDeleted;
+  final Value<int> rowid;
+  const ContractsCompanion({
+    this.id = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.roomId = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.propertyId = const Value.absent(),
+    this.rentPrice = const Value.absent(),
+    this.deposit = const Value.absent(),
+    this.startDate = const Value.absent(),
+    this.endDate = const Value.absent(),
+    this.status = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ContractsCompanion.insert({
+    required String id,
+    required String ownerId,
+    required String roomId,
+    required String tenantId,
+    required String propertyId,
+    required double rentPrice,
+    required double deposit,
+    required String startDate,
+    this.endDate = const Value.absent(),
+    this.status = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerId = Value(ownerId),
+       roomId = Value(roomId),
+       tenantId = Value(tenantId),
+       propertyId = Value(propertyId),
+       rentPrice = Value(rentPrice),
+       deposit = Value(deposit),
+       startDate = Value(startDate);
+  static Insertable<Contract> custom({
+    Expression<String>? id,
+    Expression<String>? ownerId,
+    Expression<String>? roomId,
+    Expression<String>? tenantId,
+    Expression<String>? propertyId,
+    Expression<double>? rentPrice,
+    Expression<double>? deposit,
+    Expression<String>? startDate,
+    Expression<String>? endDate,
+    Expression<String>? status,
+    Expression<String>? notes,
+    Expression<bool>? isSynced,
+    Expression<bool>? isDeleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (roomId != null) 'room_id': roomId,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (propertyId != null) 'property_id': propertyId,
+      if (rentPrice != null) 'rent_price': rentPrice,
+      if (deposit != null) 'deposit': deposit,
+      if (startDate != null) 'start_date': startDate,
+      if (endDate != null) 'end_date': endDate,
+      if (status != null) 'status': status,
+      if (notes != null) 'notes': notes,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ContractsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerId,
+    Value<String>? roomId,
+    Value<String>? tenantId,
+    Value<String>? propertyId,
+    Value<double>? rentPrice,
+    Value<double>? deposit,
+    Value<String>? startDate,
+    Value<String?>? endDate,
+    Value<ContractStatus>? status,
+    Value<String?>? notes,
+    Value<bool>? isSynced,
+    Value<bool>? isDeleted,
+    Value<int>? rowid,
+  }) {
+    return ContractsCompanion(
+      id: id ?? this.id,
+      ownerId: ownerId ?? this.ownerId,
+      roomId: roomId ?? this.roomId,
+      tenantId: tenantId ?? this.tenantId,
+      propertyId: propertyId ?? this.propertyId,
+      rentPrice: rentPrice ?? this.rentPrice,
+      deposit: deposit ?? this.deposit,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      status: status ?? this.status,
+      notes: notes ?? this.notes,
+      isSynced: isSynced ?? this.isSynced,
+      isDeleted: isDeleted ?? this.isDeleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (roomId.present) {
+      map['room_id'] = Variable<String>(roomId.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<String>(tenantId.value);
+    }
+    if (propertyId.present) {
+      map['property_id'] = Variable<String>(propertyId.value);
+    }
+    if (rentPrice.present) {
+      map['rent_price'] = Variable<double>(rentPrice.value);
+    }
+    if (deposit.present) {
+      map['deposit'] = Variable<double>(deposit.value);
+    }
+    if (startDate.present) {
+      map['start_date'] = Variable<String>(startDate.value);
+    }
+    if (endDate.present) {
+      map['end_date'] = Variable<String>(endDate.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(
+        $ContractsTable.$converterstatus.toSql(status.value),
+      );
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContractsCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('roomId: $roomId, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('propertyId: $propertyId, ')
+          ..write('rentPrice: $rentPrice, ')
+          ..write('deposit: $deposit, ')
+          ..write('startDate: $startDate, ')
+          ..write('endDate: $endDate, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -2582,6 +3054,20 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES rooms (id)',
+    ),
+  );
+  static const VerificationMeta _contractIdMeta = const VerificationMeta(
+    'contractId',
+  );
+  @override
+  late final GeneratedColumn<String> contractId = GeneratedColumn<String>(
+    'contract_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contracts (id)',
     ),
   );
   static const VerificationMeta _monthMeta = const VerificationMeta('month');
@@ -2681,6 +3167,7 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
     id,
     ownerId,
     roomId,
+    contractId,
     month,
     totalAmount,
     status,
@@ -2722,6 +3209,12 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
       );
     } else if (isInserting) {
       context.missing(_roomIdMeta);
+    }
+    if (data.containsKey('contract_id')) {
+      context.handle(
+        _contractIdMeta,
+        contractId.isAcceptableOrUnknown(data['contract_id']!, _contractIdMeta),
+      );
     }
     if (data.containsKey('month')) {
       context.handle(
@@ -2796,6 +3289,10 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
             DriftSqlType.string,
             data['${effectivePrefix}room_id'],
           )!,
+      contractId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contract_id'],
+      ),
       month:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
@@ -2850,6 +3347,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
   final Value<String> id;
   final Value<String> ownerId;
   final Value<String> roomId;
+  final Value<String?> contractId;
   final Value<String> month;
   final Value<double> totalAmount;
   final Value<InvoiceStatus> status;
@@ -2863,6 +3361,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     this.id = const Value.absent(),
     this.ownerId = const Value.absent(),
     this.roomId = const Value.absent(),
+    this.contractId = const Value.absent(),
     this.month = const Value.absent(),
     this.totalAmount = const Value.absent(),
     this.status = const Value.absent(),
@@ -2877,6 +3376,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     required String id,
     required String ownerId,
     required String roomId,
+    this.contractId = const Value.absent(),
     required String month,
     required double totalAmount,
     required InvoiceStatus status,
@@ -2896,6 +3396,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     Expression<String>? id,
     Expression<String>? ownerId,
     Expression<String>? roomId,
+    Expression<String>? contractId,
     Expression<String>? month,
     Expression<double>? totalAmount,
     Expression<String>? status,
@@ -2910,6 +3411,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
       if (id != null) 'id': id,
       if (ownerId != null) 'owner_id': ownerId,
       if (roomId != null) 'room_id': roomId,
+      if (contractId != null) 'contract_id': contractId,
       if (month != null) 'month': month,
       if (totalAmount != null) 'total_amount': totalAmount,
       if (status != null) 'status': status,
@@ -2926,6 +3428,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     Value<String>? id,
     Value<String>? ownerId,
     Value<String>? roomId,
+    Value<String?>? contractId,
     Value<String>? month,
     Value<double>? totalAmount,
     Value<InvoiceStatus>? status,
@@ -2940,6 +3443,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
       id: id ?? this.id,
       ownerId: ownerId ?? this.ownerId,
       roomId: roomId ?? this.roomId,
+      contractId: contractId ?? this.contractId,
       month: month ?? this.month,
       totalAmount: totalAmount ?? this.totalAmount,
       status: status ?? this.status,
@@ -2963,6 +3467,9 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     }
     if (roomId.present) {
       map['room_id'] = Variable<String>(roomId.value);
+    }
+    if (contractId.present) {
+      map['contract_id'] = Variable<String>(contractId.value);
     }
     if (month.present) {
       map['month'] = Variable<String>(month.value);
@@ -3002,6 +3509,7 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
           ..write('id: $id, ')
           ..write('ownerId: $ownerId, ')
           ..write('roomId: $roomId, ')
+          ..write('contractId: $contractId, ')
           ..write('month: $month, ')
           ..write('totalAmount: $totalAmount, ')
           ..write('status: $status, ')
@@ -3185,6 +3693,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $RoomsTable rooms = $RoomsTable(this);
   late final $TenantsTable tenants = $TenantsTable(this);
   late final $MeterReadingsTable meterReadings = $MeterReadingsTable(this);
+  late final $ContractsTable contracts = $ContractsTable(this);
   late final $InvoicesTable invoices = $InvoicesTable(this);
   late final $OnboardingStatesTable onboardingStates = $OnboardingStatesTable(
     this,
@@ -3221,6 +3730,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'invoice_room_month',
     'CREATE INDEX invoice_room_month ON invoices (room_id, month)',
   );
+  late final Index contractRoom = Index(
+    'contract_room',
+    'CREATE INDEX contract_room ON contracts (room_id)',
+  );
+  late final Index contractTenant = Index(
+    'contract_tenant',
+    'CREATE INDEX contract_tenant ON contracts (tenant_id)',
+  );
+  late final Index contractOwner = Index(
+    'contract_owner',
+    'CREATE INDEX contract_owner ON contracts (owner_id)',
+  );
   late final UserDao userDao = UserDao(this as AppDatabase);
   late final PropertyDao propertyDao = PropertyDao(this as AppDatabase);
   late final RoomDao roomDao = RoomDao(this as AppDatabase);
@@ -3230,6 +3751,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final InvoiceDao invoiceDao = InvoiceDao(this as AppDatabase);
   late final ServiceDao serviceDao = ServiceDao(this as AppDatabase);
+  late final ContractDao contractDao = ContractDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3241,6 +3763,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     rooms,
     tenants,
     meterReadings,
+    contracts,
     invoices,
     onboardingStates,
     propertyOwner,
@@ -3251,6 +3774,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     tenantProperty,
     readingRoomMonth,
     invoiceRoomMonth,
+    contractRoom,
+    contractTenant,
+    contractOwner,
   ];
 }
 
@@ -3346,6 +3872,24 @@ final class $$UsersTableReferences
     ).filter((f) => f.ownerId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_meterReadingsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ContractsTable, List<Contract>>
+  _contractsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.contracts,
+    aliasName: $_aliasNameGenerator(db.users.id, db.contracts.ownerId),
+  );
+
+  $$ContractsTableProcessedTableManager get contractsRefs {
+    final manager = $$ContractsTableTableManager(
+      $_db,
+      $_db.contracts,
+    ).filter((f) => f.ownerId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_contractsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -3515,6 +4059,31 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
           }) => $$MeterReadingsTableFilterComposer(
             $db: $db,
             $table: $db.meterReadings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> contractsRefs(
+    Expression<bool> Function($$ContractsTableFilterComposer f) f,
+  ) {
+    final $$ContractsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.ownerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableFilterComposer(
+            $db: $db,
+            $table: $db.contracts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3734,6 +4303,31 @@ class $$UsersTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> contractsRefs<T extends Object>(
+    Expression<T> Function($$ContractsTableAnnotationComposer a) f,
+  ) {
+    final $$ContractsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.ownerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> invoicesRefs<T extends Object>(
     Expression<T> Function($$InvoicesTableAnnotationComposer a) f,
   ) {
@@ -3803,6 +4397,7 @@ class $$UsersTableTableManager
             bool roomsRefs,
             bool tenantsRefs,
             bool meterReadingsRefs,
+            bool contractsRefs,
             bool invoicesRefs,
             bool onboardingStatesRefs,
           })
@@ -3865,6 +4460,7 @@ class $$UsersTableTableManager
             roomsRefs = false,
             tenantsRefs = false,
             meterReadingsRefs = false,
+            contractsRefs = false,
             invoicesRefs = false,
             onboardingStatesRefs = false,
           }) {
@@ -3875,6 +4471,7 @@ class $$UsersTableTableManager
                 if (roomsRefs) db.rooms,
                 if (tenantsRefs) db.tenants,
                 if (meterReadingsRefs) db.meterReadings,
+                if (contractsRefs) db.contracts,
                 if (invoicesRefs) db.invoices,
                 if (onboardingStatesRefs) db.onboardingStates,
               ],
@@ -3947,6 +4544,24 @@ class $$UsersTableTableManager
                           ),
                       typedResults: items,
                     ),
+                  if (contractsRefs)
+                    await $_getPrefetchedData<User, $UsersTable, Contract>(
+                      currentTable: table,
+                      referencedTable: $$UsersTableReferences
+                          ._contractsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).contractsRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.ownerId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
                   if (invoicesRefs)
                     await $_getPrefetchedData<User, $UsersTable, Invoice>(
                       currentTable: table,
@@ -4011,6 +4626,7 @@ typedef $$UsersTableProcessedTableManager =
         bool roomsRefs,
         bool tenantsRefs,
         bool meterReadingsRefs,
+        bool contractsRefs,
         bool invoicesRefs,
         bool onboardingStatesRefs,
       })
@@ -4120,6 +4736,24 @@ final class $$PropertiesTableReferences
     ).filter((f) => f.propertyId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_tenantsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ContractsTable, List<Contract>>
+  _contractsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.contracts,
+    aliasName: $_aliasNameGenerator(db.properties.id, db.contracts.propertyId),
+  );
+
+  $$ContractsTableProcessedTableManager get contractsRefs {
+    final manager = $$ContractsTableTableManager(
+      $_db,
+      $_db.contracts,
+    ).filter((f) => f.propertyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_contractsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -4276,6 +4910,31 @@ class $$PropertiesTableFilterComposer
           }) => $$TenantsTableFilterComposer(
             $db: $db,
             $table: $db.tenants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> contractsRefs(
+    Expression<bool> Function($$ContractsTableFilterComposer f) f,
+  ) {
+    final $$ContractsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.propertyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableFilterComposer(
+            $db: $db,
+            $table: $db.contracts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4514,6 +5173,31 @@ class $$PropertiesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> contractsRefs<T extends Object>(
+    Expression<T> Function($$ContractsTableAnnotationComposer a) f,
+  ) {
+    final $$ContractsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.propertyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PropertiesTableTableManager
@@ -4534,6 +5218,7 @@ class $$PropertiesTableTableManager
             bool servicesRefs,
             bool roomsRefs,
             bool tenantsRefs,
+            bool contractsRefs,
           })
         > {
   $$PropertiesTableTableManager(_$AppDatabase db, $PropertiesTable table)
@@ -4618,6 +5303,7 @@ class $$PropertiesTableTableManager
             servicesRefs = false,
             roomsRefs = false,
             tenantsRefs = false,
+            contractsRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
@@ -4625,6 +5311,7 @@ class $$PropertiesTableTableManager
                 if (servicesRefs) db.services,
                 if (roomsRefs) db.rooms,
                 if (tenantsRefs) db.tenants,
+                if (contractsRefs) db.contracts,
               ],
               addJoins: <
                 T extends TableManagerState<
@@ -4722,6 +5409,28 @@ class $$PropertiesTableTableManager
                           ),
                       typedResults: items,
                     ),
+                  if (contractsRefs)
+                    await $_getPrefetchedData<
+                      Property,
+                      $PropertiesTable,
+                      Contract
+                    >(
+                      currentTable: table,
+                      referencedTable: $$PropertiesTableReferences
+                          ._contractsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$PropertiesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).contractsRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.propertyId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
@@ -4747,6 +5456,7 @@ typedef $$PropertiesTableProcessedTableManager =
         bool servicesRefs,
         bool roomsRefs,
         bool tenantsRefs,
+        bool contractsRefs,
       })
     >;
 typedef $$ServicesTableCreateCompanionBuilder =
@@ -5211,6 +5921,24 @@ final class $$RoomsTableReferences
     );
   }
 
+  static MultiTypedResultKey<$ContractsTable, List<Contract>>
+  _contractsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.contracts,
+    aliasName: $_aliasNameGenerator(db.rooms.id, db.contracts.roomId),
+  );
+
+  $$ContractsTableProcessedTableManager get contractsRefs {
+    final manager = $$ContractsTableTableManager(
+      $_db,
+      $_db.contracts,
+    ).filter((f) => f.roomId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_contractsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$InvoicesTable, List<Invoice>> _invoicesRefsTable(
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
@@ -5362,6 +6090,31 @@ class $$RoomsTableFilterComposer extends Composer<_$AppDatabase, $RoomsTable> {
           }) => $$MeterReadingsTableFilterComposer(
             $db: $db,
             $table: $db.meterReadings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> contractsRefs(
+    Expression<bool> Function($$ContractsTableFilterComposer f) f,
+  ) {
+    final $$ContractsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.roomId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableFilterComposer(
+            $db: $db,
+            $table: $db.contracts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5614,6 +6367,31 @@ class $$RoomsTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> contractsRefs<T extends Object>(
+    Expression<T> Function($$ContractsTableAnnotationComposer a) f,
+  ) {
+    final $$ContractsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.roomId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> invoicesRefs<T extends Object>(
     Expression<T> Function($$InvoicesTableAnnotationComposer a) f,
   ) {
@@ -5658,6 +6436,7 @@ class $$RoomsTableTableManager
             bool propertyId,
             bool tenantsRefs,
             bool meterReadingsRefs,
+            bool contractsRefs,
             bool invoicesRefs,
           })
         > {
@@ -5735,6 +6514,7 @@ class $$RoomsTableTableManager
             propertyId = false,
             tenantsRefs = false,
             meterReadingsRefs = false,
+            contractsRefs = false,
             invoicesRefs = false,
           }) {
             return PrefetchHooks(
@@ -5742,6 +6522,7 @@ class $$RoomsTableTableManager
               explicitlyWatchedTables: [
                 if (tenantsRefs) db.tenants,
                 if (meterReadingsRefs) db.meterReadings,
+                if (contractsRefs) db.contracts,
                 if (invoicesRefs) db.invoices,
               ],
               addJoins: <
@@ -5819,6 +6600,23 @@ class $$RoomsTableTableManager
                               referencedItems.where((e) => e.roomId == item.id),
                       typedResults: items,
                     ),
+                  if (contractsRefs)
+                    await $_getPrefetchedData<Room, $RoomsTable, Contract>(
+                      currentTable: table,
+                      referencedTable: $$RoomsTableReferences
+                          ._contractsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$RoomsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).contractsRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) =>
+                              referencedItems.where((e) => e.roomId == item.id),
+                      typedResults: items,
+                    ),
                   if (invoicesRefs)
                     await $_getPrefetchedData<Room, $RoomsTable, Invoice>(
                       currentTable: table,
@@ -5861,6 +6659,7 @@ typedef $$RoomsTableProcessedTableManager =
         bool propertyId,
         bool tenantsRefs,
         bool meterReadingsRefs,
+        bool contractsRefs,
         bool invoicesRefs,
       })
     >;
@@ -5873,10 +6672,8 @@ typedef $$TenantsTableCreateCompanionBuilder =
       required String cccd,
       required String dateOfBirth,
       required String hometown,
-      required String roomId,
-      required String propertyId,
-      required String startDate,
-      required double deposit,
+      Value<String?> roomId,
+      Value<String?> propertyId,
       Value<bool> isVerified,
       Value<bool> isSynced,
       Value<bool> isDeleted,
@@ -5891,10 +6688,8 @@ typedef $$TenantsTableUpdateCompanionBuilder =
       Value<String> cccd,
       Value<String> dateOfBirth,
       Value<String> hometown,
-      Value<String> roomId,
-      Value<String> propertyId,
-      Value<String> startDate,
-      Value<double> deposit,
+      Value<String?> roomId,
+      Value<String?> propertyId,
       Value<bool> isVerified,
       Value<bool> isSynced,
       Value<bool> isDeleted,
@@ -5927,9 +6722,9 @@ final class $$TenantsTableReferences
     $_aliasNameGenerator(db.tenants.roomId, db.rooms.id),
   );
 
-  $$RoomsTableProcessedTableManager get roomId {
-    final $_column = $_itemColumn<String>('room_id')!;
-
+  $$RoomsTableProcessedTableManager? get roomId {
+    final $_column = $_itemColumn<String>('room_id');
+    if ($_column == null) return null;
     final manager = $$RoomsTableTableManager(
       $_db,
       $_db.rooms,
@@ -5946,9 +6741,9 @@ final class $$TenantsTableReferences
         $_aliasNameGenerator(db.tenants.propertyId, db.properties.id),
       );
 
-  $$PropertiesTableProcessedTableManager get propertyId {
-    final $_column = $_itemColumn<String>('property_id')!;
-
+  $$PropertiesTableProcessedTableManager? get propertyId {
+    final $_column = $_itemColumn<String>('property_id');
+    if ($_column == null) return null;
     final manager = $$PropertiesTableTableManager(
       $_db,
       $_db.properties,
@@ -5957,6 +6752,24 @@ final class $$TenantsTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$ContractsTable, List<Contract>>
+  _contractsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.contracts,
+    aliasName: $_aliasNameGenerator(db.tenants.id, db.contracts.tenantId),
+  );
+
+  $$ContractsTableProcessedTableManager get contractsRefs {
+    final manager = $$ContractsTableTableManager(
+      $_db,
+      $_db.contracts,
+    ).filter((f) => f.tenantId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_contractsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -5997,16 +6810,6 @@ class $$TenantsTableFilterComposer
 
   ColumnFilters<String> get hometown => $composableBuilder(
     column: $table.hometown,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get startDate => $composableBuilder(
-    column: $table.startDate,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get deposit => $composableBuilder(
-    column: $table.deposit,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6093,6 +6896,31 @@ class $$TenantsTableFilterComposer
     );
     return composer;
   }
+
+  Expression<bool> contractsRefs(
+    Expression<bool> Function($$ContractsTableFilterComposer f) f,
+  ) {
+    final $$ContractsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.tenantId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableFilterComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TenantsTableOrderingComposer
@@ -6131,16 +6959,6 @@ class $$TenantsTableOrderingComposer
 
   ColumnOrderings<String> get hometown => $composableBuilder(
     column: $table.hometown,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get startDate => $composableBuilder(
-    column: $table.startDate,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get deposit => $composableBuilder(
-    column: $table.deposit,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6258,12 +7076,6 @@ class $$TenantsTableAnnotationComposer
   GeneratedColumn<String> get hometown =>
       $composableBuilder(column: $table.hometown, builder: (column) => column);
 
-  GeneratedColumn<String> get startDate =>
-      $composableBuilder(column: $table.startDate, builder: (column) => column);
-
-  GeneratedColumn<double> get deposit =>
-      $composableBuilder(column: $table.deposit, builder: (column) => column);
-
   GeneratedColumn<bool> get isVerified => $composableBuilder(
     column: $table.isVerified,
     builder: (column) => column,
@@ -6343,6 +7155,31 @@ class $$TenantsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> contractsRefs<T extends Object>(
+    Expression<T> Function($$ContractsTableAnnotationComposer a) f,
+  ) {
+    final $$ContractsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.tenantId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TenantsTableTableManager
@@ -6358,7 +7195,12 @@ class $$TenantsTableTableManager
           $$TenantsTableUpdateCompanionBuilder,
           (Tenant, $$TenantsTableReferences),
           Tenant,
-          PrefetchHooks Function({bool ownerId, bool roomId, bool propertyId})
+          PrefetchHooks Function({
+            bool ownerId,
+            bool roomId,
+            bool propertyId,
+            bool contractsRefs,
+          })
         > {
   $$TenantsTableTableManager(_$AppDatabase db, $TenantsTable table)
     : super(
@@ -6380,10 +7222,8 @@ class $$TenantsTableTableManager
                 Value<String> cccd = const Value.absent(),
                 Value<String> dateOfBirth = const Value.absent(),
                 Value<String> hometown = const Value.absent(),
-                Value<String> roomId = const Value.absent(),
-                Value<String> propertyId = const Value.absent(),
-                Value<String> startDate = const Value.absent(),
-                Value<double> deposit = const Value.absent(),
+                Value<String?> roomId = const Value.absent(),
+                Value<String?> propertyId = const Value.absent(),
                 Value<bool> isVerified = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
@@ -6398,8 +7238,6 @@ class $$TenantsTableTableManager
                 hometown: hometown,
                 roomId: roomId,
                 propertyId: propertyId,
-                startDate: startDate,
-                deposit: deposit,
                 isVerified: isVerified,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
@@ -6414,10 +7252,8 @@ class $$TenantsTableTableManager
                 required String cccd,
                 required String dateOfBirth,
                 required String hometown,
-                required String roomId,
-                required String propertyId,
-                required String startDate,
-                required double deposit,
+                Value<String?> roomId = const Value.absent(),
+                Value<String?> propertyId = const Value.absent(),
                 Value<bool> isVerified = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
@@ -6432,8 +7268,6 @@ class $$TenantsTableTableManager
                 hometown: hometown,
                 roomId: roomId,
                 propertyId: propertyId,
-                startDate: startDate,
-                deposit: deposit,
                 isVerified: isVerified,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
@@ -6453,10 +7287,11 @@ class $$TenantsTableTableManager
             ownerId = false,
             roomId = false,
             propertyId = false,
+            contractsRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [],
+              explicitlyWatchedTables: [if (contractsRefs) db.contracts],
               addJoins: <
                 T extends TableManagerState<
                   dynamic,
@@ -6514,7 +7349,26 @@ class $$TenantsTableTableManager
                 return state;
               },
               getPrefetchedDataCallback: (items) async {
-                return [];
+                return [
+                  if (contractsRefs)
+                    await $_getPrefetchedData<Tenant, $TenantsTable, Contract>(
+                      currentTable: table,
+                      referencedTable: $$TenantsTableReferences
+                          ._contractsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$TenantsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).contractsRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.tenantId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
               },
             );
           },
@@ -6534,7 +7388,12 @@ typedef $$TenantsTableProcessedTableManager =
       $$TenantsTableUpdateCompanionBuilder,
       (Tenant, $$TenantsTableReferences),
       Tenant,
-      PrefetchHooks Function({bool ownerId, bool roomId, bool propertyId})
+      PrefetchHooks Function({
+        bool ownerId,
+        bool roomId,
+        bool propertyId,
+        bool contractsRefs,
+      })
     >;
 typedef $$MeterReadingsTableCreateCompanionBuilder =
     MeterReadingsCompanion Function({
@@ -7072,11 +7931,855 @@ typedef $$MeterReadingsTableProcessedTableManager =
       MeterReading,
       PrefetchHooks Function({bool ownerId, bool roomId})
     >;
+typedef $$ContractsTableCreateCompanionBuilder =
+    ContractsCompanion Function({
+      required String id,
+      required String ownerId,
+      required String roomId,
+      required String tenantId,
+      required String propertyId,
+      required double rentPrice,
+      required double deposit,
+      required String startDate,
+      Value<String?> endDate,
+      Value<ContractStatus> status,
+      Value<String?> notes,
+      Value<bool> isSynced,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+typedef $$ContractsTableUpdateCompanionBuilder =
+    ContractsCompanion Function({
+      Value<String> id,
+      Value<String> ownerId,
+      Value<String> roomId,
+      Value<String> tenantId,
+      Value<String> propertyId,
+      Value<double> rentPrice,
+      Value<double> deposit,
+      Value<String> startDate,
+      Value<String?> endDate,
+      Value<ContractStatus> status,
+      Value<String?> notes,
+      Value<bool> isSynced,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+
+final class $$ContractsTableReferences
+    extends BaseReferences<_$AppDatabase, $ContractsTable, Contract> {
+  $$ContractsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UsersTable _ownerIdTable(_$AppDatabase db) => db.users.createAlias(
+    $_aliasNameGenerator(db.contracts.ownerId, db.users.id),
+  );
+
+  $$UsersTableProcessedTableManager get ownerId {
+    final $_column = $_itemColumn<String>('owner_id')!;
+
+    final manager = $$UsersTableTableManager(
+      $_db,
+      $_db.users,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ownerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $RoomsTable _roomIdTable(_$AppDatabase db) => db.rooms.createAlias(
+    $_aliasNameGenerator(db.contracts.roomId, db.rooms.id),
+  );
+
+  $$RoomsTableProcessedTableManager get roomId {
+    final $_column = $_itemColumn<String>('room_id')!;
+
+    final manager = $$RoomsTableTableManager(
+      $_db,
+      $_db.rooms,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_roomIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $TenantsTable _tenantIdTable(_$AppDatabase db) => db.tenants
+      .createAlias($_aliasNameGenerator(db.contracts.tenantId, db.tenants.id));
+
+  $$TenantsTableProcessedTableManager get tenantId {
+    final $_column = $_itemColumn<String>('tenant_id')!;
+
+    final manager = $$TenantsTableTableManager(
+      $_db,
+      $_db.tenants,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_tenantIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $PropertiesTable _propertyIdTable(_$AppDatabase db) =>
+      db.properties.createAlias(
+        $_aliasNameGenerator(db.contracts.propertyId, db.properties.id),
+      );
+
+  $$PropertiesTableProcessedTableManager get propertyId {
+    final $_column = $_itemColumn<String>('property_id')!;
+
+    final manager = $$PropertiesTableTableManager(
+      $_db,
+      $_db.properties,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_propertyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$InvoicesTable, List<Invoice>> _invoicesRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.invoices,
+    aliasName: $_aliasNameGenerator(db.contracts.id, db.invoices.contractId),
+  );
+
+  $$InvoicesTableProcessedTableManager get invoicesRefs {
+    final manager = $$InvoicesTableTableManager(
+      $_db,
+      $_db.invoices,
+    ).filter((f) => f.contractId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_invoicesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ContractsTableFilterComposer
+    extends Composer<_$AppDatabase, $ContractsTable> {
+  $$ContractsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get rentPrice => $composableBuilder(
+    column: $table.rentPrice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get deposit => $composableBuilder(
+    column: $table.deposit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<ContractStatus, ContractStatus, String>
+  get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UsersTableFilterComposer get ownerId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableFilterComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoomsTableFilterComposer get roomId {
+    final $$RoomsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roomId,
+      referencedTable: $db.rooms,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomsTableFilterComposer(
+            $db: $db,
+            $table: $db.rooms,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TenantsTableFilterComposer get tenantId {
+    final $$TenantsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantId,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableFilterComposer(
+            $db: $db,
+            $table: $db.tenants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PropertiesTableFilterComposer get propertyId {
+    final $$PropertiesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.propertyId,
+      referencedTable: $db.properties,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PropertiesTableFilterComposer(
+            $db: $db,
+            $table: $db.properties,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> invoicesRefs(
+    Expression<bool> Function($$InvoicesTableFilterComposer f) f,
+  ) {
+    final $$InvoicesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.invoices,
+      getReferencedColumn: (t) => t.contractId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoicesTableFilterComposer(
+            $db: $db,
+            $table: $db.invoices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ContractsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContractsTable> {
+  $$ContractsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get rentPrice => $composableBuilder(
+    column: $table.rentPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get deposit => $composableBuilder(
+    column: $table.deposit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startDate => $composableBuilder(
+    column: $table.startDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endDate => $composableBuilder(
+    column: $table.endDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UsersTableOrderingComposer get ownerId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableOrderingComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoomsTableOrderingComposer get roomId {
+    final $$RoomsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roomId,
+      referencedTable: $db.rooms,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomsTableOrderingComposer(
+            $db: $db,
+            $table: $db.rooms,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TenantsTableOrderingComposer get tenantId {
+    final $$TenantsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantId,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableOrderingComposer(
+            $db: $db,
+            $table: $db.tenants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PropertiesTableOrderingComposer get propertyId {
+    final $$PropertiesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.propertyId,
+      referencedTable: $db.properties,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PropertiesTableOrderingComposer(
+            $db: $db,
+            $table: $db.properties,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContractsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContractsTable> {
+  $$ContractsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get rentPrice =>
+      $composableBuilder(column: $table.rentPrice, builder: (column) => column);
+
+  GeneratedColumn<double> get deposit =>
+      $composableBuilder(column: $table.deposit, builder: (column) => column);
+
+  GeneratedColumn<String> get startDate =>
+      $composableBuilder(column: $table.startDate, builder: (column) => column);
+
+  GeneratedColumn<String> get endDate =>
+      $composableBuilder(column: $table.endDate, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ContractStatus, String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  $$UsersTableAnnotationComposer get ownerId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ownerId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$RoomsTableAnnotationComposer get roomId {
+    final $$RoomsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roomId,
+      referencedTable: $db.rooms,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.rooms,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TenantsTableAnnotationComposer get tenantId {
+    final $$TenantsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantId,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.tenants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PropertiesTableAnnotationComposer get propertyId {
+    final $$PropertiesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.propertyId,
+      referencedTable: $db.properties,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PropertiesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.properties,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> invoicesRefs<T extends Object>(
+    Expression<T> Function($$InvoicesTableAnnotationComposer a) f,
+  ) {
+    final $$InvoicesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.invoices,
+      getReferencedColumn: (t) => t.contractId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoicesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.invoices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ContractsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ContractsTable,
+          Contract,
+          $$ContractsTableFilterComposer,
+          $$ContractsTableOrderingComposer,
+          $$ContractsTableAnnotationComposer,
+          $$ContractsTableCreateCompanionBuilder,
+          $$ContractsTableUpdateCompanionBuilder,
+          (Contract, $$ContractsTableReferences),
+          Contract,
+          PrefetchHooks Function({
+            bool ownerId,
+            bool roomId,
+            bool tenantId,
+            bool propertyId,
+            bool invoicesRefs,
+          })
+        > {
+  $$ContractsTableTableManager(_$AppDatabase db, $ContractsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$ContractsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$ContractsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$ContractsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> roomId = const Value.absent(),
+                Value<String> tenantId = const Value.absent(),
+                Value<String> propertyId = const Value.absent(),
+                Value<double> rentPrice = const Value.absent(),
+                Value<double> deposit = const Value.absent(),
+                Value<String> startDate = const Value.absent(),
+                Value<String?> endDate = const Value.absent(),
+                Value<ContractStatus> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContractsCompanion(
+                id: id,
+                ownerId: ownerId,
+                roomId: roomId,
+                tenantId: tenantId,
+                propertyId: propertyId,
+                rentPrice: rentPrice,
+                deposit: deposit,
+                startDate: startDate,
+                endDate: endDate,
+                status: status,
+                notes: notes,
+                isSynced: isSynced,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerId,
+                required String roomId,
+                required String tenantId,
+                required String propertyId,
+                required double rentPrice,
+                required double deposit,
+                required String startDate,
+                Value<String?> endDate = const Value.absent(),
+                Value<ContractStatus> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContractsCompanion.insert(
+                id: id,
+                ownerId: ownerId,
+                roomId: roomId,
+                tenantId: tenantId,
+                propertyId: propertyId,
+                rentPrice: rentPrice,
+                deposit: deposit,
+                startDate: startDate,
+                endDate: endDate,
+                status: status,
+                notes: notes,
+                isSynced: isSynced,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $$ContractsTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({
+            ownerId = false,
+            roomId = false,
+            tenantId = false,
+            propertyId = false,
+            invoicesRefs = false,
+          }) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (invoicesRefs) db.invoices],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (ownerId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.ownerId,
+                            referencedTable: $$ContractsTableReferences
+                                ._ownerIdTable(db),
+                            referencedColumn:
+                                $$ContractsTableReferences._ownerIdTable(db).id,
+                          )
+                          as T;
+                }
+                if (roomId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.roomId,
+                            referencedTable: $$ContractsTableReferences
+                                ._roomIdTable(db),
+                            referencedColumn:
+                                $$ContractsTableReferences._roomIdTable(db).id,
+                          )
+                          as T;
+                }
+                if (tenantId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.tenantId,
+                            referencedTable: $$ContractsTableReferences
+                                ._tenantIdTable(db),
+                            referencedColumn:
+                                $$ContractsTableReferences
+                                    ._tenantIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+                if (propertyId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.propertyId,
+                            referencedTable: $$ContractsTableReferences
+                                ._propertyIdTable(db),
+                            referencedColumn:
+                                $$ContractsTableReferences
+                                    ._propertyIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (invoicesRefs)
+                    await $_getPrefetchedData<
+                      Contract,
+                      $ContractsTable,
+                      Invoice
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ContractsTableReferences
+                          ._invoicesRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$ContractsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).invoicesRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.contractId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ContractsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ContractsTable,
+      Contract,
+      $$ContractsTableFilterComposer,
+      $$ContractsTableOrderingComposer,
+      $$ContractsTableAnnotationComposer,
+      $$ContractsTableCreateCompanionBuilder,
+      $$ContractsTableUpdateCompanionBuilder,
+      (Contract, $$ContractsTableReferences),
+      Contract,
+      PrefetchHooks Function({
+        bool ownerId,
+        bool roomId,
+        bool tenantId,
+        bool propertyId,
+        bool invoicesRefs,
+      })
+    >;
 typedef $$InvoicesTableCreateCompanionBuilder =
     InvoicesCompanion Function({
       required String id,
       required String ownerId,
       required String roomId,
+      Value<String?> contractId,
       required String month,
       required double totalAmount,
       required InvoiceStatus status,
@@ -7092,6 +8795,7 @@ typedef $$InvoicesTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> ownerId,
       Value<String> roomId,
+      Value<String?> contractId,
       Value<String> month,
       Value<double> totalAmount,
       Value<InvoiceStatus> status,
@@ -7137,6 +8841,25 @@ final class $$InvoicesTableReferences
       $_db.rooms,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_roomIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContractsTable _contractIdTable(_$AppDatabase db) =>
+      db.contracts.createAlias(
+        $_aliasNameGenerator(db.invoices.contractId, db.contracts.id),
+      );
+
+  $$ContractsTableProcessedTableManager? get contractId {
+    final $_column = $_itemColumn<String>('contract_id');
+    if ($_column == null) return null;
+    final manager = $$ContractsTableTableManager(
+      $_db,
+      $_db.contracts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contractIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -7236,6 +8959,29 @@ class $$InvoicesTableFilterComposer
           }) => $$RoomsTableFilterComposer(
             $db: $db,
             $table: $db.rooms,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$ContractsTableFilterComposer get contractId {
+    final $$ContractsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableFilterComposer(
+            $db: $db,
+            $table: $db.contracts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7345,6 +9091,29 @@ class $$InvoicesTableOrderingComposer
     );
     return composer;
   }
+
+  $$ContractsTableOrderingComposer get contractId {
+    final $$ContractsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$InvoicesTableAnnotationComposer
@@ -7430,6 +9199,29 @@ class $$InvoicesTableAnnotationComposer
     );
     return composer;
   }
+
+  $$ContractsTableAnnotationComposer get contractId {
+    final $$ContractsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$InvoicesTableTableManager
@@ -7445,7 +9237,7 @@ class $$InvoicesTableTableManager
           $$InvoicesTableUpdateCompanionBuilder,
           (Invoice, $$InvoicesTableReferences),
           Invoice,
-          PrefetchHooks Function({bool ownerId, bool roomId})
+          PrefetchHooks Function({bool ownerId, bool roomId, bool contractId})
         > {
   $$InvoicesTableTableManager(_$AppDatabase db, $InvoicesTable table)
     : super(
@@ -7463,6 +9255,7 @@ class $$InvoicesTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> ownerId = const Value.absent(),
                 Value<String> roomId = const Value.absent(),
+                Value<String?> contractId = const Value.absent(),
                 Value<String> month = const Value.absent(),
                 Value<double> totalAmount = const Value.absent(),
                 Value<InvoiceStatus> status = const Value.absent(),
@@ -7476,6 +9269,7 @@ class $$InvoicesTableTableManager
                 id: id,
                 ownerId: ownerId,
                 roomId: roomId,
+                contractId: contractId,
                 month: month,
                 totalAmount: totalAmount,
                 status: status,
@@ -7491,6 +9285,7 @@ class $$InvoicesTableTableManager
                 required String id,
                 required String ownerId,
                 required String roomId,
+                Value<String?> contractId = const Value.absent(),
                 required String month,
                 required double totalAmount,
                 required InvoiceStatus status,
@@ -7504,6 +9299,7 @@ class $$InvoicesTableTableManager
                 id: id,
                 ownerId: ownerId,
                 roomId: roomId,
+                contractId: contractId,
                 month: month,
                 totalAmount: totalAmount,
                 status: status,
@@ -7524,7 +9320,11 @@ class $$InvoicesTableTableManager
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: ({ownerId = false, roomId = false}) {
+          prefetchHooksCallback: ({
+            ownerId = false,
+            roomId = false,
+            contractId = false,
+          }) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -7567,6 +9367,20 @@ class $$InvoicesTableTableManager
                           )
                           as T;
                 }
+                if (contractId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contractId,
+                            referencedTable: $$InvoicesTableReferences
+                                ._contractIdTable(db),
+                            referencedColumn:
+                                $$InvoicesTableReferences
+                                    ._contractIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
 
                 return state;
               },
@@ -7591,7 +9405,7 @@ typedef $$InvoicesTableProcessedTableManager =
       $$InvoicesTableUpdateCompanionBuilder,
       (Invoice, $$InvoicesTableReferences),
       Invoice,
-      PrefetchHooks Function({bool ownerId, bool roomId})
+      PrefetchHooks Function({bool ownerId, bool roomId, bool contractId})
     >;
 typedef $$OnboardingStatesTableCreateCompanionBuilder =
     OnboardingStatesCompanion Function({
@@ -7888,6 +9702,8 @@ class $AppDatabaseManager {
       $$TenantsTableTableManager(_db, _db.tenants);
   $$MeterReadingsTableTableManager get meterReadings =>
       $$MeterReadingsTableTableManager(_db, _db.meterReadings);
+  $$ContractsTableTableManager get contracts =>
+      $$ContractsTableTableManager(_db, _db.contracts);
   $$InvoicesTableTableManager get invoices =>
       $$InvoicesTableTableManager(_db, _db.invoices);
   $$OnboardingStatesTableTableManager get onboardingStates =>

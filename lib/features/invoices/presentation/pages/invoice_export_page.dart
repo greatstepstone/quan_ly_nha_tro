@@ -159,7 +159,7 @@ class _InvoiceExportPageState extends State<InvoiceExportPage> {
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
-                      pw.Text('TỔNG CỘNG',
+                      pw.Text(AppStrings.invoiceTotal,
                         style: pw.TextStyle(font: fontBold, fontSize: 14, color: PdfColor.fromHex('#0066FF'))),
                       pw.Text(_fmt(_total),
                         style: pw.TextStyle(font: fontBold, fontSize: 20, color: PdfColor.fromHex('#0066FF'))),
@@ -170,7 +170,7 @@ class _InvoiceExportPageState extends State<InvoiceExportPage> {
 
                 // Footer
                 pw.Center(
-                  child: pw.Text('Phần mềm Quản lý Nhà Trọ - Azure Clarity',
+                  child: pw.Text(AppStrings.invoicePdfFooter,
                     style: pw.TextStyle(font: fontData, fontSize: 10, color: PdfColors.grey)),
                 ),
               ],
@@ -180,8 +180,8 @@ class _InvoiceExportPageState extends State<InvoiceExportPage> {
       );
 
       final bytes = await pdf.save();
-      final fileName = 'hoa_don_${widget.room.name}_${widget.invoice.month.replaceAll('/', '-')}.pdf';
-      final shareText = 'Hóa đơn tiền phòng ${widget.room.name} - Tháng ${widget.invoice.month}';
+      final fileName = '${AppStrings.invoicePdfFileName}_${widget.room.name}_${widget.invoice.month.replaceAll('/', '-')}.pdf';
+      final shareText = '${AppStrings.invoicePdfShareText} ${widget.room.name} - ${AppStrings.monthSuffix} ${widget.invoice.month}';
 
       if (kIsWeb) {
         await downloadBytes(bytes, fileName, 'application/pdf');
@@ -190,7 +190,7 @@ class _InvoiceExportPageState extends State<InvoiceExportPage> {
       }
 
       if (mounted) {
-        final msg = kIsWeb ? 'Đã xuất PDF thành công!' : 'Đã mở danh sách chia sẻ PDF!';
+        final msg = kIsWeb ? AppStrings.invoiceExportPdfSuccess : AppStrings.invoiceExportPdfShare;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(msg), backgroundColor: Colors.green),
         );
@@ -198,7 +198,7 @@ class _InvoiceExportPageState extends State<InvoiceExportPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi xuất PDF: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${AppStrings.invoiceExportPdfError}$e'), backgroundColor: Colors.red),
         );
       }
     } finally {

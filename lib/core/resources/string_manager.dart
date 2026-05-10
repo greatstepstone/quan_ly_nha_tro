@@ -14,6 +14,8 @@ class AppStrings {
   static String get ok => isEn ? 'OK' : 'Đồng ý';
   static String get close => isEn ? 'Close' : 'Đóng';
   static String get info => isEn ? 'Info' : 'Thông tin';
+  static String get home => isEn ? 'Home' : 'Trang chủ';
+  static String get reports => isEn ? 'Reports' : 'Báo cáo';
   static String get zero => '0';
   static String get loading => isEn ? 'Loading...' : 'Đang tải...';
   static String get retry => isEn ? 'Retry' : 'Thử lại';
@@ -33,7 +35,7 @@ class AppStrings {
   static String get management => isEn ? 'MANAGEMENT' : 'QUẢN LÝ';
   static String get properties => isEn ? 'Properties' : 'Nhà trọ';
   static String get rooms => isEn ? 'Rooms' : 'Phòng trọ';
-  static String get tenants => isEn ? 'Tenants' : 'Khách thuê';
+  // static String get tenants => isEn ? 'Tenants' : 'Khách thuê';
   static String get invoices => isEn ? 'Invoices' : 'Hóa đơn';
 
   // Settings
@@ -195,5 +197,154 @@ class AppStrings {
   static String get loginTryGuestBtn => isEn ? 'Try Guest Mode' : 'Thử Guest Mode';
   static String get loginGeneralError => isEn ? 'Login error. Please try again.' : 'Lỗi đăng nhập. Vui lòng thử lại.';
   static String get loginServerConnectionError => isEn ? 'Could not connect to server. Please try again.' : 'Không thể kết nối với máy chủ. Vui lòng thử lại.';
-  static String get loginManagementEcosystem => isEn ? 'Management Ecosystem' : 'Management Ecosystem';
+  static String get loginManagementEcosystem => isEn ? 'Management Ecosystem' : 'Hệ sinh thái Quản lý';
+
+  // Sign Up Page
+  static String get signUpTitle => isEn ? 'Create Account' : 'Tạo tài khoản';
+  static String get signUpSubtitle => isEn ? 'Join us to start managing your properties professionally.' : 'Tham gia cùng chúng tôi để bắt đầu quản lý nhà trọ chuyên nghiệp.';
+  static String get signUpFullName => isEn ? 'Full Name' : 'Họ và tên';
+  static String get signUpFullNameHint => isEn ? 'Enter your full name' : 'Nhập họ và tên của bạn';
+  static String get signUpEmailHint => isEn ? 'Email address' : 'Địa chỉ email';
+  static String get signUpPasswordHint => isEn ? 'Create password' : 'Tạo mật khẩu';
+  static String get signUpBtn => isEn ? 'Sign Up' : 'Đăng ký';
+  static String get signUpAlreadyHaveAccount => isEn ? 'Already have an account?' : 'Đã có tài khoản?';
+  static String get signUpLoginNow => isEn ? 'Login Now' : 'Đăng nhập ngay';
+  static String get signUpSuccess => isEn ? 'Account created successfully! Please verify your email.' : 'Tạo tài khoản thành công! Vui lòng xác minh email.';
+  static String get signUpError => isEn ? 'Sign up failed. Please try again.' : 'Đăng ký thất bại. Vui lòng thử lại.';
+  static String get signUpConfirmPassword => isEn ? 'Confirm Password' : 'Xác nhận mật khẩu';
+  static String get signUpPasswordMismatch => isEn ? 'Passwords do not match' : 'Mật khẩu không khớp';
+  static String get signUpNoAccountYet => isEn ? "Don't have an account?" : 'Chưa có tài khoản?';
+  static String get signUpCreateOne => isEn ? 'Create One' : 'Tạo ngay';
+
+  // Invoices & Export
+  static String get invoiceTitle => isEn ? 'Create Invoice' : 'Lập hóa đơn';
+  static String get invoiceRoomInfo => isEn ? 'ROOM INFORMATION' : 'THÔNG TIN PHÒNG';
+  static String get invoiceTenantLabel => isEn ? 'Tenant: ' : 'Khách thuê: ';
+  static String get invoiceElectricityWater => isEn ? 'Electricity & Water' : 'Điện & Nước';
+  static String get invoiceElectricOld => isEn ? 'Old Electric' : 'Chỉ số điện cũ';
+  static String get invoiceElectricNew => isEn ? 'New Electric' : 'Chỉ số điện mới';
+  static String get invoiceWaterOld => isEn ? 'Old Water' : 'Chỉ số nước cũ';
+  static String get invoiceWaterNew => isEn ? 'New Water' : 'Chỉ số nước mới';
+  static String get invoiceElectricCost => isEn ? 'Electric Cost' : 'Tiền điện';
+  static String get invoiceWaterCost => isEn ? 'Water Cost' : 'Tiền nước';
+  static String get invoiceRentServices => isEn ? 'Rent & Services' : 'Tiền phòng & Dịch vụ';
+  static String get invoiceNotes => isEn ? 'Notes' : 'Ghi chú';
+  static String get invoiceNotesHint => isEn ? 'Enter notes for this invoice...' : 'Nhập ghi chú cho hóa đơn này...';
+  static String get invoiceTotalAmountToPay => isEn ? 'Total amount to pay' : 'Tổng số tiền cần thanh toán';
+  static String get invoiceExportBtn => isEn ? 'Export Invoice' : 'Xuất hóa đơn';
+  static String get invoiceSaveBtn => isEn ? 'Save Invoice' : 'Lưu hóa đơn';
+  static String get invoiceUpdateBtn => isEn ? 'Update Invoice' : 'Cập nhật hóa đơn';
+  static String get invoiceSaveSuccess => isEn ? 'Invoice saved successfully for ' : 'Đã lưu hóa đơn ';
+  static String get invoiceSaveError => isEn ? 'Error: ' : 'Lỗi: ';
+  static String get invoiceMustSaveBeforeExport => isEn ? 'Please save invoice before exporting!' : 'Vui lòng lưu hóa đơn trước khi xuất!';
+  static String get invoiceRoomNotFound => isEn ? 'Room not found.' : 'Không tìm thấy phòng.';
+  static String get invoiceLoginRequired => isEn ? 'Please login again' : 'Vui lòng đăng nhập lại';
+  static String get invoiceStatusTitle => isEn ? 'Invoice Status' : 'Trạng thái hóa đơn';
+  static String get invoiceFilterAll => isEn ? 'All' : 'Tất cả';
+  static String get invoiceFilterNotCreated => isEn ? 'Not Created' : 'Chưa lập';
+  static String get invoiceFilterWaitingPayment => isEn ? 'Waiting Payment' : 'Chờ thanh toán';
+  static String get invoiceFilterPaid => isEn ? 'Paid' : 'Đã thu';
+  static String get invoiceFilterOverdue => isEn ? 'Overdue' : 'Quá hạn';
+  static String get invoiceCountSuffix => isEn ? 'invoices' : 'hóa đơn';
+  static String get invoiceLoadRoomsError => isEn ? 'Error loading rooms: ' : 'Lỗi tải phòng: ';
+  static String get invoiceLoadInvoicesError => isEn ? 'Error loading invoices: ' : 'Lỗi tải hóa đơn: ';
+  static String get invoiceEmptyStateAll => isEn ? 'No invoices yet. Tap + to create one.' : 'Chưa có hóa đơn nào. Nhấn + để tạo hóa đơn.';
+  static String get invoiceEmptyStateFilterPrefix => isEn ? 'No invoices with status "' : 'Không có hóa đơn ở trạng thái "';
+  static String get invoiceEmptyStateFilterSuffix => isEn ? '".' : '".';
+  static String get invoiceCreateBtnLabel => isEn ? 'Create Invoice' : 'Tạo hóa đơn';
+  
+  static String get invoiceTotal => isEn ? 'TOTAL AMOUNT' : 'TỔNG CỘNG';
+  static String get invoiceExportPdfSuccess => isEn ? 'PDF exported successfully!' : 'Đã xuất PDF thành công!';
+  static String get invoiceExportPdfShare => isEn ? 'Opening PDF sharing...' : 'Đã mở danh sách chia sẻ PDF!';
+  static String get invoiceExportPdfError => isEn ? 'Error exporting PDF: ' : 'Lỗi xuất PDF: ';
+  static String get invoicePdfFooter => isEn ? 'Property Management Software - Azure Clarity' : 'Phần mềm Quản lý Nhà Trọ - Azure Clarity';
+  static String get invoicePdfFileName => isEn ? 'invoice' : 'hoa_don';
+  static String get invoicePdfShareText => isEn ? 'Room Invoice' : 'Hóa đơn tiền phòng';
+  static String get monthSuffix => isEn ? 'Month' : 'Tháng';
+
+  // Reports & Costs
+  static String get totalCosts => isEn ? 'TOTAL COSTS' : 'TỔNG CHI PHÍ';
+  static String get maintenanceAndRepair => isEn ? 'Maintenance & Repair' : 'Bảo trì & Sửa chữa';
+  static String get costOther => isEn ? 'Other Costs' : 'Chi phí khác';
+
+  // Reports & Revenue
+  static String get monthlyRevenue => isEn ? 'Monthly Revenue' : 'Doanh thu hàng tháng';
+  static String get costAllocation => isEn ? 'Cost Allocation' : 'Phân bổ chi phí';
+  static String get viewPropertyReport => isEn ? 'View property-wise report' : 'Xem báo cáo theo nhà trọ';
+  static String get yearLabel => isEn ? 'Year' : 'Năm';
+  static String get maintenance => isEn ? 'Maintenance' : 'Bảo trì';
+  static String get vsLastMonth => isEn ? 'vs last month' : 'so với tháng trước';
+  static String get vsLastYear => isEn ? 'vs last year' : 'so với năm trước';
+
+  // Reports & Vacancy
+  static String get roomDistribution => isEn ? 'Room Distribution' : 'Phân bổ tỷ lệ phòng';
+  static String get depositLabel => isEn ? 'Deposit' : 'Đặt cọc';
+
+  // Property Specific Reports
+  static String get revenueByMonth => isEn ? 'Revenue by Month' : 'Doanh thu theo tháng';
+  static String get totalAllTime => isEn ? 'Total All Time' : 'Tổng tất cả thời gian';
+  static String get invoiceSummary => isEn ? 'Invoice Summary' : 'Tổng hợp hóa đơn';
+  static String get roomStatusDistribution => isEn ? 'Room Status Distribution' : 'Phân bổ trạng thái phòng';
+  static String get propertyInfo => isEn ? 'Property Information' : 'Thông tin nhà trọ';
+
+  // Tenants
+  static String get verified => isEn ? 'VERIFIED' : 'ĐÃ XÁC MINH';
+  static String get unverified => isEn ? 'UNVERIFIED' : 'CHƯA XÁC MINH';
+  static String get fromDatePrefix => isEn ? 'From: ' : 'Từ: ';
+  static String get depositPrefix => isEn ? 'Deposit: ' : 'Cọc: ';
+
+  // Tenant List Page
+  static String get tenants => isEn ? 'Tenants' : 'Danh sách khách thuê';
+  static String get searchTenantHint => isEn ? 'Search tenants...' : 'Tìm kiếm khách thuê...';
+  static String get filterCheckedOut => isEn ? 'Checked Out' : 'Đã trả phòng';
+  static String get noTenantsYet => isEn ? 'No tenants yet' : 'Chưa có khách thuê';
+  static String get noTenantsFound => isEn ? 'No tenants found' : 'Không tìm thấy khách thuê';
+  static String get addNewTenantTitle => isEn ? 'Add new tenant' : 'Thêm khách mới';
+  static String get addNewTenantDesc => isEn ? 'Register new tenant information into the system' : 'Đăng ký thông tin khách thuê mới vào hệ thống';
+  static String get managementProfessional => isEn ? 'Professional Management' : 'Quản lý chuyên nghiệp';
+  static String get managementProfessionalDesc => isEn ? 'All tenant information, contracts and payments are centrally managed.' : 'Tất cả thông tin khách thuê, hợp đồng và thanh toán được quản lý tập trung.';
+  
+  // Contracts
+  static String get contracts => isEn ? 'Contracts' : 'Hợp đồng';
+  static String get contractList => isEn ? 'Contracts List' : 'Danh sách hợp đồng';
+  static String get contractDetail => isEn ? 'Contract Details' : 'Chi tiết hợp đồng';
+  static String get addContract => isEn ? 'Add Contract' : 'Thêm hợp đồng';
+  static String get editContract => isEn ? 'Edit Contract' : 'Chỉnh sửa hợp đồng';
+  static String get rentPrice => isEn ? 'Rent Price' : 'Giá thuê';
+  static String get startDate => isEn ? 'Start Date' : 'Ngày bắt đầu';
+  static String get endDate => isEn ? 'End Date' : 'Ngày kết thúc';
+  static String get contractStatus => isEn ? 'Status' : 'Trạng thái';
+  static String get contractActive => isEn ? 'Active' : 'Đang hiệu lực';
+  static String get contractExpired => isEn ? 'Expired' : 'Đã hết hạn';
+  static String get contractTerminated => isEn ? 'Terminated' : 'Đã chấm dứt';
+  static String get terminateContract => isEn ? 'Terminate Contract' : 'Chấm dứt hợp đồng';
+  static String get renewContract => isEn ? 'Renew Contract' : 'Gia hạn hợp đồng';
+  static String get noContractYet => isEn ? 'No contracts yet' : 'Chưa có hợp đồng nào';
+  static String get searchContractHint => isEn ? 'Search contracts...' : 'Tìm kiếm hợp đồng...';
+  static String get selectEmptyRoom => isEn ? 'Select empty room' : 'Chọn phòng trống';
+  static String get selectTenant => isEn ? 'Select tenant' : 'Chọn khách thuê';
+  static String get contractDuration => isEn ? 'Contract Duration' : 'Thời hạn hợp đồng';
+  static String get noDuration => isEn ? 'No fixed term' : 'Không thời hạn';
+  static String get contractCreatedSuccess => isEn ? 'Contract created successfully' : 'Đã tạo hợp đồng mới';
+  static String get selectRoomValidation => isEn ? 'Please select a room' : 'Vui lòng chọn phòng';
+  static String get selectTenantValidation => isEn ? 'Please select a tenant' : 'Vui lòng chọn khách thuê';
+  static String get enterPriceValidation => isEn ? 'Please enter price' : 'Vui lòng nhập giá';
+  static String get errorLoadingRooms => isEn ? 'Error loading rooms' : 'Lỗi tải danh sách phòng';
+  static String get errorLoadingTenants => isEn ? 'Error loading tenants' : 'Lỗi tải danh sách khách thuê';
+
+  // Error Dialog
+  static String get hideTechnicalDetails => isEn ? 'Hide Technical Details' : 'Ẩn chi tiết kỹ thuật';
+  static String get showTechnicalDetails => isEn ? 'Show Technical Details' : 'Xem chi tiết kỹ thuật';
+  static String get copyLogSuccess => isEn ? 'Error log copied to clipboard' : 'Đã sao chép log lỗi vào bộ nhớ tạm';
+  static String get copy => isEn ? 'Copy' : 'Sao chép';
+  static String get sendReport => isEn ? 'Send Report' : 'Gửi báo cáo';
+  static String get appErrorReportSubject => isEn ? 'Property Management App Error' : 'Lỗi ứng dụng Quản Lý Nhà Trọ';
+
+  // Error Report Labels
+  static String get errorReportHeader => '--- ${isEn ? 'ERROR REPORT' : 'BÁO CÁO LỖI'} ---';
+  static String get errorReportTitle => isEn ? 'Title' : 'Tiêu đề';
+  static String get errorReportMessage => isEn ? 'Message' : 'Nội dung';
+  static String get errorReportTimestamp => isEn ? 'Timestamp' : 'Thời gian';
+  static String get errorReportTechnicalDetails => isEn ? 'Technical Details' : 'Chi tiết kỹ thuật';
+  static String get errorReportStackTrace => isEn ? 'Stack Trace' : 'Truy vết ngăn xếp';
 }

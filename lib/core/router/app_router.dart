@@ -22,6 +22,11 @@ import 'package:quan_ly_nha_tro/features/reports/presentation/pages/property_rep
 import 'package:quan_ly_nha_tro/features/settings/presentation/pages/settings_page.dart';
 import 'package:quan_ly_nha_tro/features/settings/presentation/pages/owner_profile_page.dart';
 import 'package:quan_ly_nha_tro/features/auth/presentation/pages/login_page.dart';
+import 'package:quan_ly_nha_tro/features/auth/presentation/pages/sign_up_page.dart';
+import 'package:quan_ly_nha_tro/features/contracts/presentation/pages/contracts_list_page.dart';
+import 'package:quan_ly_nha_tro/features/contracts/presentation/pages/contract_detail_page.dart';
+import 'package:quan_ly_nha_tro/features/contracts/presentation/pages/add_contract_page.dart';
+
 import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
 import 'package:quan_ly_nha_tro/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:quan_ly_nha_tro/features/onboarding/presentation/providers/onboarding_providers.dart';
@@ -29,6 +34,8 @@ import 'package:quan_ly_nha_tro/core/widgets/main_scaffold.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
+import 'package:quan_ly_nha_tro/core/resources/feature_flags.dart';
+
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -36,6 +43,8 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 final appRouterProvider = Provider<GoRouter>((ref) {
   final isGuest = ref.watch(isGuestProvider);
   final hasSeenOnboarding = ref.watch(onboardingSeenProvider);
+  // Watch auth state changes to trigger router refresh on login/logout
+  ref.watch(authStateProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
@@ -55,13 +64,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // If already seen onboarding and trying to go there, go to login or home
       if (isOnboarding) return AppRoutes.loginPath;
 
+      final isSignUp = state.matchedLocation == AppRoutes.signUpPath;
       final hasAccess = session != null || isGuest;
 
-      if (!hasAccess) {
+      if (isSignUp && !FeatureFlags.enablePasswordAuth) {
+        return AppRoutes.loginPath;
+      }
+
+      if (!hasAccess && !isSignUp) {
         return isLoggingIn ? null : '/login';
       }
 
-      if (isLoggingIn) return AppRoutes.homePath;
+      if (isLoggingIn && hasAccess) return AppRoutes.homePath;
 
       return null;
     },
@@ -76,6 +90,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.loginPath,
         builder: (c, s) => const LoginPage(),
       ),
+      GoRoute(
+        name: AppRoutes.signUp,
+        path: AppRoutes.signUpPath,
+        builder: (c, s) => const SignUpPage(),
+      ),
+
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => MainScaffold(child: child),
@@ -176,9 +196,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (c, s) => const PropertyReportPage(),
       ),
       GoRoute(
-        name: AppRoutes.profile,
-        path: AppRoutes.profilePath,
-        builder: (c, s) => const OwnerProfilePage(),
+        name: AppRoutes.contracts,
+        path: AppRoutes.contractsPath,
+        builder: (c, s) => const ContractsListPage(),
+      ),
+      GoRoute(
+        name: AppRoutes.contractDetail,
+        path: AppRoutes.contractDetailPath,
+        builder: (c, s) => ContractDetailPage(contractId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        name: AppRoutes.contractAdd,
+        path: AppRoutes.contractAddPath,
+        builder: (c, s) => const AddContractPage(),
       ),
     ],
   );
