@@ -8,16 +8,29 @@ void main() {
       final oldIndex = 100;
       final newIndex = 150;
       final price = 3000.0;
-      
-      final result = InvoiceCalculator.calculateElectricFee(oldIndex, newIndex, price);
-      
+
+      final result = InvoiceCalculator.calculateElectricFee(
+        oldIndex,
+        newIndex,
+        price,
+      );
+
       expect(result, equals(150000.0)); // (150-100) * 3000
     });
 
-    test('calculateElectricFee should return 0 if newIndex is null or smaller than old', () {
-      expect(InvoiceCalculator.calculateElectricFee(100, null, 3000.0), equals(0.0));
-      expect(InvoiceCalculator.calculateElectricFee(100, 50, 3000.0), equals(0.0));
-    });
+    test(
+      'calculateElectricFee should return 0 if newIndex is null or smaller than old',
+      () {
+        expect(
+          InvoiceCalculator.calculateElectricFee(100, null, 3000.0),
+          equals(0.0),
+        );
+        expect(
+          InvoiceCalculator.calculateElectricFee(100, 50, 3000.0),
+          equals(0.0),
+        );
+      },
+    );
 
     test('calculateWaterFee - BillingType.byMeter', () {
       final result = InvoiceCalculator.calculateWaterFee(
@@ -53,11 +66,14 @@ void main() {
     });
 
     test('calculateServiceFee - perPerson', () {
-      expect(InvoiceCalculator.calculateServiceFee(
-        type: BillingType.perPerson,
-        price: 20000.0,
-        tenantCount: 4,
-      ), equals(80000.0));
+      expect(
+        InvoiceCalculator.calculateServiceFee(
+          type: BillingType.perPerson,
+          price: 20000.0,
+          tenantCount: 4,
+        ),
+        equals(80000.0),
+      );
     });
 
     test('calculateTotal should sum all components', () {

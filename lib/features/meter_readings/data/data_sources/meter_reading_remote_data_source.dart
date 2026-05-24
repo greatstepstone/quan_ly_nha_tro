@@ -12,7 +12,7 @@ class MeterReadingRemoteDataSource {
         .select()
         .eq('room_id', roomId)
         .order('month', ascending: false);
-    
+
     return (response as List).map((json) => _mapToReading(json)).toList();
   }
 

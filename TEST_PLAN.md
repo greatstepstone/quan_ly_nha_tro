@@ -78,8 +78,22 @@ Mục tiêu: Cảm giác cao cấp (Premium).
 | U2 | Đa ngôn ngữ (VI/EN) | Toàn bộ Text trong app được dịch chính xác. |
 | U3 | Phản hồi xúc giác (Haptics) | Rung nhẹ khi nhấn nút hoặc hoàn thành tác vụ (trên Mobile). |
 | U4 | Responsive Layout | Hiển thị tốt trên cả màn hình điện thoại nhỏ và máy tính bảng. |
+| U5 | Ẩn bàn phím | Bàn phím ẩn đi khi chạm vào vùng trống ngoài trường nhập liệu. |
+
+---
+
+### 7. Kiểm thử Đặc thù Mobile & Ngoại lệ (Mobile Specific & Edge Cases)
+Mục tiêu: Đảm bảo app hoạt động ổn định trong các điều kiện thực tế của thiết bị di động.
+
+| ID | Kịch bản kiểm thử | Kết quả mong đợi |
+|:---|:---|:---|
+| E1 | Xử lý gián đoạn (Interruption) | Đang dùng app có cuộc gọi đến, SMS hoặc thông báo đẩy -> App không bị crash, sau khi xử lý gián đoạn vẫn quay lại trạng thái trước đó. |
+| E2 | Chuyển đổi mạng (Network Switch) | Đang thực hiện tác vụ (ví dụ: lưu hóa đơn) và mạng yếu hoặc chuyển từ Wifi sang 4G -> Hiển thị loading hoặc thông báo lỗi thân thiện, không bị mất dữ liệu. |
+| E3 | Nhập liệu vượt giới hạn (Max Length) | Nhập text siêu dài vào các trường -> Không bị vỡ layout, tự động xuống dòng hoặc giới hạn ký tự. |
+| E4 | Thao tác nhanh/Liên tục | Nhấn nút lưu/gửi liên tục nhiều lần -> Không tạo ra dữ liệu trùng lặp (Double submit). |
+| E5 | Khóa màn hình / Đổi ứng dụng | Đang ở màn hình nhập liệu, khóa màn hình hoặc chuyển sang app khác rồi quay lại -> Giữ nguyên dữ liệu đang nhập. |
 
 ---
 
 ### Kết luận
-Kế hoạch này bao phủ toàn bộ các chức năng đã triển khai. Các lỗi về Import và DAO vừa qua đã được xử lý, tạo nền tảng vững chắc cho việc kiểm thử tính đúng đắn của dữ liệu (Data Integrity).
+Kế hoạch này bao phủ toàn bộ các chức năng đã triển khai, đồng thời bổ sung các kịch bản đặc thù của Mobile dựa trên kinh nghiệm thực tế. Các lỗi về Import và DAO vừa qua đã được xử lý, tạo nền tảng vững chắc cho việc kiểm thử tính đúng đắn của dữ liệu (Data Integrity).

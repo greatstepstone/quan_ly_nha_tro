@@ -35,12 +35,13 @@ final filteredTenantsProvider = Provider<AsyncValue<List<Tenant>>>((ref) {
 
   return allTenantsAsync.whenData((tenants) {
     return tenants.where((tenant) {
-      final matchesQuery = tenant.name.toLowerCase().contains(query) || 
-                           tenant.phone.contains(query);
-      
+      final matchesQuery =
+          tenant.name.toLowerCase().contains(query) ||
+          tenant.phone.contains(query);
+
       // Giả thuyết: filterIndex == 1 là đang thuê, 2 là đã trả
-      // Cần logic xác định tenant đang thuê hay không từ Room status? 
-      // Hoặc dựa trên một field trong Tenant model. 
+      // Cần logic xác định tenant đang thuê hay không từ Room status?
+      // Hoặc dựa trên một field trong Tenant model.
       // Hiện tại model Tenant chưa có status, tạm thời chỉ lọc theo query.
       return matchesQuery;
     }).toList();
@@ -48,13 +49,20 @@ final filteredTenantsProvider = Provider<AsyncValue<List<Tenant>>>((ref) {
 });
 
 /// Provider watch danh sách khách thuê theo Property ID
-final tenantsByPropertyProvider = StreamProvider.family<List<Tenant>, String>((ref, propertyId) {
+final tenantsByPropertyProvider = StreamProvider.family<List<Tenant>, String>((
+  ref,
+  propertyId,
+) {
   return ref.watch(tenantRepositoryProvider).watchTenantsByProperty(propertyId);
 });
 
 /// Provider watch thông tin 1 khách thuê theo ID
-final tenantDetailProvider = StreamProvider.family<Tenant?, String>((ref, tenantId) {
-  return ref.watch(tenantRepositoryProvider).watchAllTenants().map(
-    (list) => list.firstWhere((t) => t.id == tenantId),
-  );
+final tenantDetailProvider = StreamProvider.family<Tenant?, String>((
+  ref,
+  tenantId,
+) {
+  return ref
+      .watch(tenantRepositoryProvider)
+      .watchAllTenants()
+      .map((list) => list.firstWhere((t) => t.id == tenantId));
 });

@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/providers/locale_provider.dart';
+import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
 
 class OwnerProfilePage extends ConsumerWidget {
   const OwnerProfilePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(localeProvider); 
+    ref.watch(localeProvider);
+    final user = ref.watch(currentUserProvider);
+    final email = user?.email ?? 'N/A';
+    final name = user?.userMetadata?['full_name'] ?? email.split('@')[0];
+    final avatarUrl = user?.userMetadata?['avatar_url'] as String?;
+    final phone = user?.userMetadata?['phone'] ?? user?.phone ?? 'N/A';
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
@@ -22,7 +29,7 @@ class OwnerProfilePage extends ConsumerWidget {
         centerTitle: true,
         title: Text(
           AppStrings.profileTitle,
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: FontSize.s16,
             fontWeight: FontWeightManager.bold,
             color: AppColors.primary,
@@ -40,7 +47,10 @@ class OwnerProfilePage extends ConsumerWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16, vertical: AppPadding.p8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppPadding.p16,
+          vertical: AppPadding.p8,
+        ),
         child: Column(
           children: [
             const SizedBox(height: AppHeight.h16),
@@ -60,8 +70,14 @@ class OwnerProfilePage extends ConsumerWidget {
                           offset: const Offset(0, 4),
                         ),
                       ],
-                      image: const DecorationImage(
-                        image: NetworkImage('https://i.pravatar.cc/150?img=11'),
+                      image: DecorationImage(
+                        image:
+                            avatarUrl != null
+                                ? NetworkImage(avatarUrl)
+                                : const NetworkImage(
+                                      'https://i.pravatar.cc/150?img=11',
+                                    )
+                                    as ImageProvider,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -71,11 +87,21 @@ class OwnerProfilePage extends ConsumerWidget {
                     right: 4,
                     child: Container(
                       padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
                       child: Container(
                         padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                        child: const Icon(Icons.check, color: Colors.white, size: AppSize.s12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: AppSize.s12,
+                        ),
                       ),
                     ),
                   ),
@@ -84,8 +110,12 @@ class OwnerProfilePage extends ConsumerWidget {
             ),
             const SizedBox(height: AppHeight.h16),
             Text(
-              'Nguyễn Văn Thành',
-              style: GoogleFonts.manrope(fontSize: FontSize.s22, fontWeight: FontWeightManager.extraBold, color: AppColors.textPrimary),
+              name,
+              style: manrope(
+                fontSize: FontSize.s22,
+                fontWeight: FontWeightManager.extraBold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: AppHeight.h4),
             Row(
@@ -94,12 +124,19 @@ class OwnerProfilePage extends ConsumerWidget {
                 Container(
                   width: AppSize.s8,
                   height: AppSize.s8,
-                  decoration: BoxDecoration(color: AppColors.emerald, shape: BoxShape.circle),
+                  decoration: BoxDecoration(
+                    color: AppColors.emerald,
+                    shape: BoxShape.circle,
+                  ),
                 ),
                 const SizedBox(width: AppWidth.w6),
                 Text(
                   AppStrings.verifiedIdentity,
-                  style: GoogleFonts.manrope(fontSize: FontSize.s13, fontWeight: FontWeightManager.medium, color: AppColors.textSecondary),
+                  style: manrope(
+                    fontSize: FontSize.s13,
+                    fontWeight: FontWeightManager.medium,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -110,7 +147,7 @@ class OwnerProfilePage extends ConsumerWidget {
               iconBgColor: AppColors.primaryLight,
               iconColor: AppColors.primary,
               title: AppStrings.phoneNumber,
-              value: '0908 123 456',
+              value: phone,
             ),
             const SizedBox(height: AppHeight.h12),
             _ProfileInfoCard(
@@ -118,7 +155,7 @@ class OwnerProfilePage extends ConsumerWidget {
               iconBgColor: AppColors.primaryLight,
               iconColor: AppColors.primary,
               title: AppStrings.contactEmail,
-              value: 'thanh.nguyen@azure.com',
+              value: email,
             ),
             const SizedBox(height: AppHeight.h12),
             _ProfileInfoCard(
@@ -126,7 +163,8 @@ class OwnerProfilePage extends ConsumerWidget {
               iconBgColor: AppColors.primaryLight,
               iconColor: AppColors.primary,
               title: AppStrings.permanentAddress,
-              value: '45/12 Đường Số 8, Phường Linh Trung, Thành phố Thủ Đức, TP. Hồ Chí Minh',
+              value:
+                  '45/12 Đường Số 8, Phường Linh Trung, Thành phố Thủ Đức, TP. Hồ Chí Minh',
             ),
             const SizedBox(height: AppHeight.h12),
             _ProfileInfoCard(
@@ -136,14 +174,17 @@ class OwnerProfilePage extends ConsumerWidget {
               title: AppStrings.joinDate,
               value: '15 tháng 08, 2023',
               trailingWidget: Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppPadding.p10, vertical: AppPadding.p6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppPadding.p10,
+                  vertical: AppPadding.p6,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceContainer,
                   borderRadius: BorderRadius.circular(AppRadius.r20),
                 ),
                 child: Text(
                   AppStrings.monthsAgo,
-                  style: GoogleFonts.manrope(
+                  style: manrope(
                     fontSize: FontSize.s11,
                     fontWeight: FontWeightManager.bold,
                     color: AppColors.textSecondary,
@@ -203,7 +244,9 @@ class OwnerProfilePage extends ConsumerWidget {
                 elevation: 0,
                 shadowColor: Colors.transparent,
                 minimumSize: const Size(double.infinity, AppHeight.h52),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.r26)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.r26),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -212,7 +255,10 @@ class OwnerProfilePage extends ConsumerWidget {
                   const SizedBox(width: AppWidth.w8),
                   Text(
                     AppStrings.editInfo,
-                    style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold),
+                    style: manrope(
+                      fontSize: FontSize.s15,
+                      fontWeight: FontWeightManager.bold,
+                    ),
                   ),
                 ],
               ),
@@ -221,7 +267,7 @@ class OwnerProfilePage extends ConsumerWidget {
             Text(
               AppStrings.privacyPolicySnippet,
               textAlign: TextAlign.center,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: FontSize.s11,
                 fontWeight: FontWeightManager.medium,
                 color: AppColors.textTertiary,
@@ -273,7 +319,10 @@ class _ProfileInfoCard extends StatelessWidget {
           Container(
             width: AppSize.s44,
             height: AppSize.s44,
-            decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: iconBgColor,
+              shape: BoxShape.circle,
+            ),
             child: Icon(icon, color: iconColor, size: AppSize.s22),
           ),
           const SizedBox(width: AppWidth.w14),
@@ -285,7 +334,7 @@ class _ProfileInfoCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   title,
-                  style: GoogleFonts.manrope(
+                  style: manrope(
                     fontSize: FontSize.s10,
                     fontWeight: FontWeightManager.extraBold,
                     color: AppColors.textTertiary,
@@ -295,7 +344,7 @@ class _ProfileInfoCard extends StatelessWidget {
                 const SizedBox(height: AppHeight.h4),
                 Text(
                   value,
-                  style: GoogleFonts.manrope(
+                  style: manrope(
                     fontSize: FontSize.s14,
                     fontWeight: FontWeightManager.semiBold,
                     color: AppColors.textPrimary,
@@ -329,7 +378,10 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppPadding.p20, horizontal: AppPadding.p8),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppPadding.p20,
+        horizontal: AppPadding.p8,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppRadius.r16),
@@ -345,13 +397,17 @@ class _StatCard extends StatelessWidget {
         children: [
           Text(
             value,
-            style: GoogleFonts.manrope(fontSize: FontSize.s22, fontWeight: FontWeightManager.extraBold, color: valueColor),
+            style: manrope(
+              fontSize: FontSize.s22,
+              fontWeight: FontWeightManager.extraBold,
+              color: valueColor,
+            ),
           ),
           const SizedBox(height: AppHeight.h6),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
+            style: manrope(
               fontSize: FontSize.s11,
               fontWeight: FontWeightManager.medium,
               color: AppColors.textSecondary,

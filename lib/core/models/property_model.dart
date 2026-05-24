@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// Removed: perPerson (use fixed type and adjust price manually)
-enum BillingType { byMeter, fixed }
+enum BillingType { byMeter, fixed, perPerson }
 
 extension BillingTypeExt on BillingType {
   String get label {
@@ -10,6 +9,8 @@ extension BillingTypeExt on BillingType {
         return 'Theo đồng hồ';
       case BillingType.fixed:
         return 'Cố định';
+      case BillingType.perPerson:
+        return 'Theo người';
     }
   }
 
@@ -19,6 +20,8 @@ extension BillingTypeExt on BillingType {
         return 'byMeter';
       case BillingType.fixed:
         return 'fixed';
+      case BillingType.perPerson:
+        return 'perPerson';
     }
   }
 
@@ -26,6 +29,8 @@ extension BillingTypeExt on BillingType {
     switch (value) {
       case 'byMeter':
         return BillingType.byMeter;
+      case 'perPerson':
+        return BillingType.perPerson;
       case 'fixed':
       default:
         return BillingType.fixed;

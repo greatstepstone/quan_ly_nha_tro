@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
@@ -7,10 +7,7 @@ import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 class ContractStatusChip extends StatelessWidget {
   final ContractStatus status;
 
-  const ContractStatusChip({
-    super.key,
-    required this.status,
-  });
+  const ContractStatusChip({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +41,7 @@ class ContractStatusChip extends StatelessWidget {
       ),
       child: Text(
         label.toUpperCase(),
-        style: GoogleFonts.manrope(
+        style: manrope(
           fontSize: 10,
           fontWeight: FontWeight.w800,
           color: textColor,

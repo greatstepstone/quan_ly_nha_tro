@@ -23,13 +23,17 @@ final allRoomsProvider = StreamProvider<List<Room>>((ref) {
 });
 
 /// Provider watch danh sách phòng theo Property ID
-final roomsByPropertyProvider = StreamProvider.family<List<Room>, String>((ref, propertyId) {
+final roomsByPropertyProvider = StreamProvider.family<List<Room>, String>((
+  ref,
+  propertyId,
+) {
   return ref.watch(roomRepositoryProvider).watchRoomsByProperty(propertyId);
 });
 
 /// Provider watch thông tin 1 phòng theo ID
 final roomDetailProvider = StreamProvider.family<Room?, String>((ref, roomId) {
-  return ref.watch(roomRepositoryProvider).watchAllRooms().map(
-    (list) => list.firstWhere((r) => r.id == roomId),
-  );
+  return ref
+      .watch(roomRepositoryProvider)
+      .watchAllRooms()
+      .map((list) => list.firstWhere((r) => r.id == roomId));
 });

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
@@ -14,7 +14,8 @@ class TenantFormModel {
   final hometownCtrl = TextEditingController();
   final depositCtrl = TextEditingController(text: '0');
   final startDateCtrl = TextEditingController(
-    text: '${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}'
+    text:
+        '${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}',
   );
 
   void dispose() {
@@ -56,14 +57,17 @@ class TenantFormCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: AppPadding.p10, vertical: AppPadding.p4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppPadding.p10,
+                  vertical: AppPadding.p4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primaryLight,
                   borderRadius: BorderRadius.circular(AppRadius.r50),
                 ),
                 child: Text(
                   'Người thuê #${index + 1}',
-                  style: GoogleFonts.manrope(
+                  style: manrope(
                     fontSize: FontSize.s12,
                     fontWeight: FontWeightManager.bold,
                     color: AppColors.primary,
@@ -76,8 +80,15 @@ class TenantFormCard extends StatelessWidget {
                 child: Container(
                   width: AppSize.s28,
                   height: AppSize.s28,
-                  decoration: BoxDecoration(color: AppColors.redLight, shape: BoxShape.circle),
-                  child: Icon(Icons.delete_outline, color: AppColors.red, size: AppSize.s16),
+                  decoration: BoxDecoration(
+                    color: AppColors.redLight,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.delete_outline,
+                    color: AppColors.red,
+                    size: AppSize.s16,
+                  ),
                 ),
               ),
             ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -48,7 +48,7 @@ class VacancyTab extends StatelessWidget {
             children: [
               Text(
                 AppStrings.roomDistribution,
-                style: GoogleFonts.manrope(
+                style: manrope(
                   fontSize: FontSize.s15,
                   fontWeight: FontWeightManager.bold,
                 ),
@@ -67,7 +67,7 @@ class VacancyTab extends StatelessWidget {
                         value: 60,
                         title: '60%',
                         radius: 40,
-                        titleStyle: GoogleFonts.manrope(
+                        titleStyle: manrope(
                           fontSize: FontSize.s12,
                           fontWeight: FontWeightManager.bold,
                           color: Colors.white,
@@ -78,7 +78,7 @@ class VacancyTab extends StatelessWidget {
                         value: 20,
                         title: '20%',
                         radius: 40,
-                        titleStyle: GoogleFonts.manrope(
+                        titleStyle: manrope(
                           fontSize: FontSize.s12,
                           fontWeight: FontWeightManager.bold,
                           color: Colors.white,
@@ -89,7 +89,7 @@ class VacancyTab extends StatelessWidget {
                         value: 15,
                         title: '15%',
                         radius: 40,
-                        titleStyle: GoogleFonts.manrope(
+                        titleStyle: manrope(
                           fontSize: FontSize.s12,
                           fontWeight: FontWeightManager.bold,
                           color: Colors.white,
@@ -100,7 +100,7 @@ class VacancyTab extends StatelessWidget {
                         value: 5,
                         title: '5%',
                         radius: 40,
-                        titleStyle: GoogleFonts.manrope(
+                        titleStyle: manrope(
                           fontSize: FontSize.s12,
                           fontWeight: FontWeightManager.bold,
                           color: Colors.white,
@@ -111,13 +111,29 @@ class VacancyTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppHeight.h32),
-              VacancyProgressBar(label: AppStrings.filterRented, percent: 0.60, color: AppColors.primary),
+              VacancyProgressBar(
+                label: AppStrings.filterRented,
+                percent: 0.60,
+                color: AppColors.primary,
+              ),
               const SizedBox(height: AppHeight.h10),
-              VacancyProgressBar(label: AppStrings.depositLabel, percent: 0.20, color: AppColors.amber),
+              VacancyProgressBar(
+                label: AppStrings.depositLabel,
+                percent: 0.20,
+                color: AppColors.amber,
+              ),
               const SizedBox(height: AppHeight.h10),
-              VacancyProgressBar(label: AppStrings.filterEmpty, percent: 0.15, color: AppColors.emerald),
+              VacancyProgressBar(
+                label: AppStrings.filterEmpty,
+                percent: 0.15,
+                color: AppColors.emerald,
+              ),
               const SizedBox(height: AppHeight.h10),
-              VacancyProgressBar(label: AppStrings.filterMaintenance, percent: 0.05, color: AppColors.red),
+              VacancyProgressBar(
+                label: AppStrings.filterMaintenance,
+                percent: 0.05,
+                color: AppColors.red,
+              ),
             ],
           ),
         ),

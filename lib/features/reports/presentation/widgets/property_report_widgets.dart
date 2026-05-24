@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/status_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -9,7 +9,7 @@ import 'package:quan_ly_nha_tro/core/models/models.dart';
 
 class PropertyMonthlyBarChart extends StatelessWidget {
   final Map<String, double> monthlyRevenue;
-  
+
   const PropertyMonthlyBarChart({super.key, required this.monthlyRevenue});
 
   @override
@@ -20,75 +20,91 @@ class PropertyMonthlyBarChart extends StatelessWidget {
         alignment: Alignment.center,
         child: Text(
           'Chưa có dữ liệu doanh thu.',
-          style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textTertiary),
+          style: manrope(fontSize: FontSize.s13, color: AppColors.textTertiary),
         ),
       );
     }
 
-    final sortedEntries = monthlyRevenue.entries.toList()
-      ..sort((a, b) {
-        final ap = _parseMonth(a.key);
-        final bp = _parseMonth(b.key);
-        return ap.compareTo(bp);
-      });
+    final sortedEntries =
+        monthlyRevenue.entries.toList()..sort((a, b) {
+          final ap = _parseMonth(a.key);
+          final bp = _parseMonth(b.key);
+          return ap.compareTo(bp);
+        });
 
-    final display = sortedEntries.length > 12
-        ? sortedEntries.sublist(sortedEntries.length - 12)
-        : sortedEntries;
+    final display =
+        sortedEntries.length > 12
+            ? sortedEntries.sublist(sortedEntries.length - 12)
+            : sortedEntries;
 
     final maxVal = display.map((e) => e.value).reduce((a, b) => a > b ? a : b);
-    final currentMonthStr = '${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}';
+    final currentMonthStr =
+        '${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}';
 
     return SizedBox(
       height: 130,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
-        children: display.map((entry) {
-          final ratio = maxVal > 0 ? entry.value / maxVal : 0.0;
-          final isActive = entry.key == currentMonthStr || entry.key == 'Tháng $currentMonthStr';
-          final label = entry.key.replaceAll('Tháng ', '').substring(0, 2); 
-          
-          return Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (isActive)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
-                      child: Text(
-                        _fmtShort(entry.value),
-                        style: GoogleFonts.manrope(
-                          fontSize: 8,
-                          fontWeight: FontWeightManager.bold,
-                          color: AppColors.primary,
+        children:
+            display.map((entry) {
+              final ratio = maxVal > 0 ? entry.value / maxVal : 0.0;
+              final isActive =
+                  entry.key == currentMonthStr ||
+                  entry.key == 'Tháng $currentMonthStr';
+              final label = entry.key.replaceAll('Tháng ', '').substring(0, 2);
+
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (isActive)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Text(
+                            _fmtShort(entry.value),
+                            style: manrope(
+                              fontSize: 8,
+                              fontWeight: FontWeightManager.bold,
+                              color: AppColors.primary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
+                      AnimatedContainer(
+                        duration: Duration(
+                          milliseconds: 400 + display.indexOf(entry) * 40,
+                        ),
+                        height: (90 * ratio).clamp(4.0, 90.0),
+                        decoration: BoxDecoration(
+                          color:
+                              isActive
+                                  ? AppColors.primary
+                                  : AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
-                    ),
-                  AnimatedContainer(
-                    duration: Duration(milliseconds: 400 + display.indexOf(entry) * 40),
-                    height: (90 * ratio).clamp(4.0, 90.0),
-                    decoration: BoxDecoration(
-                      color: isActive ? AppColors.primary : AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'T${int.tryParse(label) ?? label}',
+                        style: manrope(
+                          fontSize: 9,
+                          fontWeight:
+                              isActive
+                                  ? FontWeightManager.bold
+                                  : FontWeightManager.medium,
+                          color:
+                              isActive
+                                  ? AppColors.primary
+                                  : AppColors.textTertiary,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'T${int.tryParse(label) ?? label}',
-                    style: GoogleFonts.manrope(
-                      fontSize: 9,
-                      fontWeight: isActive ? FontWeightManager.bold : FontWeightManager.medium,
-                      color: isActive ? AppColors.primary : AppColors.textTertiary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -137,11 +153,14 @@ class PropertyVacancyBar extends StatelessWidget {
             ),
             const SizedBox(width: AppWidth.w8),
             Expanded(
-              child: Text(label, style: GoogleFonts.manrope(fontSize: FontSize.s13)),
+              child: Text(label, style: manrope(fontSize: FontSize.s13)),
             ),
             Text(
               '$count phòng',
-              style: GoogleFonts.manrope(fontSize: FontSize.s13, fontWeight: FontWeightManager.bold),
+              style: manrope(
+                fontSize: FontSize.s13,
+                fontWeight: FontWeightManager.bold,
+              ),
             ),
           ],
         ),
@@ -179,12 +198,21 @@ class PropertyInfoRow extends StatelessWidget {
       children: [
         Icon(icon, size: AppSize.s16, color: AppColors.textTertiary),
         const SizedBox(width: AppWidth.w10),
-        Text('$label:', style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
+        Text(
+          '$label:',
+          style: manrope(
+            fontSize: FontSize.s13,
+            color: AppColors.textSecondary,
+          ),
+        ),
         const SizedBox(width: AppWidth.w6),
         Expanded(
           child: Text(
             value,
-            style: GoogleFonts.manrope(fontSize: FontSize.s13, fontWeight: FontWeightManager.semiBold),
+            style: manrope(
+              fontSize: FontSize.s13,
+              fontWeight: FontWeightManager.semiBold,
+            ),
           ),
         ),
       ],
@@ -227,12 +255,18 @@ class StatusBar extends StatelessWidget {
             Expanded(
               child: Text(
                 '$label ($count)',
-                style: GoogleFonts.manrope(fontSize: FontSize.s13, fontWeight: FontWeightManager.semiBold),
+                style: manrope(
+                  fontSize: FontSize.s13,
+                  fontWeight: FontWeightManager.semiBold,
+                ),
               ),
             ),
             Text(
               _fmt(amount),
-              style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary),
+              style: manrope(
+                fontSize: FontSize.s13,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -279,7 +313,11 @@ class PropertyInvoiceRow extends StatelessWidget {
               color: invoice.status.color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.r10),
             ),
-            child: Icon(invoice.status.icon, color: invoice.status.color, size: AppSize.s18),
+            child: Icon(
+              invoice.status.icon,
+              color: invoice.status.color,
+              size: AppSize.s18,
+            ),
           ),
           const SizedBox(width: AppWidth.w12),
           Expanded(
@@ -287,12 +325,18 @@ class PropertyInvoiceRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Phòng ${invoice.roomId.substring(0, 4)}...', 
-                  style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold),
+                  'Phòng ${invoice.roomId.substring(0, 4)}...',
+                  style: manrope(
+                    fontSize: FontSize.s14,
+                    fontWeight: FontWeightManager.bold,
+                  ),
                 ),
                 Text(
                   invoice.month,
-                  style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textSecondary),
+                  style: manrope(
+                    fontSize: FontSize.s12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -302,11 +346,18 @@ class PropertyInvoiceRow extends StatelessWidget {
             children: [
               Text(
                 _fmt(invoice.totalAmount),
-                style: GoogleFonts.manrope(fontSize: FontSize.s14, fontWeight: FontWeightManager.bold),
+                style: manrope(
+                  fontSize: FontSize.s14,
+                  fontWeight: FontWeightManager.bold,
+                ),
               ),
               Text(
                 invoice.status.label,
-                style: GoogleFonts.manrope(fontSize: FontSize.s11, color: invoice.status.color, fontWeight: FontWeightManager.semiBold),
+                style: manrope(
+                  fontSize: FontSize.s11,
+                  color: invoice.status.color,
+                  fontWeight: FontWeightManager.semiBold,
+                ),
               ),
             ],
           ),

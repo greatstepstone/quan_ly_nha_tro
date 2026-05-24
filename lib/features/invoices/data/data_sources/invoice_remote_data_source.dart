@@ -12,7 +12,7 @@ class InvoiceRemoteDataSource {
         .select()
         .eq('room_id', roomId)
         .order('id', ascending: false);
-    
+
     return (response as List).map((json) => _mapToInvoice(json)).toList();
   }
 
@@ -31,7 +31,9 @@ class InvoiceRemoteDataSource {
       roomId: json['room_id'],
       month: json['month'],
       totalAmount: (json['total_amount'] as num).toDouble(),
-      status: InvoiceStatus.values.firstWhere((e) => e.toString() == 'InvoiceStatus.${json['status']}'),
+      status: InvoiceStatus.values.firstWhere(
+        (e) => e.toString() == 'InvoiceStatus.${json['status']}',
+      ),
       dueDate: json['due_date'],
       paidDate: json['paid_date'],
       createdAt: json['created_at'],

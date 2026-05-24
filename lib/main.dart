@@ -6,17 +6,15 @@ import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/providers/theme_provider.dart';
 import 'package:quan_ly_nha_tro/core/providers/locale_provider.dart';
 import 'package:quan_ly_nha_tro/core/services/notification_service.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Khởi tạo NotificationService
   await NotificationService().init();
 
-  // Cấu hình Google Fonts để sử dụng offline (dùng assets đã tải về)
-  GoogleFonts.config.allowRuntimeFetching = false;
-  
   // Load biến môi trường
   await dotenv.load(fileName: ".env");
 
@@ -26,11 +24,7 @@ void main() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
 
-  runApp(
-    const ProviderScope(
-      child: QuanLyNhaTroApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: QuanLyNhaTroApp()));
 }
 
 class QuanLyNhaTroApp extends ConsumerWidget {
@@ -45,7 +39,7 @@ class QuanLyNhaTroApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Quản Lý Nhà Trọ',
-      theme: AppTheme.lightTheme, 
+      theme: AppTheme.lightTheme,
       themeMode: themeMode,
       locale: Locale(localeCode),
       routerConfig: router,

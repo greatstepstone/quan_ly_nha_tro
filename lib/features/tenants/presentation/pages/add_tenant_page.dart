@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:uuid/uuid.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
@@ -44,7 +44,10 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
     _dob = TextEditingController();
     _cccd = TextEditingController();
     _hometown = TextEditingController();
-    _startDate = TextEditingController(text: '${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}');
+    _startDate = TextEditingController(
+      text:
+          '${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year}',
+    );
     _deposit = TextEditingController(text: '0');
     Future.microtask(() => _loadData());
   }
@@ -52,7 +55,10 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
   Future<void> _loadData() async {
     final roomRepo = ref.read(roomRepositoryProvider);
     _room = await roomRepo.getRoomById(widget.roomId);
-    if (mounted) setState(() { _isLoading = false; });
+    if (mounted)
+      setState(() {
+        _isLoading = false;
+      });
   }
 
   @override
@@ -69,7 +75,9 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
 
   Future<void> _save() async {
     if (_name.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng nhập họ tên')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Vui lòng nhập họ tên')));
       return;
     }
     if (_room == null) return;
@@ -79,14 +87,16 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
       final tenantRepo = ref.read(tenantRepositoryProvider);
       final roomRepo = ref.read(roomRepositoryProvider);
       final contractRepo = ref.read(contractRepositoryProvider);
-      
+
       final tenantId = const Uuid().v4();
       final contractId = const Uuid().v4();
       final user = ref.read(currentUserProvider);
       if (user == null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng đăng nhập để thực hiện thao tác này')),
+          const SnackBar(
+            content: Text('Vui lòng đăng nhập để thực hiện thao tác này'),
+          ),
         );
         return;
       }
@@ -105,9 +115,9 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
         hometown: _hometown.text.trim(),
         // startDate and deposit live in Contract, not Tenant
       );
-      
+
       await tenantRepo.addTenant(newTenant);
-      
+
       final updatedRoom = Room(
         id: _room!.id,
         ownerId: _room!.ownerId,
@@ -119,7 +129,11 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
       );
       await roomRepo.saveRoom(updatedRoom);
 
-      final depositValue = double.tryParse(_deposit.text.replaceAll(',', '').replaceAll('.', '')) ?? 0.0;
+      final depositValue =
+          double.tryParse(
+            _deposit.text.replaceAll(',', '').replaceAll('.', ''),
+          ) ??
+          0.0;
       final newContract = Contract(
         id: contractId,
         ownerId: ownerId,
@@ -128,14 +142,24 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
         propertyId: _room!.propertyId,
         rentPrice: _room!.rentPrice,
         deposit: depositValue,
-        startDate: _startDate.text.trim(),
+        startDate: _startDate.text.trim().split('/').reversed.join('-'),
       );
       await contractRepo.saveContract(newContract);
+
+      // Create a RoomMember entry for the tenant in this contract
+      final newMember = RoomMember(
+        id: const Uuid().v4(),
+        ownerId: ownerId,
+        contractId: contractId,
+        tenantId: tenantId,
+        role: RoomMemberRole.primary, // First tenant is primary
+      );
+      await contractRepo.addMember(newMember);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Đã thêm khách thuê ${_name.text}!', style: GoogleFonts.manrope()),
+          content: Text('Đã thêm khách thuê ${_name.text}!', style: manrope()),
           backgroundColor: AppColors.emerald,
         ),
       );
@@ -161,62 +185,119 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : _room == null
-        ? const Center(child: Text('Không tìm thấy phòng'))
-        : ListView(
-        padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16, vertical: AppPadding.p20),
-        children: [
-          SectionHeader(icon: Icons.person_outline, label: 'THÔNG TIN CÁ NHÂN'),
-          SizedBox(height: AppHeight.h12),
-          LabeledField(label: 'Họ và tên', controller: _name, hint: 'Nhập họ và tên'),
-          SizedBox(height: AppHeight.h12),
-          Row(
-            children: [
-              Expanded(child: LabeledField(label: 'Số điện thoại', controller: _phone, hint: '090...', keyboardType: TextInputType.phone)),
-              SizedBox(width: AppWidth.w12),
-              Expanded(child: AppDatePicker(label: 'Ngày sinh', controller: _dob, hint: 'dd/mm/yyyy')),
-            ],
-          ),
-          SizedBox(height: AppHeight.h12),
-          LabeledField(label: 'Số CCCD', controller: _cccd, hint: 'Nhập số CCCD', keyboardType: TextInputType.number),
-          SizedBox(height: AppHeight.h12),
-          LabeledField(label: 'Quê quán', controller: _hometown, hint: 'Nhập quê quán'),
-          SizedBox(height: AppHeight.h24),
-
-          SectionHeader(icon: Icons.home_work_outlined, label: 'THÔNG TIN THUÊ PHÒNG'),
-          SizedBox(height: AppHeight.h12),
-          Row(
-            children: [
-              Expanded(child: AppDatePicker(label: 'Ngày bắt đầu', controller: _startDate, hint: 'dd/mm/yyyy')),
-              SizedBox(width: AppWidth.w12),
-              Expanded(
-                child: LabeledField(
-                  label: 'Tiền cọc (${AppStrings.currencySymbol})',
-                  controller: _deposit,
-                  hint: '0',
-                  keyboardType: TextInputType.number,
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _room == null
+              ? const Center(child: Text('Không tìm thấy phòng'))
+              : ListView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppPadding.p16,
+                  vertical: AppPadding.p20,
                 ),
+                children: [
+                  SectionHeader(
+                    icon: Icons.person_outline,
+                    label: 'THÔNG TIN CÁ NHÂN',
+                  ),
+                  SizedBox(height: AppHeight.h12),
+                  LabeledField(
+                    label: 'Họ và tên',
+                    controller: _name,
+                    hint: 'Nhập họ và tên',
+                  ),
+                  SizedBox(height: AppHeight.h12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: LabeledField(
+                          label: 'Số điện thoại',
+                          controller: _phone,
+                          hint: '090...',
+                          keyboardType: TextInputType.phone,
+                        ),
+                      ),
+                      SizedBox(width: AppWidth.w12),
+                      Expanded(
+                        child: AppDatePicker(
+                          label: 'Ngày sinh',
+                          controller: _dob,
+                          hint: 'dd/mm/yyyy',
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: AppHeight.h12),
+                  LabeledField(
+                    label: 'Số CCCD',
+                    controller: _cccd,
+                    hint: 'Nhập số CCCD',
+                    keyboardType: TextInputType.number,
+                  ),
+                  SizedBox(height: AppHeight.h12),
+                  LabeledField(
+                    label: 'Quê quán',
+                    controller: _hometown,
+                    hint: 'Nhập quê quán',
+                  ),
+                  SizedBox(height: AppHeight.h24),
+
+                  SectionHeader(
+                    icon: Icons.home_work_outlined,
+                    label: 'THÔNG TIN THUÊ PHÒNG',
+                  ),
+                  SizedBox(height: AppHeight.h12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppDatePicker(
+                          label: 'Ngày bắt đầu',
+                          controller: _startDate,
+                          hint: 'dd/mm/yyyy',
+                        ),
+                      ),
+                      SizedBox(width: AppWidth.w12),
+                      Expanded(
+                        child: LabeledField(
+                          label: 'Tiền cọc (${AppStrings.currencySymbol})',
+                          controller: _deposit,
+                          hint: '0',
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: AppHeight.h32),
+                ],
               ),
-            ],
-          ),
-          SizedBox(height: AppHeight.h32),
-        ],
-      ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(AppPadding.p16, AppPadding.p8, AppPadding.p16, AppPadding.p16),
+          padding: const EdgeInsets.fromLTRB(
+            AppPadding.p16,
+            AppPadding.p8,
+            AppPadding.p16,
+            AppPadding.p16,
+          ),
           child: Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => context.pop(),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppPadding.p12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.r50)),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppPadding.p12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.r50),
+                    ),
                   ),
-                  child: Text('Hủy', style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.semiBold)),
+                  child: Text(
+                    'Hủy',
+                    style: manrope(
+                      fontSize: FontSize.s15,
+                      fontWeight: FontWeightManager.semiBold,
+                    ),
+                  ),
                 ),
               ),
               SizedBox(width: AppWidth.w12),
@@ -225,10 +306,18 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading || _room == null ? null : _save,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppPadding.p12),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppPadding.p12,
+                    ),
                     minimumSize: const Size(0, AppHeight.h52),
                   ),
-                  child: Text('Thêm người', style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
+                  child: Text(
+                    'Thêm người',
+                    style: manrope(
+                      fontSize: FontSize.s15,
+                      fontWeight: FontWeightManager.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -238,4 +327,3 @@ class _AddTenantPageState extends ConsumerState<AddTenantPage> {
     );
   }
 }
-

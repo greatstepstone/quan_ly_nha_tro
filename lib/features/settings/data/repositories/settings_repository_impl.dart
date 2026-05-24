@@ -21,8 +21,16 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<void> updateOwnerProfile({required String userId, required String name, String? phone}) {
-    return remoteDataSource.updateOwnerProfile(userId: userId, name: name, phone: phone);
+  Future<void> updateOwnerProfile({
+    required String userId,
+    required String name,
+    String? phone,
+  }) {
+    return remoteDataSource.updateOwnerProfile(
+      userId: userId,
+      name: name,
+      phone: phone,
+    );
   }
 
   @override

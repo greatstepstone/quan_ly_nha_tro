@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
@@ -56,12 +56,15 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
   }
 
   Future<void> _save() async {
-    if (_room == null || _name.text.trim().isEmpty || _rentPrice.text.trim().isEmpty) return;
+    if (_room == null ||
+        _name.text.trim().isEmpty ||
+        _rentPrice.text.trim().isEmpty)
+      return;
 
     try {
       setState(() => _isLoading = true);
       final roomRepo = ref.read(roomRepositoryProvider);
-      
+
       final updatedRoom = Room(
         id: _room!.id,
         ownerId: _room!.ownerId,
@@ -71,13 +74,13 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
         name: _name.text.trim(),
         rentPrice: double.tryParse(_rentPrice.text.replaceAll('.', '')) ?? 0,
       );
-      
+
       await roomRepo.saveRoom(updatedRoom);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Đã lưu thay đổi cho ${_name.text}!', style: GoogleFonts.manrope()),
+          content: Text('Đã lưu thay đổi cho ${_name.text}!', style: manrope()),
           backgroundColor: AppColors.emerald,
           behavior: SnackBarBehavior.floating,
         ),
@@ -104,40 +107,70 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _room == null
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _room == null
               ? const Center(child: Text('Không tìm thấy phòng'))
               : ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16, vertical: AppPadding.p20),
-                  children: [
-                    SectionHeader(icon: Icons.info_outline, label: 'THÔNG TIN CƠ BẢN'),
-                    SizedBox(height: AppHeight.h12),
-                    LabeledField(label: 'Tên / Mã phòng', controller: _name, hint: 'Nhập tên phòng'),
-                    SizedBox(height: AppHeight.h24),
-                    SectionHeader(icon: Icons.receipt_long_outlined, label: 'THÔNG TIN THUÊ'),
-                    SizedBox(height: AppHeight.h12),
-                    LabeledField(
-                      label: 'Giá thuê (${AppStrings.currencySymbol}/${AppStrings.month})', 
-                      controller: _rentPrice, 
-                      hint: '0',
-                      keyboardType: TextInputType.number
-                    ),
-                  ],
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppPadding.p16,
+                  vertical: AppPadding.p20,
                 ),
+                children: [
+                  SectionHeader(
+                    icon: Icons.info_outline,
+                    label: 'THÔNG TIN CƠ BẢN',
+                  ),
+                  SizedBox(height: AppHeight.h12),
+                  LabeledField(
+                    label: 'Tên / Mã phòng',
+                    controller: _name,
+                    hint: 'Nhập tên phòng',
+                  ),
+                  SizedBox(height: AppHeight.h24),
+                  SectionHeader(
+                    icon: Icons.receipt_long_outlined,
+                    label: 'THÔNG TIN THUÊ',
+                  ),
+                  SizedBox(height: AppHeight.h12),
+                  LabeledField(
+                    label:
+                        'Giá thuê (${AppStrings.currencySymbol}/${AppStrings.month})',
+                    controller: _rentPrice,
+                    hint: '0',
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+              ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(AppPadding.p16, AppPadding.p8, AppPadding.p16, AppPadding.p16),
+          padding: const EdgeInsets.fromLTRB(
+            AppPadding.p16,
+            AppPadding.p8,
+            AppPadding.p16,
+            AppPadding.p16,
+          ),
           child: Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => context.pop(),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppPadding.p12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.r50)),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppPadding.p12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.r50),
+                    ),
                   ),
-                  child: Text('Hủy', style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.semiBold)),
+                  child: Text(
+                    'Hủy',
+                    style: manrope(
+                      fontSize: FontSize.s15,
+                      fontWeight: FontWeightManager.semiBold,
+                    ),
+                  ),
                 ),
               ),
               SizedBox(width: AppWidth.w12),
@@ -146,10 +179,18 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading || _room == null ? null : _save,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppPadding.p12),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppPadding.p12,
+                    ),
                     minimumSize: const Size(0, AppHeight.h52),
                   ),
-                  child: Text('Lưu thay đổi', style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
+                  child: Text(
+                    'Lưu thay đổi',
+                    style: manrope(
+                      fontSize: FontSize.s15,
+                      fontWeight: FontWeightManager.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -159,4 +200,3 @@ class _EditRoomPageState extends ConsumerState<EditRoomPage> {
     );
   }
 }
-

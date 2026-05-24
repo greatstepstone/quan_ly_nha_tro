@@ -12,7 +12,11 @@ class InvoiceCalculator {
   }
 
   /// Tính tiền điện dựa trên chỉ số mới/cũ
-  static double calculateElectricFee(int oldIndex, int? newIndex, double price) {
+  static double calculateElectricFee(
+    int oldIndex,
+    int? newIndex,
+    double price,
+  ) {
     if (newIndex == null || newIndex < oldIndex) return 0;
     return (newIndex - oldIndex) * price;
   }
@@ -32,6 +36,8 @@ class InvoiceCalculator {
         return (newIndex - oldIndex) * price;
       case BillingType.fixed:
         return price;
+      case BillingType.perPerson:
+        return price * tenantCount;
     }
   }
 
@@ -47,6 +53,8 @@ class InvoiceCalculator {
         return price;
       case BillingType.byMeter:
         return 0;
+      case BillingType.perPerson:
+        return price * tenantCount;
     }
   }
 }

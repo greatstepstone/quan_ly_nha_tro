@@ -7,10 +7,8 @@ class RoomRemoteDataSource {
   RoomRemoteDataSource(this._client);
 
   Future<List<Room>> getAllRooms() async {
-    final response = await _client
-        .from('rooms')
-        .select();
-    
+    final response = await _client.from('rooms').select();
+
     return (response as List).map((json) => _mapToRoom(json)).toList();
   }
 
@@ -19,7 +17,7 @@ class RoomRemoteDataSource {
         .from('rooms')
         .select()
         .eq('property_id', propertyId);
-    
+
     return (response as List).map((json) => _mapToRoom(json)).toList();
   }
 

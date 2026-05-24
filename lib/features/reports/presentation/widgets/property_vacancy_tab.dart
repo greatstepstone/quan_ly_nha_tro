@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -12,7 +12,11 @@ class PropertyVacancyTab extends StatelessWidget {
   final List<Room> rooms;
   final Property property;
 
-  const PropertyVacancyTab({super.key, required this.rooms, required this.property});
+  const PropertyVacancyTab({
+    super.key,
+    required this.rooms,
+    required this.property,
+  });
 
   int _count(RoomStatus s) => rooms.where((r) => r.status == s).length;
 
@@ -81,18 +85,43 @@ class PropertyVacancyTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AppStrings.roomStatusDistribution,
-                  style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
+              Text(
+                AppStrings.roomStatusDistribution,
+                style: manrope(
+                  fontSize: FontSize.s15,
+                  fontWeight: FontWeightManager.bold,
+                ),
+              ),
               const SizedBox(height: AppHeight.h16),
               if (total == 0)
-                Text(AppStrings.noRoomYet,
-                    style: GoogleFonts.manrope(fontSize: FontSize.s14, color: AppColors.textSecondary))
+                Text(
+                  AppStrings.noRoomYet,
+                  style: manrope(
+                    fontSize: FontSize.s14,
+                    color: AppColors.textSecondary,
+                  ),
+                )
               else ...[
-                PropertyVacancyBar(label: AppStrings.filterRented, count: rented, total: total, color: AppColors.primary),
+                PropertyVacancyBar(
+                  label: AppStrings.filterRented,
+                  count: rented,
+                  total: total,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(height: AppHeight.h12),
-                PropertyVacancyBar(label: AppStrings.filterEmpty, count: empty, total: total, color: AppColors.emerald),
+                PropertyVacancyBar(
+                  label: AppStrings.filterEmpty,
+                  count: empty,
+                  total: total,
+                  color: AppColors.emerald,
+                ),
                 const SizedBox(height: AppHeight.h12),
-                PropertyVacancyBar(label: AppStrings.maintenance, count: maintenance, total: total, color: AppColors.red),
+                PropertyVacancyBar(
+                  label: AppStrings.maintenance,
+                  count: maintenance,
+                  total: total,
+                  color: AppColors.red,
+                ),
               ],
             ],
           ),
@@ -108,16 +137,37 @@ class PropertyVacancyTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AppStrings.propertyInfo,
-                  style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
+              Text(
+                AppStrings.propertyInfo,
+                style: manrope(
+                  fontSize: FontSize.s15,
+                  fontWeight: FontWeightManager.bold,
+                ),
+              ),
               const SizedBox(height: AppHeight.h12),
-              PropertyInfoRow(icon: Icons.location_on_outlined, label: AppStrings.propertyAddress, value: property.address),
+              PropertyInfoRow(
+                icon: Icons.location_on_outlined,
+                label: AppStrings.propertyAddress,
+                value: property.address,
+              ),
               const SizedBox(height: AppHeight.h8),
-              PropertyInfoRow(icon: Icons.bolt, label: AppStrings.electricityPrice, value: '${_fmt(property.electricityPrice)}/kWh'),
+              PropertyInfoRow(
+                icon: Icons.bolt,
+                label: AppStrings.electricityPrice,
+                value: '${_fmt(property.electricityPrice)}/kWh',
+              ),
               const SizedBox(height: AppHeight.h8),
-              PropertyInfoRow(icon: Icons.water_drop_outlined, label: AppStrings.waterPrice, value: '${_fmt(property.waterPrice)}/m³'),
+              PropertyInfoRow(
+                icon: Icons.water_drop_outlined,
+                label: AppStrings.waterPrice,
+                value: '${_fmt(property.waterPrice)}/m³',
+              ),
               const SizedBox(height: AppHeight.h8),
-              PropertyInfoRow(icon: Icons.water_drop_outlined, label: AppStrings.billingSystem, value: property.waterBillingType.label),
+              PropertyInfoRow(
+                icon: Icons.water_drop_outlined,
+                label: AppStrings.billingSystem,
+                value: property.waterBillingType.label,
+              ),
             ],
           ),
         ),

@@ -52,7 +52,7 @@ class TenantRemoteDataSource {
       'cccd': t.cccd,
       'date_of_birth': t.dateOfBirth,
       'hometown': t.hometown,
-      'room_id': t.roomId,       // nullable
+      'room_id': t.roomId, // nullable
       'property_id': t.propertyId, // nullable
       // start_date and deposit removed — write to contracts table instead
       'is_verified': t.isVerified,

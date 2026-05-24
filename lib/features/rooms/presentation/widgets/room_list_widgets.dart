@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/status_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
@@ -11,11 +11,7 @@ class RoomListItemCard extends StatelessWidget {
   final Room room;
   final VoidCallback onTap;
 
-  const RoomListItemCard({
-    super.key,
-    required this.room,
-    required this.onTap,
-  });
+  const RoomListItemCard({super.key, required this.room, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +39,11 @@ class RoomListItemCard extends StatelessWidget {
                 color: room.status.color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.r12),
               ),
-              child: Icon(room.status.icon, color: room.status.color, size: AppSize.s24),
+              child: Icon(
+                room.status.icon,
+                color: room.status.color,
+                size: AppSize.s24,
+              ),
             ),
             const SizedBox(width: AppWidth.w12),
             Expanded(
@@ -52,7 +52,7 @@ class RoomListItemCard extends StatelessWidget {
                 children: [
                   Text(
                     room.name,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s15,
                       fontWeight: FontWeightManager.bold,
                     ),
@@ -63,12 +63,15 @@ class RoomListItemCard extends StatelessWidget {
                       Container(
                         width: AppSize.s7,
                         height: AppSize.s7,
-                        decoration: BoxDecoration(color: room.status.color, shape: BoxShape.circle),
+                        decoration: BoxDecoration(
+                          color: room.status.color,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                       const SizedBox(width: AppWidth.w4),
                       Text(
                         '${AppStrings.statusString}: ${room.status.label}',
-                        style: GoogleFonts.manrope(
+                        style: manrope(
                           fontSize: FontSize.s13,
                           color: AppColors.textSecondary,
                         ),
@@ -85,4 +88,3 @@ class RoomListItemCard extends StatelessWidget {
     );
   }
 }
-

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -36,7 +36,10 @@ class InvoiceCard extends StatelessWidget {
               const SizedBox(width: AppWidth.w8),
               Text(
                 title,
-                style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold),
+                style: manrope(
+                  fontSize: FontSize.s15,
+                  fontWeight: FontWeightManager.bold,
+                ),
               ),
             ],
           ),
@@ -52,7 +55,12 @@ class InvoiceInputField extends StatefulWidget {
   final String label;
   final TextEditingController controller;
   final String? suffix;
-  const InvoiceInputField(this.label, this.controller, {super.key, this.suffix});
+  const InvoiceInputField(
+    this.label,
+    this.controller, {
+    super.key,
+    this.suffix,
+  });
 
   @override
   State<InvoiceInputField> createState() => _InvoiceInputFieldState();
@@ -82,7 +90,10 @@ class _InvoiceInputFieldState extends State<InvoiceInputField> {
       children: [
         Text(
           widget.label,
-          style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textSecondary),
+          style: manrope(
+            fontSize: FontSize.s12,
+            color: AppColors.textSecondary,
+          ),
         ),
         const SizedBox(height: AppHeight.h4),
         TextField(
@@ -92,7 +103,10 @@ class _InvoiceInputFieldState extends State<InvoiceInputField> {
             hintText: AppStrings.zero,
             fillColor: AppColors.surface,
             suffixText: widget.suffix,
-            suffixStyle: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textTertiary),
+            suffixStyle: manrope(
+              fontSize: FontSize.s12,
+              color: AppColors.textTertiary,
+            ),
           ),
         ),
       ],
@@ -112,12 +126,15 @@ class InvoiceCostRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.textTertiary),
+            style: manrope(
+              fontSize: FontSize.s12,
+              color: AppColors.textTertiary,
+            ),
           ),
         ),
         Text(
           '= ${fmtDouble(value)}',
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: FontSize.s13,
             fontWeight: FontWeightManager.semiBold,
             color: AppColors.primary,
@@ -149,19 +166,17 @@ class InvoiceServiceRow extends StatelessWidget {
         Container(
           width: AppSize.s32,
           height: AppSize.s32,
-          decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: AppColors.primaryLight,
+            shape: BoxShape.circle,
+          ),
           child: Icon(icon, color: AppColors.primary, size: AppSize.s16),
         ),
         const SizedBox(width: AppWidth.w10),
-        Expanded(
-          child: Text(
-            label,
-            style: GoogleFonts.manrope(fontSize: FontSize.s14),
-          ),
-        ),
+        Expanded(child: Text(label, style: manrope(fontSize: FontSize.s14))),
         Text(
           fmtDouble(value),
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: FontSize.s14,
             fontWeight: FontWeightManager.bold,
             color: isHighlight ? AppColors.primary : AppColors.textPrimary,
@@ -175,7 +190,8 @@ class InvoiceServiceRow extends StatelessWidget {
 IconData serviceIcon(String name) {
   final lower = name.toLowerCase();
   if (lower.contains('internet') || lower.contains('wifi')) return Icons.wifi;
-  if (lower.contains('rác') || lower.contains('vệ sinh')) return Icons.delete_outline;
+  if (lower.contains('rác') || lower.contains('vệ sinh'))
+    return Icons.delete_outline;
   if (lower.contains('xe') || lower.contains('giữ')) return Icons.two_wheeler;
   if (lower.contains('điện')) return Icons.bolt;
   if (lower.contains('nước')) return Icons.water_drop_outlined;

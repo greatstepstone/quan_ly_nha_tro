@@ -59,8 +59,8 @@ class Invoice {
   final String month; // format: 'YYYY-MM'
   final double totalAmount;
   final InvoiceStatus status;
-  final String? dueDate;   // TODO: migrate to DateTime
-  final String? paidDate;  // TODO: migrate to DateTime
+  final String? dueDate; // TODO: migrate to DateTime
+  final String? paidDate; // TODO: migrate to DateTime
   final String? createdAt;
   final bool isSynced;
   final bool isDeleted;

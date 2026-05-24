@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
-import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 
 class AppErrorView extends StatelessWidget {
   final Object error;
   final VoidCallback onRetry;
-  
-  const AppErrorView({
-    super.key,
-    required this.error,
-    required this.onRetry,
-  });
+
+  const AppErrorView({super.key, required this.error, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +24,16 @@ class AppErrorView extends StatelessWidget {
                 color: AppColors.red.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.error_outline_rounded, color: AppColors.red, size: 48),
-
+              child: Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.red,
+                size: 48,
+              ),
             ),
             const SizedBox(height: AppHeight.h24),
             Text(
               AppStrings.errorTitle,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: FontSize.s18,
                 fontWeight: FontWeightManager.bold,
                 color: AppColors.textPrimary,
@@ -45,7 +43,7 @@ class AppErrorView extends StatelessWidget {
             Text(
               AppStrings.errorDesc,
               textAlign: TextAlign.center,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: FontSize.s14,
                 fontWeight: FontWeightManager.medium,
                 color: AppColors.textSecondary,
@@ -59,7 +57,10 @@ class AppErrorView extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.r12),
                 ),
@@ -70,23 +71,25 @@ class AppErrorView extends StatelessWidget {
               onPressed: () {
                 showModalBottomSheet(
                   context: context,
-                  builder: (ctx) => Container(
-                    padding: const EdgeInsets.all(AppPadding.p24),
-                    child: SingleChildScrollView(
-                      child: Text(
-                        error.toString(),
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: FontSize.s12,
-                          color: AppColors.textTertiary,
+                  builder:
+                      (ctx) => Container(
+                        padding: const EdgeInsets.all(AppPadding.p24),
+                        child: SingleChildScrollView(
+                          child: Text(
+                            error.toString(),
+                            style: TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 12,
+                              color: AppColors.textTertiary,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
                 );
               },
               child: Text(
                 AppStrings.showTechnicalDetails,
-                style: GoogleFonts.manrope(
+                style: manrope(
                   fontSize: FontSize.s12,
                   color: AppColors.textTertiary,
                   decoration: TextDecoration.underline,

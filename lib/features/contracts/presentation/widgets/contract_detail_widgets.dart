@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 
 class FinancialSummaryCard extends StatelessWidget {
   final List<FinancialItem> items;
-  
+
   const FinancialSummaryCard({super.key, required this.items});
 
   @override
@@ -55,7 +55,7 @@ class FinancialItem extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: 10,
             fontWeight: FontWeight.bold,
             color: isWhite ? Colors.white70 : AppColors.textTertiary,
@@ -65,7 +65,7 @@ class FinancialItem extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: isWhite ? Colors.white : AppColors.textPrimary,
@@ -86,7 +86,7 @@ class ContractSectionTitle extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         title.toUpperCase(),
-        style: GoogleFonts.manrope(
+        style: manrope(
           fontSize: 12,
           fontWeight: FontWeight.bold,
           color: AppColors.textTertiary,
@@ -129,11 +129,11 @@ class DetailRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary),
+                style: manrope(fontSize: 12, color: AppColors.textSecondary),
               ),
               Text(
                 value,
-                style: GoogleFonts.manrope(
+                style: manrope(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -185,11 +185,14 @@ class LinkedDetailRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.manrope(fontSize: 12, color: AppColors.textSecondary),
+                    style: manrope(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   Text(
                     value,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
@@ -198,7 +201,11 @@ class LinkedDetailRow extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: AppColors.primary, size: 20),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.primary,
+              size: 20,
+            ),
           ],
         ),
       ),

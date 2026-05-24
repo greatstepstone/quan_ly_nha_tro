@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
@@ -13,17 +13,21 @@ class ContractCard extends ConsumerWidget {
   final Contract contract;
   final VoidCallback onTap;
 
-  const ContractCard({
-    super.key,
-    required this.contract,
-    required this.onTap,
-  });
+  const ContractCard({super.key, required this.contract, required this.onTap});
+
+  String _getFormattedDate(String dateStr) {
+    try {
+      return DateFormat('dd/MM/yyyy').format(DateTime.parse(dateStr));
+    } catch (e) {
+      return dateStr;
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final roomAsync = ref.watch(roomDetailProvider(contract.roomId));
     final tenantAsync = ref.watch(tenantDetailProvider(contract.tenantId));
-    
+
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
     final dateFormat = DateFormat('dd/MM/yyyy');
 
@@ -50,31 +54,41 @@ class ContractCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 roomAsync.when(
-                  data: (room) => Text(
-                    room?.name ?? 'Room ${contract.roomId}',
-                    style: GoogleFonts.manrope(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
+                  data:
+                      (room) => Text(
+                        room?.name ?? 'Room ${contract.roomId}',
+                        style: manrope(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                   loading: () => const _LoadingPlaceholder(width: 80),
-                  error: (_, _) => Text('Room Error', style: GoogleFonts.manrope(color: AppColors.red)),
+                  error:
+                      (_, _) => Text(
+                        'Room Error',
+                        style: manrope(color: AppColors.red),
+                      ),
                 ),
                 ContractStatusChip(status: contract.status),
               ],
             ),
             const SizedBox(height: 4),
             tenantAsync.when(
-              data: (tenant) => Text(
-                tenant?.name ?? 'Tenant ${contract.tenantId}',
-                style: GoogleFonts.manrope(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
+              data:
+                  (tenant) => Text(
+                    tenant?.name ?? 'Tenant ${contract.tenantId}',
+                    style: manrope(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
               loading: () => const _LoadingPlaceholder(width: 120),
-              error: (_, _) => Text('Tenant Error', style: GoogleFonts.manrope(color: AppColors.red)),
+              error:
+                  (_, _) => Text(
+                    'Tenant Error',
+                    style: manrope(color: AppColors.red),
+                  ),
             ),
             const Divider(height: 24, thickness: 0.5),
             Row(
@@ -85,7 +99,7 @@ class ContractCard extends ConsumerWidget {
                   children: [
                     Text(
                       AppStrings.rentPrice.toUpperCase(),
-                      style: GoogleFonts.manrope(
+                      style: manrope(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textTertiary,
@@ -95,7 +109,7 @@ class ContractCard extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       currencyFormat.format(contract.rentPrice),
-                      style: GoogleFonts.manrope(
+                      style: manrope(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
@@ -108,7 +122,7 @@ class ContractCard extends ConsumerWidget {
                   children: [
                     Text(
                       AppStrings.startDate.toUpperCase(),
-                      style: GoogleFonts.manrope(
+                      style: manrope(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textTertiary,
@@ -117,8 +131,8 @@ class ContractCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      dateFormat.format(DateTime.parse(contract.startDate)),
-                      style: GoogleFonts.manrope(
+                      _getFormattedDate(contract.startDate),
+                      style: manrope(
                         fontSize: 14,
                         color: AppColors.textPrimary,
                       ),

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/tenant_providers.dart';
+import 'package:quan_ly_nha_tro/core/providers/contract_providers.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
+import 'package:quan_ly_nha_tro/features/rooms/presentation/widgets/room_detail_widgets.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class RoomDetailPage extends ConsumerWidget {
@@ -32,41 +34,59 @@ class RoomDetailPage extends ConsumerWidget {
               if (value == 'delete') {
                 final confirm = await showDialog<bool>(
                   context: context,
-                  builder: (c) => AlertDialog(
-                    title: const Text('Xóa phòng'),
-                    content: const Text('Bạn có chắc chắn muốn xóa phòng này?'),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Hủy')),
-                      TextButton(
-                        onPressed: () => Navigator.pop(c, true), 
-                        child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+                  builder:
+                      (c) => AlertDialog(
+                        title: const Text('Xóa phòng'),
+                        content: const Text(
+                          'Bạn có chắc chắn muốn xóa phòng này?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(c, false),
+                            child: const Text('Hủy'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(c, true),
+                            child: const Text(
+                              'Xóa',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
                       ),
-                    ]
-                  )
                 );
-                
+
                 if (confirm == true) {
                   final roomRepo = ref.read(roomRepositoryProvider);
-                  
+
                   // In a stream-based UI, we might not need to fetch the room again
                   // but we need to know the tenantId to delete it too.
-                  // For now, let's just delete the room. If we want cascading delete, 
+                  // For now, let's just delete the room. If we want cascading delete,
                   // we should handle it in the repository or DAO.
-                  
+
                   await roomRepo.deleteRoom(roomId);
-                  // Note: The previous logic also deleted the tenant. 
+                  // Note: The previous logic also deleted the tenant.
                   // We should ideally have a more robust way to handle related data.
-                  
+
                   if (context.mounted) {
                     context.pop();
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Đã xóa phòng')));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Đã xóa phòng')));
                   }
                 }
               }
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 'delete', child: Text('Xóa phòng', style: TextStyle(color: Colors.red))),
-            ],
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Text(
+                      'Xóa phòng',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
             icon: Icon(Icons.more_vert),
           ),
         ],
@@ -74,162 +94,404 @@ class RoomDetailPage extends ConsumerWidget {
       body: roomAsync.when(
         data: (room) {
           if (room == null) {
-            return Center(child: Text('Không tìm thấy phòng', style: GoogleFonts.manrope(color: AppColors.textSecondary)));
+            return Center(
+              child: Text(
+                'Không tìm thấy phòng',
+                style: manrope(color: AppColors.textSecondary),
+              ),
+            );
           }
 
-          final propertyAsync = ref.watch(propertyDetailProvider(room.propertyId));
-          final tenantAsync = room.tenantId != null 
-              ? ref.watch(tenantDetailProvider(room.tenantId!))
-              : const AsyncValue<Tenant?>.data(null);
+          final propertyAsync = ref.watch(
+            propertyDetailProvider(room.propertyId),
+          );
+          // Watch the currently active contract for this room
+          final activeContractAsync = ref.watch(
+            activeContractByRoomProvider(roomId),
+          );
 
           return propertyAsync.when(
-            data: (property) => tenantAsync.when(
-              data: (tenant) => ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  // Room header
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(16)),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: room.status == RoomStatus.rented ? AppColors.redLight : AppColors.primaryLight,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Icon(
-                            Icons.door_front_door_outlined,
-                            color: room.status == RoomStatus.rented ? AppColors.red : AppColors.primary,
-                            size: 32,
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        Text(room.name, style: GoogleFonts.manrope(fontSize: 22, fontWeight: FontWeight.w800)),
-                        SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: room.status == RoomStatus.rented ? AppColors.redLight : AppColors.emeraldLight,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(room.status.label,
-                              style: GoogleFonts.manrope(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: room.status == RoomStatus.rented ? AppColors.red : AppColors.emerald,
-                              )),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 16),
+            data:
+                (property) => activeContractAsync.when(
+                  data: (activeContract) {
+                    // If there is an active contract, watch its members; otherwise null
+                    final membersAsync =
+                        activeContract != null
+                            ? ref.watch(
+                              roomMembersByContractProvider(activeContract.id),
+                            )
+                            : const AsyncValue<List<RoomMember>>.data([]);
 
-                  // Room info section
-                  _Section(
-                    title: 'THÔNG TIN PHÒNG',
-                    child: Column(
-                      children: [
-                        _InfoRow(icon: Icons.payments_outlined, label: 'Giá thuê', value: '${_fmt(room.rentPrice)}/tháng', valueColor: AppColors.primary),
-                        Divider(height: 1, color: AppColors.surface),
-                        _InfoRow(icon: Icons.home_outlined, label: 'Tòa nhà', value: property?.name ?? 'Đang tải...'),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 16),
+                    return membersAsync.when(
+                      data:
+                          (members) => ListView(
+                            padding: const EdgeInsets.all(16),
+                            children: [
+                              // Room header
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceBright,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: 64,
+                                      height: 64,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            room.status == RoomStatus.rented
+                                                ? AppColors.redLight
+                                                : AppColors.primaryLight,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Icon(
+                                        Icons.door_front_door_outlined,
+                                        color:
+                                            room.status == RoomStatus.rented
+                                                ? AppColors.red
+                                                : AppColors.primary,
+                                        size: 32,
+                                      ),
+                                    ),
+                                    SizedBox(height: 12),
+                                    Text(
+                                      room.name,
+                                      style: manrope(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            room.status == RoomStatus.rented
+                                                ? AppColors.redLight
+                                                : AppColors.emeraldLight,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        room.status.label,
+                                        style: manrope(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color:
+                                              room.status == RoomStatus.rented
+                                                  ? AppColors.red
+                                                  : AppColors.emerald,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 16),
 
-                  if (tenant != null) ...[
-                    _Section(
-                      title: 'KHÁCH THUÊ HIỆN TẠI',
-                      child: GestureDetector(
-                        onTap: () => context.pushNamed(AppRoutes.tenantDetail, pathParameters: {'id': tenant.id}),
-                        child: Column(
-                          children: [
-                            _InfoRow(icon: Icons.person_outline, label: 'Họ tên', value: tenant.name),
-                            Divider(height: 1, color: AppColors.surface),
-                            _InfoRow(icon: Icons.phone_outlined, label: 'Điện thoại', value: tenant.phone),
-                            Divider(height: 1, color: AppColors.surface),
-                            // startDate and deposit moved to Contract — view via Contracts tab
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                  ] else ...[
-                    _Section(
-                      title: 'KHÁCH THUÊ HIỆN TẠI',
-                      child: Center(
-                        child: TextButton.icon(
-                          onPressed: () => context.pushNamed(AppRoutes.tenantAdd, pathParameters: {'id': roomId}),
-                          icon: Icon(Icons.person_add_alt_1_outlined),
-                          label: const Text('Thêm khách thuê'),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                  ],
+                              // Room info section
+                              RoomDetailSection(
+                                title: 'THÔNG TIN PHÒNG',
+                                child: Column(
+                                  children: [
+                                    RoomDetailInfoRow(
+                                      icon: Icons.payments_outlined,
+                                      label: 'Giá thuê',
+                                      value: '${_fmt(room.rentPrice)}/tháng',
+                                      valueColor: AppColors.primary,
+                                    ),
+                                    Divider(
+                                      height: 1,
+                                      color: AppColors.surface,
+                                    ),
+                                    RoomDetailInfoRow(
+                                      icon: Icons.home_outlined,
+                                      label: 'Tòa nhà',
+                                      value: property?.name ?? 'Đang tải...',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 16),
 
-                  // Meter readings shortcut
-                  _Section(
-                    title: 'ĐIỆN NƯỚC',
-                    child: GestureDetector(
-                      onTap: () => context.pushNamed(AppRoutes.meterReadingDetail, pathParameters: {'roomId': roomId}),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(color: AppColors.primaryLight, shape: BoxShape.circle),
-                              child: Icon(Icons.bolt, color: AppColors.primary, size: 20),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Text('Ghi chỉ số điện nước tháng này',
-                                  style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600)),
-                            ),
-                            Icon(Icons.chevron_right, color: AppColors.textTertiary),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 24),
+                              // Members section
+                              if (members.isNotEmpty) ...[
+                                RoomDetailSection(
+                                  title: 'NGƯỜI Ở (${members.length} người)',
+                                  child: Column(
+                                    children:
+                                        members.map((m) {
+                                          final tAsync = ref.watch(
+                                            tenantDetailProvider(m.tenantId),
+                                          );
+                                          return tAsync.when(
+                                            data:
+                                                (tenant) => GestureDetector(
+                                                  onTap:
+                                                      () => context.pushNamed(
+                                                        AppRoutes.tenantDetail,
+                                                        pathParameters: {
+                                                          'id': m.tenantId,
+                                                        },
+                                                      ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 6,
+                                                        ),
+                                                    child: Row(
+                                                      children: [
+                                                        CircleAvatar(
+                                                          radius: 18,
+                                                          backgroundColor:
+                                                              m.role ==
+                                                                      RoomMemberRole
+                                                                          .primary
+                                                                  ? AppColors
+                                                                      .primaryLight
+                                                                  : AppColors
+                                                                      .surfaceContainer,
+                                                          child: Text(
+                                                            tenant?.name.isNotEmpty ==
+                                                                    true
+                                                                ? tenant!
+                                                                    .name[0]
+                                                                    .toUpperCase()
+                                                                : '?',
+                                                            style: manrope(
+                                                              fontSize: 13,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700,
+                                                              color:
+                                                                  m.role ==
+                                                                          RoomMemberRole
+                                                                              .primary
+                                                                      ? AppColors
+                                                                          .primary
+                                                                      : AppColors
+                                                                          .textSecondary,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 10,
+                                                        ),
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                tenant?.name ??
+                                                                    m.tenantId,
+                                                                style: manrope(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
+                                                              ),
+                                                              Text(
+                                                                tenant?.phone ??
+                                                                    '',
+                                                                style: manrope(
+                                                                  fontSize: 12,
+                                                                  color:
+                                                                      AppColors
+                                                                          .textSecondary,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 8,
+                                                                vertical: 3,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color:
+                                                                m.role ==
+                                                                        RoomMemberRole
+                                                                            .primary
+                                                                    ? AppColors
+                                                                        .primaryLight
+                                                                    : AppColors
+                                                                        .surfaceContainer,
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  20,
+                                                                ),
+                                                          ),
+                                                          child: Text(
+                                                            m.role.label,
+                                                            style: manrope(
+                                                              fontSize: 11,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700,
+                                                              color:
+                                                                  m.role ==
+                                                                          RoomMemberRole
+                                                                              .primary
+                                                                      ? AppColors
+                                                                          .primary
+                                                                      : AppColors
+                                                                          .textSecondary,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                            loading:
+                                                () => const SizedBox(
+                                                  height: 40,
+                                                  child:
+                                                      LinearProgressIndicator(),
+                                                ),
+                                            error:
+                                                (_, __) =>
+                                                    const SizedBox.shrink(),
+                                          );
+                                        }).toList(),
+                                  ),
+                                ),
+                                SizedBox(height: 16),
+                              ] else ...[
+                                RoomDetailSection(
+                                  title: 'KHÁCH THUÊ HIỆN TẠI',
+                                  child: Center(
+                                    child: TextButton.icon(
+                                      onPressed:
+                                          () => context.pushNamed(
+                                            AppRoutes.tenantAdd,
+                                            pathParameters: {'id': roomId},
+                                          ),
+                                      icon: Icon(
+                                        Icons.person_add_alt_1_outlined,
+                                      ),
+                                      label: const Text('Thêm khách thuê'),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 16),
+                              ],
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          icon: Icon(Icons.edit_outlined),
-                          label: const Text('Chỉnh sửa'),
-                          onPressed: () => context.pushNamed(AppRoutes.roomEdit, pathParameters: {'id': roomId}),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                            side: BorderSide(color: AppColors.primary),
-                            foregroundColor: AppColors.primary,
+                              // Meter readings shortcut
+                              RoomDetailSection(
+                                title: 'ĐIỆN NƯỚC',
+                                child: GestureDetector(
+                                  onTap:
+                                      () => context.pushNamed(
+                                        AppRoutes.meterReadingDetail,
+                                        pathParameters: {'roomId': roomId},
+                                      ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primaryLight,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.bolt,
+                                            color: AppColors.primary,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            'Ghi chỉ số điện nước tháng này',
+                                            style: manrope(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.chevron_right,
+                                          color: AppColors.textTertiary,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 24),
+
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      icon: Icon(Icons.edit_outlined),
+                                      label: const Text('Chỉnh sửa'),
+                                      onPressed:
+                                          () => context.pushNamed(
+                                            AppRoutes.roomEdit,
+                                            pathParameters: {'id': roomId},
+                                          ),
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 14,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            50,
+                                          ),
+                                        ),
+                                        side: BorderSide(
+                                          color: AppColors.primary,
+                                        ),
+                                        foregroundColor: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: ElevatedButton.icon(
+                                      icon: Icon(Icons.receipt_long_outlined),
+                                      label: const Text('Lập hóa đơn'),
+                                      onPressed:
+                                          () => context.pushNamed(
+                                            AppRoutes.invoiceCreate,
+                                            queryParameters: {'roomId': roomId},
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 24),
+                            ],
                           ),
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          icon: Icon(Icons.receipt_long_outlined),
-                          label: const Text('Lập hóa đơn'),
-                          onPressed: () => context.pushNamed(AppRoutes.invoiceCreate, queryParameters: {'roomId': roomId}),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 24),
-                ],
-              ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text('Lỗi tải khách thuê: $err')),
-            ),
+                      loading:
+                          () =>
+                              const Center(child: CircularProgressIndicator()),
+                      error:
+                          (err, _) =>
+                              Center(child: Text('Lỗi tải thành viên: $err')),
+                    );
+                  },
+                  loading:
+                      () => const Center(child: CircularProgressIndicator()),
+                  error:
+                      (err, _) => Center(child: Text('Lỗi tải hợp đồng: $err')),
+                ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, _) => Center(child: Text('Lỗi tải khu trọ: $err')),
           );
@@ -250,52 +512,4 @@ String _fmt(double value) {
     result.write(s[i]);
   }
   return '${result.toString()}${AppStrings.currencySymbol}';
-}
-
-class _Section extends StatelessWidget {
-  final String title;
-  final Widget child;
-  const _Section({required this.title, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: AppColors.surfaceBright, borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Text(title,
-                style: GoogleFonts.manrope(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textTertiary, letterSpacing: 0.5)),
-          ),
-          Divider(height: 0, color: AppColors.surface),
-          Padding(padding: const EdgeInsets.all(16), child: child),
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color? valueColor;
-  const _InfoRow({required this.icon, required this.label, required this.value, this.valueColor});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: AppColors.primary),
-          SizedBox(width: 10),
-          Expanded(child: Text(label, style: GoogleFonts.manrope(fontSize: 14, color: AppColors.textSecondary))),
-          Text(value, style: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700, color: valueColor ?? AppColors.textPrimary)),
-        ],
-      ),
-    );
-  }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
@@ -18,7 +18,10 @@ class HomeStatsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final roomsAsync = ref.watch(allRoomsProvider);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16, vertical: AppPadding.p12 + 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppPadding.p16,
+        vertical: AppPadding.p14,
+      ),
       decoration: BoxDecoration(
         color: AppColors.surfaceBright,
         borderRadius: BorderRadius.circular(AppRadius.r12),
@@ -33,36 +36,58 @@ class HomeStatsRow extends ConsumerWidget {
       child: Row(
         children: [
           Expanded(
-            child: ref.watch(totalMonthlyRevenueProvider).when(
-              data: (total) => _StatItem(
-                label: AppStrings.totalRevenue,
-                value: '${_currencyFormatter.format(total)}${AppStrings.currencySymbol}',
-                valueColor: AppColors.primary,
-              ),
-              loading: () => _LoadingStatItem(label: AppStrings.totalRevenue),
-              error: (_, _) => _ErrorStatItem(label: AppStrings.totalRevenue),
-            ),
+            child: ref
+                .watch(totalMonthlyRevenueProvider)
+                .when(
+                  data:
+                      (total) => _StatItem(
+                        label: AppStrings.totalRevenue,
+                        value:
+                            '${_currencyFormatter.format(total)}${AppStrings.currencySymbol}',
+                        valueColor: AppColors.primary,
+                      ),
+                  loading:
+                      () => _LoadingStatItem(label: AppStrings.totalRevenue),
+                  error:
+                      (_, _) => _ErrorStatItem(label: AppStrings.totalRevenue),
+                ),
           ),
-          Container(width: 1, height: AppHeight.h40, color: AppColors.surfaceContainer),
+          Container(
+            width: 1,
+            height: AppHeight.h40,
+            color: AppColors.surfaceContainer,
+          ),
           Expanded(
-            child: ref.watch(totalOutstandingDebtProvider).when(
-              data: (debt) => _StatItem(
-                label: AppStrings.totalDebtUnpaid,
-                value: '${_currencyFormatter.format(debt)}${AppStrings.currencySymbol}',
-                valueColor: AppColors.red,
-              ),
-              loading: () => _LoadingStatItem(label: AppStrings.totalDebtUnpaid),
-              error: (_, _) => _ErrorStatItem(label: AppStrings.totalDebtUnpaid),
-            ),
+            child: ref
+                .watch(totalOutstandingDebtProvider)
+                .when(
+                  data:
+                      (debt) => _StatItem(
+                        label: AppStrings.totalDebtUnpaid,
+                        value:
+                            '${_currencyFormatter.format(debt)}${AppStrings.currencySymbol}',
+                        valueColor: AppColors.red,
+                      ),
+                  loading:
+                      () => _LoadingStatItem(label: AppStrings.totalDebtUnpaid),
+                  error:
+                      (_, _) =>
+                          _ErrorStatItem(label: AppStrings.totalDebtUnpaid),
+                ),
           ),
-          Container(width: 1, height: AppHeight.h40, color: AppColors.surfaceContainer),
+          Container(
+            width: 1,
+            height: AppHeight.h40,
+            color: AppColors.surfaceContainer,
+          ),
           Expanded(
             child: roomsAsync.when(
-              data: (rooms) => _StatItem(
-                label: AppStrings.totalRooms,
-                value: '${rooms.length} ${AppStrings.roomsCountSuffix}',
-                valueColor: AppColors.emerald,
-              ),
+              data:
+                  (rooms) => _StatItem(
+                    label: AppStrings.totalRooms,
+                    value: '${rooms.length} ${AppStrings.roomsCountSuffix}',
+                    valueColor: AppColors.emerald,
+                  ),
               loading: () => _LoadingStatItem(label: AppStrings.totalRooms),
               error: (_, _) => _ErrorStatItem(label: AppStrings.totalRooms),
             ),
@@ -92,7 +117,7 @@ class _StatItem extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.manrope(
+            style: manrope(
               fontSize: FontSize.s9,
               fontWeight: FontWeightManager.semiBold,
               color: AppColors.textTertiary,
@@ -101,7 +126,7 @@ class _StatItem extends StatelessWidget {
           const SizedBox(height: AppHeight.h4),
           Text(
             value,
-            style: GoogleFonts.manrope(
+            style: manrope(
               fontSize: FontSize.s13,
               fontWeight: FontWeightManager.bold,
               color: valueColor,
@@ -123,7 +148,7 @@ class _LoadingStatItem extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: FontSize.s9,
             fontWeight: FontWeightManager.semiBold,
             color: AppColors.textTertiary,
@@ -153,7 +178,7 @@ class _ErrorStatItem extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: FontSize.s11 - 2, // 9
             fontWeight: FontWeightManager.semiBold,
             color: AppColors.textTertiary,
@@ -161,7 +186,7 @@ class _ErrorStatItem extends StatelessWidget {
         ),
         Text(
           'Lỗi',
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: FontSize.s13,
             fontWeight: FontWeightManager.bold,
             color: AppColors.red,

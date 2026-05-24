@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -16,26 +16,29 @@ class RevenueTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppPadding.p16),
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                label: '+5.2% ${AppStrings.vsLastMonth}',
-                value: '15M ${AppStrings.currencySymbol}',
-                trend: '+5.2% ${AppStrings.vsLastMonth}',
-                icon: Icons.receipt_long_outlined,
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: StatCard(
+                  label: '+5.2% ${AppStrings.vsLastMonth}',
+                  value: '20M ${AppStrings.currencySymbol}',
+                  trend: '+5.2% ${AppStrings.vsLastMonth}',
+                  icon: Icons.receipt_long_outlined,
+                ),
               ),
-            ),
-            SizedBox(width: AppWidth.w12),
-            Expanded(
-              child: StatCard(
-                label: '+2.1% ${AppStrings.vsLastYear}',
-                value: '92%',
-                trend: '+2.1% ${AppStrings.vsLastYear}',
-                icon: Icons.home_outlined,
+              const SizedBox(width: AppWidth.w12),
+              Expanded(
+                child: StatCard(
+                  label: '+2.1% ${AppStrings.vsLastYear}',
+                  value: '92%',
+                  trend: '+2.1% ${AppStrings.vsLastYear}',
+                  icon: Icons.home_outlined,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: AppHeight.h16),
 
@@ -51,22 +54,22 @@ class RevenueTab extends StatelessWidget {
             children: [
               Text(
                 AppStrings.monthlyRevenue,
-                style: GoogleFonts.manrope(
+                style: manrope(
                   fontSize: FontSize.s14,
                   color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppHeight.h4),
               Text(
-                '120M ${AppStrings.currencySymbol}',
-                style: GoogleFonts.manrope(
+                '34M ${AppStrings.currencySymbol}',
+                style: manrope(
                   fontSize: FontSize.s24,
                   fontWeight: FontWeightManager.extraBold,
                 ),
               ),
               Text(
                 '${AppStrings.yearLabel} 2024 ',
-                style: GoogleFonts.manrope(
+                style: manrope(
                   fontSize: FontSize.s13,
                   color: AppColors.textSecondary,
                 ),
@@ -74,7 +77,7 @@ class RevenueTab extends StatelessWidget {
               const SizedBox(height: AppHeight.h4),
               Text(
                 AppStrings.monthlyRevenue,
-                style: GoogleFonts.manrope(
+                style: manrope(
                   fontSize: FontSize.s13,
                   color: AppColors.emerald,
                   fontWeight: FontWeightManager.semiBold,
@@ -105,14 +108,14 @@ class RevenueTab extends StatelessWidget {
                       children: [
                         Text(
                           AppStrings.costAllocation,
-                          style: GoogleFonts.manrope(
+                          style: manrope(
                             fontSize: FontSize.s14,
                             color: AppColors.textSecondary,
                           ),
                         ),
                         Text(
                           '45M ${AppStrings.currencySymbol}',
-                          style: GoogleFonts.manrope(
+                          style: manrope(
                             fontSize: FontSize.s20,
                             fontWeight: FontWeightManager.extraBold,
                           ),
@@ -124,13 +127,29 @@ class RevenueTab extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppHeight.h16),
-              PieLegendItem(color: AppColors.primary, label: AppStrings.maintenance, percent: '45%'),
+              PieLegendItem(
+                color: AppColors.primary,
+                label: AppStrings.maintenance,
+                percent: '45%',
+              ),
               const SizedBox(height: AppHeight.h8),
-              PieLegendItem(color: AppColors.chartBlue, label: AppStrings.electricity, percent: '30%'),
+              PieLegendItem(
+                color: AppColors.chartBlue,
+                label: AppStrings.electricity,
+                percent: '30%',
+              ),
               const SizedBox(height: AppHeight.h8),
-              PieLegendItem(color: AppColors.chartGray, label: AppStrings.water, percent: '15%'),
+              PieLegendItem(
+                color: AppColors.chartGray,
+                label: AppStrings.water,
+                percent: '15%',
+              ),
               const SizedBox(height: AppHeight.h8),
-              PieLegendItem(color: AppColors.chartLightGray, label: AppStrings.otherFee, percent: '10%'),
+              PieLegendItem(
+                color: AppColors.chartLightGray,
+                label: AppStrings.otherFee,
+                percent: '10%',
+              ),
             ],
           ),
         ),

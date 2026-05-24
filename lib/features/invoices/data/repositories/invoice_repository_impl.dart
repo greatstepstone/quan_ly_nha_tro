@@ -53,28 +53,29 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
 
   @override
   Future<void> addInvoice(Invoice invoice) async {
-    await localDataSource.insertInvoice(InvoicesCompanion.insert(
-      id: invoice.id,
-      ownerId: invoice.ownerId,
-      roomId: invoice.roomId,
-      month: invoice.month,
-      totalAmount: invoice.totalAmount,
-      status: invoice.status,
-      dueDate: Value(invoice.dueDate),
-      paidDate: Value(invoice.paidDate),
-      isSynced: const Value(false),
-    ));
+    await localDataSource.insertInvoice(
+      InvoicesCompanion.insert(
+        id: invoice.id,
+        ownerId: invoice.ownerId,
+        roomId: invoice.roomId,
+        month: invoice.month,
+        totalAmount: invoice.totalAmount,
+        status: invoice.status,
+        dueDate: Value(invoice.dueDate),
+        paidDate: Value(invoice.paidDate),
+        isSynced: const Value(false),
+      ),
+    );
 
     try {
       await remoteDataSource.upsertInvoice(invoice);
-      await localDataSource.updateInvoice(InvoicesCompanion(
-        id: Value(invoice.id),
-        isSynced: const Value(true),
-      ));
+      await localDataSource.updateInvoice(
+        InvoicesCompanion(id: Value(invoice.id), isSynced: const Value(true)),
+      );
     } catch (e) {
       print('Sync error (invoice): $e');
     }
-    
+
     await _manageInvoiceNotification(invoice);
   }
 
@@ -91,7 +92,7 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
       paidDate: Value(invoice.paidDate),
       isSynced: const Value(false),
     );
-    
+
     if (await localDataSource.getInvoiceById(invoice.id) != null) {
       await localDataSource.updateInvoice(companion);
     } else {
@@ -100,14 +101,13 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
 
     try {
       await remoteDataSource.upsertInvoice(invoice);
-      await localDataSource.updateInvoice(InvoicesCompanion(
-        id: Value(invoice.id),
-        isSynced: const Value(true),
-      ));
+      await localDataSource.updateInvoice(
+        InvoicesCompanion(id: Value(invoice.id), isSynced: const Value(true)),
+      );
     } catch (e) {
       print('Sync error (save invoice): $e');
     }
-    
+
     await _manageInvoiceNotification(invoice);
   }
 
@@ -116,26 +116,29 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     if (invoice.status == InvoiceStatus.paid) {
       await NotificationService().cancelNotification(notificationId);
       await NotificationService().cancelNotification(notificationId + 1);
-    } else if (invoice.dueDate != null && invoice.status == InvoiceStatus.unpaid) {
+    } else if (invoice.dueDate != null &&
+        invoice.status == InvoiceStatus.unpaid) {
       final dueDate = DateTime.parse(invoice.dueDate!);
       // Fetch room name for better notification
       final room = await roomDao.getRoomById(invoice.roomId);
       final roomName = room?.name ?? 'Không rõ';
-      
+
       // Lên lịch thông báo đúng ngày hạn
       await NotificationService().scheduleInvoiceReminder(
         id: notificationId,
         title: 'Nhắc nhở hóa đơn',
-        body: 'Phòng $roomName có hóa đơn tháng ${invoice.month} đến hạn thanh toán.',
+        body:
+            'Phòng $roomName có hóa đơn tháng ${invoice.month} đến hạn thanh toán.',
         scheduledDate: dueDate,
       );
-      
+
       // Có thể lên lịch thêm 1 thông báo quá hạn (hôm sau)
       final overdueDate = dueDate.add(const Duration(days: 1));
       await NotificationService().scheduleInvoiceReminder(
         id: notificationId + 1, // ID khác cho thông báo quá hạn
         title: 'Hóa đơn quá hạn!',
-        body: 'Phòng $roomName có hóa đơn tháng ${invoice.month} ĐÃ QUÁ HẠN thanh toán.',
+        body:
+            'Phòng $roomName có hóa đơn tháng ${invoice.month} ĐÃ QUÁ HẠN thanh toán.',
         scheduledDate: overdueDate,
       );
     }
@@ -150,13 +153,18 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     if (property == null) throw Exception('Property not found');
 
     final meter = await meterDao.getMeterReadingByRoomAndMonth(roomId, month);
-    if (meter == null) throw Exception('Meter reading not found for this month');
+    if (meter == null)
+      throw Exception('Meter reading not found for this month');
 
     final tenants = await tenantDao.getTenantsByRoom(roomId);
     final tenantCount = tenants.length;
 
-    double electricFee = InvoiceCalculator.calculateElectricFee(meter.electricOld, meter.electricNew, property.electricityPrice);
-    
+    double electricFee = InvoiceCalculator.calculateElectricFee(
+      meter.electricOld,
+      meter.electricNew,
+      property.electricityPrice,
+    );
+
     double waterFee = InvoiceCalculator.calculateWaterFee(
       type: property.waterBillingType,
       oldIndex: meter.waterOld,
@@ -182,10 +190,15 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
       serviceFee: serviceFee,
     );
 
-    final existingInvoice = await localDataSource.getInvoiceByRoomAndMonth(roomId, month);
-    
+    final existingInvoice = await localDataSource.getInvoiceByRoomAndMonth(
+      roomId,
+      month,
+    );
+
     return Invoice(
-      id: existingInvoice?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          existingInvoice?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       ownerId: room.ownerId,
       roomId: roomId,
       month: month,
@@ -226,10 +239,9 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     for (var inv in unsynced) {
       try {
         await remoteDataSource.upsertInvoice(inv);
-        await localDataSource.updateInvoice(InvoicesCompanion(
-          id: Value(inv.id),
-          isSynced: const Value(true),
-        ));
+        await localDataSource.updateInvoice(
+          InvoicesCompanion(id: Value(inv.id), isSynced: const Value(true)),
+        );
       } catch (e) {
         print('Error syncing invoice ${inv.id}: $e');
       }
@@ -248,17 +260,19 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     }
 
     for (var inv in remoteData) {
-      await localDataSource.insertInvoice(InvoicesCompanion.insert(
-        id: inv.id,
-        ownerId: inv.ownerId,
-        roomId: inv.roomId,
-        month: inv.month,
-        totalAmount: inv.totalAmount,
-        status: inv.status,
-        dueDate: Value(inv.dueDate),
-        paidDate: Value(inv.paidDate),
-        isSynced: const Value(true),
-      ));
+      await localDataSource.insertInvoice(
+        InvoicesCompanion.insert(
+          id: inv.id,
+          ownerId: inv.ownerId,
+          roomId: inv.roomId,
+          month: inv.month,
+          totalAmount: inv.totalAmount,
+          status: inv.status,
+          dueDate: Value(inv.dueDate),
+          paidDate: Value(inv.paidDate),
+          isSynced: const Value(true),
+        ),
+      );
     }
   }
 }

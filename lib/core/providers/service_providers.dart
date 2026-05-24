@@ -5,7 +5,9 @@ import 'package:quan_ly_nha_tro/features/properties/data/repositories/service_re
 import 'package:quan_ly_nha_tro/features/properties/data/repositories/service_repository_impl.dart';
 import 'package:quan_ly_nha_tro/core/providers/database_providers.dart';
 
-final serviceRemoteDataSourceProvider = Provider<ServiceRemoteDataSource>((ref) {
+final serviceRemoteDataSourceProvider = Provider<ServiceRemoteDataSource>((
+  ref,
+) {
   final client = ref.watch(supabaseClientProvider);
   return ServiceRemoteDataSource(client);
 });
@@ -13,5 +15,8 @@ final serviceRemoteDataSourceProvider = Provider<ServiceRemoteDataSource>((ref) 
 final serviceRepositoryProvider = Provider<ServiceRepository>((ref) {
   final local = ref.watch(serviceDaoProvider);
   final remote = ref.watch(serviceRemoteDataSourceProvider);
-  return ServiceRepositoryImpl(localDataSource: local, remoteDataSource: remote);
+  return ServiceRepositoryImpl(
+    localDataSource: local,
+    remoteDataSource: remote,
+  );
 });

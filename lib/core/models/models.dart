@@ -6,3 +6,5 @@ export 'tenant_model.dart';
 export 'meter_reading_model.dart';
 export 'invoice_model.dart';
 export 'contract_model.dart';
+export 'room_member_model.dart';
+export 'contract_custom_term_model.dart';

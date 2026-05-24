@@ -31,12 +31,13 @@ class AppSearchBar extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hintText,
         prefixIcon: Icon(Icons.search, color: AppColors.textTertiary),
-        suffixIcon: onClear != null
-            ? IconButton(
-                icon: const Icon(Icons.clear, size: AppSize.s18),
-                onPressed: onClear,
-              )
-            : null,
+        suffixIcon:
+            onClear != null
+                ? IconButton(
+                  icon: const Icon(Icons.clear, size: AppSize.s18),
+                  onPressed: onClear,
+                )
+                : null,
       ),
     );
   }

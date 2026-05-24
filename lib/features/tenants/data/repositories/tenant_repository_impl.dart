@@ -33,28 +33,29 @@ class TenantRepositoryImpl implements TenantRepository {
 
   @override
   Future<void> addTenant(Tenant tenant) async {
-    await localDataSource.insertTenant(TenantsCompanion.insert(
-      id: tenant.id,
-      ownerId: tenant.ownerId,
-      name: tenant.name,
-      phone: tenant.phone,
-      cccd: tenant.cccd,
-      dateOfBirth: tenant.dateOfBirth,
-      hometown: tenant.hometown,
-      // nullable caches — wrap in Value()
-      roomId: Value(tenant.roomId),
-      propertyId: Value(tenant.propertyId),
-      // startDate and deposit removed — now in Contracts
-      isVerified: Value(tenant.isVerified),
-      isSynced: const Value(false),
-    ));
+    await localDataSource.insertTenant(
+      TenantsCompanion.insert(
+        id: tenant.id,
+        ownerId: tenant.ownerId,
+        name: tenant.name,
+        phone: tenant.phone,
+        cccd: tenant.cccd,
+        dateOfBirth: tenant.dateOfBirth,
+        hometown: tenant.hometown,
+        // nullable caches — wrap in Value()
+        roomId: Value(tenant.roomId),
+        propertyId: Value(tenant.propertyId),
+        // startDate and deposit removed — now in Contracts
+        isVerified: Value(tenant.isVerified),
+        isSynced: const Value(false),
+      ),
+    );
 
     try {
       await remoteDataSource.upsertTenant(tenant);
-      await localDataSource.updateTenant(TenantsCompanion(
-        id: Value(tenant.id),
-        isSynced: const Value(true),
-      ));
+      await localDataSource.updateTenant(
+        TenantsCompanion(id: Value(tenant.id), isSynced: const Value(true)),
+      );
       debugPrint('✅ Sync success (tenant): ${tenant.name}');
     } catch (e) {
       debugPrint('❌ Sync error (tenant) - ${tenant.name}: $e');
@@ -87,10 +88,9 @@ class TenantRepositoryImpl implements TenantRepository {
 
     try {
       await remoteDataSource.upsertTenant(tenant);
-      await localDataSource.updateTenant(TenantsCompanion(
-        id: Value(tenant.id),
-        isSynced: const Value(true),
-      ));
+      await localDataSource.updateTenant(
+        TenantsCompanion(id: Value(tenant.id), isSynced: const Value(true)),
+      );
       debugPrint('✅ Sync success (tenant): ${tenant.name}');
     } catch (e) {
       debugPrint('❌ Sync error (tenant) - ${tenant.name}: $e');
@@ -123,7 +123,10 @@ class TenantRepositoryImpl implements TenantRepository {
 
       await localDataSource.db.batch((batch) {
         for (var t in deleted) {
-          batch.deleteWhere(localDataSource.tenants, (tbl) => tbl.id.equals(t.id));
+          batch.deleteWhere(
+            localDataSource.tenants,
+            (tbl) => tbl.id.equals(t.id),
+          );
         }
       });
     }
@@ -157,8 +160,13 @@ class TenantRepositoryImpl implements TenantRepository {
 
     await localDataSource.db.batch((batch) {
       for (var lt in localData) {
-        if (lt.propertyId == propertyId && lt.isSynced && !remoteIds.contains(lt.id)) {
-          batch.deleteWhere(localDataSource.tenants, (tbl) => tbl.id.equals(lt.id));
+        if (lt.propertyId == propertyId &&
+            lt.isSynced &&
+            !remoteIds.contains(lt.id)) {
+          batch.deleteWhere(
+            localDataSource.tenants,
+            (tbl) => tbl.id.equals(lt.id),
+          );
         }
       }
 

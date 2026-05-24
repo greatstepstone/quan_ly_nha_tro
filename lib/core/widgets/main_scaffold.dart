@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 
 class MainScaffold extends StatelessWidget {
@@ -11,8 +11,7 @@ class MainScaffold extends StatelessWidget {
 
   int _locationToIndex(String location) {
     if (location.startsWith('/reports')) return 1;
-    if (location.startsWith('/contracts')) return 2;
-    if (location.startsWith('/settings')) return 3;
+    if (location.startsWith('/settings')) return 2;
     return 0;
   }
 
@@ -55,17 +54,10 @@ class MainScaffold extends StatelessWidget {
                   onTap: () => context.goNamed(AppRoutes.reports),
                 ),
                 _NavItem(
-                  icon: Icons.description_outlined,
-                  activeIcon: Icons.description_rounded,
-                  label: AppStrings.contracts,
-                  isActive: currentIndex == 2,
-                  onTap: () => context.goNamed(AppRoutes.contracts),
-                ),
-                _NavItem(
                   icon: Icons.settings_outlined,
                   activeIcon: Icons.settings_rounded,
                   label: AppStrings.settings,
-                  isActive: currentIndex == 3,
+                  isActive: currentIndex == 2,
                   onTap: () => context.goNamed(AppRoutes.settings),
                 ),
               ],
@@ -115,7 +107,7 @@ class _NavItem extends StatelessWidget {
             SizedBox(height: 2),
             Text(
               label,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: 11,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                 color: isActive ? AppColors.primary : AppColors.textTertiary,

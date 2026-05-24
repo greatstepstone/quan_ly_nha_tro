@@ -13,5 +13,6 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
   Stream<List<User>> watchAllUsers() => select(users).watch();
   Future<int> insertUser(Insertable<User> user) => into(users).insert(user);
   Future<bool> updateUser(Insertable<User> user) => update(users).replace(user);
-  Future<int> deleteUser(String id) => (delete(users)..where((t) => t.id.equals(id))).go();
+  Future<int> deleteUser(String id) =>
+      (delete(users)..where((t) => t.id.equals(id))).go();
 }

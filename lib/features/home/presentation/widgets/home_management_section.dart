@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/providers/property_providers.dart';
 import 'package:quan_ly_nha_tro/core/providers/room_providers.dart';
@@ -31,12 +31,14 @@ class HomeManagementSection extends ConsumerWidget {
           children: [
             Expanded(
               child: propertiesAsync.when(
-                data: (props) => _ManagementCard(
-                  icon: Icons.apartment_outlined,
-                  title: AppStrings.homeProperties,
-                  subtitle: '${props.length.toString().padLeft(2, AppStrings.zero)} ${AppStrings.homePropertiesSuffix}',
-                  onTap: () => context.pushNamed(AppRoutes.properties),
-                ),
+                data:
+                    (props) => _ManagementCard(
+                      icon: Icons.apartment_outlined,
+                      title: AppStrings.homeProperties,
+                      subtitle:
+                          '${props.length.toString().padLeft(2, AppStrings.zero)} ${AppStrings.homePropertiesSuffix}',
+                      onTap: () => context.pushNamed(AppRoutes.properties),
+                    ),
                 loading: () => const _LoadingManagementCard(),
                 error: (_, _) => const _ErrorManagementCard(),
               ),
@@ -44,13 +46,14 @@ class HomeManagementSection extends ConsumerWidget {
             const SizedBox(width: AppWidth.w12),
             Expanded(
               child: roomsAsync.when(
-                data: (rooms) => _ManagementCard(
-                  icon: Icons.door_front_door_outlined,
-                  title: AppStrings.homeRooms,
-                  subtitle:
-                      '${rooms.where((r) => r.status == RoomStatus.empty).length} ${AppStrings.homeRoomsSuffix}',
-                  onTap: () => context.pushNamed(AppRoutes.rooms),
-                ),
+                data:
+                    (rooms) => _ManagementCard(
+                      icon: Icons.door_front_door_outlined,
+                      title: AppStrings.homeRooms,
+                      subtitle:
+                          '${rooms.where((r) => r.status == RoomStatus.empty).length} ${AppStrings.homeRoomsSuffix}',
+                      onTap: () => context.pushNamed(AppRoutes.rooms),
+                    ),
                 loading: () => const _LoadingManagementCard(),
                 error: (_, _) => const _ErrorManagementCard(),
               ),
@@ -62,12 +65,14 @@ class HomeManagementSection extends ConsumerWidget {
           children: [
             Expanded(
               child: tenantsAsync.when(
-                data: (tenants) => _ManagementCard(
-                  icon: Icons.person_outline,
-                  title: AppStrings.homeTenants,
-                  subtitle: '${tenants.length} ${AppStrings.homeTenantsSuffix}',
-                  onTap: () => context.pushNamed(AppRoutes.tenants),
-                ),
+                data:
+                    (tenants) => _ManagementCard(
+                      icon: Icons.person_outline,
+                      title: AppStrings.homeTenants,
+                      subtitle:
+                          '${tenants.length} ${AppStrings.homeTenantsSuffix}',
+                      onTap: () => context.pushNamed(AppRoutes.tenants),
+                    ),
                 loading: () => const _LoadingManagementCard(),
                 error: (_, _) => const _ErrorManagementCard(),
               ),
@@ -75,13 +80,14 @@ class HomeManagementSection extends ConsumerWidget {
             const SizedBox(width: AppWidth.w12),
             Expanded(
               child: invoicesAsync.when(
-                data: (invs) => _ManagementCard(
-                  icon: Icons.receipt_outlined,
-                  title: AppStrings.homeInvoices,
-                  subtitle:
-                      '${invs.where((i) => i.status != InvoiceStatus.paid).length} ${AppStrings.homeInvoicesSuffix}',
-                  onTap: () => context.pushNamed(AppRoutes.invoices),
-                ),
+                data:
+                    (invs) => _ManagementCard(
+                      icon: Icons.receipt_outlined,
+                      title: AppStrings.homeInvoices,
+                      subtitle:
+                          '${invs.where((i) => i.status != InvoiceStatus.paid).length} ${AppStrings.homeInvoicesSuffix}',
+                      onTap: () => context.pushNamed(AppRoutes.invoices),
+                    ),
                 loading: () => const _LoadingManagementCard(),
                 error: (_, _) => const _ErrorManagementCard(),
               ),
@@ -93,12 +99,14 @@ class HomeManagementSection extends ConsumerWidget {
           children: [
             Expanded(
               child: contractsAsync.when(
-                data: (contracts) => _ManagementCard(
-                  icon: Icons.description_outlined,
-                  title: AppStrings.contracts,
-                  subtitle: '${contracts.length} ${AppStrings.homeTenantsSuffix}',
-                  onTap: () => context.pushNamed(AppRoutes.contracts),
-                ),
+                data:
+                    (contracts) => _ManagementCard(
+                      icon: Icons.description_outlined,
+                      title: AppStrings.contracts,
+                      subtitle:
+                          '${contracts.length} ${AppStrings.homeContractsSuffix}',
+                      onTap: () => context.pushNamed(AppRoutes.contracts),
+                    ),
                 loading: () => const _LoadingManagementCard(),
                 error: (_, _) => const _ErrorManagementCard(),
               ),
@@ -150,7 +158,11 @@ class _ManagementCard extends StatelessWidget {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppRadius.r10),
               ),
-              child: Icon(icon, color: AppColors.textSecondary, size: FontSize.s20),
+              child: Icon(
+                icon,
+                color: AppColors.textSecondary,
+                size: FontSize.s20,
+              ),
             ),
             const SizedBox(width: AppWidth.w12),
             Expanded(
@@ -159,15 +171,17 @@ class _ManagementCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s14,
                       fontWeight: FontWeightManager.bold,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
-                    subtitle,
-                    style: GoogleFonts.manrope(
+                    subtitle.length > 11
+                        ? '${subtitle.substring(0, 11)}...'
+                        : subtitle,
+                    style: manrope(
                       fontSize: FontSize.s11,
                       color: AppColors.textSecondary,
                     ),
@@ -187,7 +201,7 @@ class _LoadingManagementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: AppHeight.h72, 
+      height: AppHeight.h72,
       decoration: BoxDecoration(
         color: AppColors.surfaceBright,
         borderRadius: BorderRadius.circular(AppRadius.r12),
@@ -201,13 +215,17 @@ class _ErrorManagementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: AppHeight.h72, 
+      height: AppHeight.h72,
       decoration: BoxDecoration(
         color: AppColors.redLight,
         borderRadius: BorderRadius.circular(AppRadius.r12),
       ),
       child: Center(
-        child: Icon(Icons.error_outline, color: AppColors.red, size: FontSize.s20),
+        child: Icon(
+          Icons.error_outline,
+          color: AppColors.red,
+          size: FontSize.s20,
+        ),
       ),
     );
   }

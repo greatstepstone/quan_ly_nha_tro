@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 import 'package:quan_ly_nha_tro/core/providers/invoice_providers.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -22,32 +22,40 @@ class HomeReportsSection extends ConsumerWidget {
         Row(
           children: [
             Expanded(
-              child: ref.watch(totalMonthlyRevenueProvider).when(
-                    data: (total) => _ReportCard(
-                      icon: Icons.trending_up,
-                      iconColor: AppColors.emerald,
-                      iconBg: AppColors.emeraldLight,
-                      title: AppStrings.homeRevenue,
-                      value: '${_currencyFormatter.format(total)}${AppStrings.currencySymbol}',
-                      valueColor: AppColors.emerald,
-                      onTap: () => context.pushNamed(AppRoutes.reports),
-                    ),
+              child: ref
+                  .watch(totalMonthlyRevenueProvider)
+                  .when(
+                    data:
+                        (total) => _ReportCard(
+                          icon: Icons.trending_up,
+                          iconColor: AppColors.emerald,
+                          iconBg: AppColors.emeraldLight,
+                          title: AppStrings.homeRevenue,
+                          value:
+                              '${_currencyFormatter.format(total)}${AppStrings.currencySymbol}',
+                          valueColor: AppColors.emerald,
+                          onTap: () => context.pushNamed(AppRoutes.reports),
+                        ),
                     loading: () => const _LoadingReportCard(),
                     error: (_, _) => const _ErrorReportCard(),
                   ),
             ),
             const SizedBox(width: AppWidth.w12),
             Expanded(
-              child: ref.watch(totalOutstandingDebtProvider).when(
-                    data: (debt) => _ReportCard(
-                      icon: Icons.warning_amber_rounded,
-                      iconColor: AppColors.red,
-                      iconBg: AppColors.redLight,
-                      title: AppStrings.homeDebt,
-                      value: '${_currencyFormatter.format(debt)}${AppStrings.currencySymbol}',
-                      valueColor: AppColors.red,
-                      onTap: () => context.pushNamed(AppRoutes.invoices),
-                    ),
+              child: ref
+                  .watch(totalOutstandingDebtProvider)
+                  .when(
+                    data:
+                        (debt) => _ReportCard(
+                          icon: Icons.warning_amber_rounded,
+                          iconColor: AppColors.red,
+                          iconBg: AppColors.redLight,
+                          title: AppStrings.homeDebt,
+                          value:
+                              '${_currencyFormatter.format(debt)}${AppStrings.currencySymbol}',
+                          valueColor: AppColors.red,
+                          onTap: () => context.pushNamed(AppRoutes.invoices),
+                        ),
                     loading: () => const _LoadingReportCard(),
                     error: (_, _) => const _ErrorReportCard(),
                   ),
@@ -127,7 +135,7 @@ class _ReportCard extends StatelessWidget {
             const SizedBox(height: AppHeight.h10),
             Text(
               title,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: FontSize.s13,
                 fontWeight: FontWeightManager.semiBold,
                 color: AppColors.textPrimary,
@@ -136,7 +144,7 @@ class _ReportCard extends StatelessWidget {
             const SizedBox(height: AppHeight.h4),
             Text(
               value,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: isValueSmall ? FontSize.s13 : FontSize.s14,
                 fontWeight: FontWeightManager.bold,
                 color: valueColor,

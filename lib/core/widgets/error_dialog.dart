@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
+import 'package:share_plus/share_plus.dart';
+
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 
 class ErrorDialog extends StatefulWidget {
@@ -29,12 +29,13 @@ class ErrorDialog extends StatefulWidget {
     return showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => ErrorDialog(
-        title: title ?? AppStrings.errorTitle,
-        message: message,
-        error: error,
-        stackTrace: stackTrace,
-      ),
+      builder:
+          (context) => ErrorDialog(
+            title: title ?? AppStrings.errorTitle,
+            message: message,
+            error: error,
+            stackTrace: stackTrace,
+          ),
     );
   }
 
@@ -48,14 +49,20 @@ class _ErrorDialogState extends State<ErrorDialog> {
   String get _fullErrorLog {
     final buffer = StringBuffer();
     buffer.writeln(AppStrings.errorReportHeader);
-    buffer.writeln('${AppStrings.errorReportTitle}: ${widget.title ?? AppStrings.errorTitle}');
+    buffer.writeln(
+      '${AppStrings.errorReportTitle}: ${widget.title ?? AppStrings.errorTitle}',
+    );
     buffer.writeln('${AppStrings.errorReportMessage}: ${widget.message}');
     buffer.writeln('${AppStrings.errorReportTimestamp}: ${DateTime.now()}');
     if (widget.error != null) {
-      buffer.writeln('${AppStrings.errorReportTechnicalDetails}: ${widget.error}');
+      buffer.writeln(
+        '${AppStrings.errorReportTechnicalDetails}: ${widget.error}',
+      );
     }
     if (widget.stackTrace != null) {
-      buffer.writeln('${AppStrings.errorReportStackTrace}:\n${widget.stackTrace}');
+      buffer.writeln(
+        '${AppStrings.errorReportStackTrace}:\n${widget.stackTrace}',
+      );
     }
     buffer.writeln('---------------------');
     return buffer.toString();
@@ -74,12 +81,8 @@ class _ErrorDialogState extends State<ErrorDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Top Accent Bar
-            Container(
-              height: 6,
-              width: double.infinity,
-              color: AppColors.red,
-            ),
-            
+            Container(height: 6, width: double.infinity, color: AppColors.red),
+
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
               child: Column(
@@ -98,30 +101,30 @@ class _ErrorDialogState extends State<ErrorDialog> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Title
                   Text(
                     widget.title ?? AppStrings.errorTitle,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // Message
                   Text(
                     widget.message,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: 14,
                       color: AppColors.textSecondary,
                       height: 1.5,
                     ),
                   ),
-                  
+
                   // Technical Details Toggle
                   if (widget.error != null) ...[
                     const SizedBox(height: 24),
@@ -129,20 +132,27 @@ class _ErrorDialogState extends State<ErrorDialog> {
                       onTap: () => setState(() => _showDetails = !_showDetails),
                       borderRadius: BorderRadius.circular(12),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 12,
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              _showDetails ? AppStrings.hideTechnicalDetails : AppStrings.showTechnicalDetails,
-                              style: GoogleFonts.manrope(
+                              _showDetails
+                                  ? AppStrings.hideTechnicalDetails
+                                  : AppStrings.showTechnicalDetails,
+                              style: manrope(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.primary,
                               ),
                             ),
                             Icon(
-                              _showDetails ? Icons.expand_less : Icons.expand_more,
+                              _showDetails
+                                  ? Icons.expand_less
+                                  : Icons.expand_more,
                               size: 18,
                               color: AppColors.primary,
                             ),
@@ -150,7 +160,7 @@ class _ErrorDialogState extends State<ErrorDialog> {
                         ),
                       ),
                     ),
-                    
+
                     if (_showDetails)
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
@@ -161,12 +171,15 @@ class _ErrorDialogState extends State<ErrorDialog> {
                         decoration: BoxDecoration(
                           color: AppColors.surfaceContainer,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                          border: Border.all(
+                            color: Colors.grey.withValues(alpha: 0.2),
+                          ),
                         ),
                         child: SingleChildScrollView(
                           child: SelectableText(
                             _fullErrorLog,
-                            style: GoogleFonts.sourceCodePro(
+                            style: TextStyle(
+                              fontFamily: 'monospace',
                               fontSize: 11,
                               color: AppColors.textPrimary,
                             ),
@@ -177,13 +190,15 @@ class _ErrorDialogState extends State<ErrorDialog> {
                 ],
               ),
             ),
-            
+
             // Action Buttons
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.surfaceBright,
-                border: Border(top: BorderSide(color: Colors.grey.withValues(alpha: 0.1))),
+                border: Border(
+                  top: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+                ),
               ),
               child: Column(
                 children: [
@@ -193,7 +208,9 @@ class _ErrorDialogState extends State<ErrorDialog> {
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () {
-                            Clipboard.setData(ClipboardData(text: _fullErrorLog));
+                            Clipboard.setData(
+                              ClipboardData(text: _fullErrorLog),
+                            );
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(AppStrings.copyLogSuccess),
@@ -205,17 +222,22 @@ class _ErrorDialogState extends State<ErrorDialog> {
                           label: Text(AppStrings.copy),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      
+
                       // Share Button
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            Share.share(_fullErrorLog, subject: AppStrings.appErrorReportSubject);
+                            Share.share(
+                              _fullErrorLog,
+                              subject: AppStrings.appErrorReportSubject,
+                            );
                           },
                           icon: const Icon(Icons.send_rounded, size: 18),
                           label: Text(AppStrings.sendReport),
@@ -223,7 +245,9 @@ class _ErrorDialogState extends State<ErrorDialog> {
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             elevation: 0,
                           ),
                         ),
@@ -231,7 +255,7 @@ class _ErrorDialogState extends State<ErrorDialog> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // Close Button
                   SizedBox(
                     width: double.infinity,
@@ -239,7 +263,7 @@ class _ErrorDialogState extends State<ErrorDialog> {
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         AppStrings.close,
-                        style: GoogleFonts.manrope(
+                        style: manrope(
                           fontWeight: FontWeight.w700,
                           color: AppColors.textTertiary,
                         ),

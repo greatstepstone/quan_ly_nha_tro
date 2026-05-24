@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
@@ -29,7 +29,7 @@ class AppDatePicker extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: FontSize.s13,
             fontWeight: FontWeightManager.medium,
             color: AppColors.textSecondary,
@@ -42,10 +42,12 @@ class AppDatePicker extends StatelessWidget {
               context: context,
               initialDate: DateTime.now(),
               firstDate: firstDate ?? DateTime(1950),
-              lastDate: lastDate ?? DateTime.now().add(const Duration(days: 3650)),
+              lastDate:
+                  lastDate ?? DateTime.now().add(const Duration(days: 3650)),
             );
             if (picked != null) {
-              final dateStr = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+              final dateStr =
+                  '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
               controller.text = dateStr;
               if (onDateSelected != null) onDateSelected!(picked);
             }
@@ -53,7 +55,7 @@ class AppDatePicker extends StatelessWidget {
           child: AbsorbPointer(
             child: TextField(
               controller: controller,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: FontSize.s14,
                 fontWeight: FontWeightManager.semiBold,
                 color: AppColors.textPrimary,

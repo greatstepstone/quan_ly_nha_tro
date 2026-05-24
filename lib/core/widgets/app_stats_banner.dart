@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
@@ -64,7 +64,7 @@ class AppStatsBanner extends StatelessWidget {
           if (title != null)
             Text(
               title!,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 color: Colors.white,
                 fontWeight: FontWeightManager.bold,
                 fontSize: FontSize.s16,
@@ -74,7 +74,7 @@ class AppStatsBanner extends StatelessWidget {
             const SizedBox(height: AppHeight.h4),
             Text(
               subtitle!,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 color: Colors.white70,
                 fontSize: FontSize.s12,
                 height: 1.4,
@@ -84,33 +84,34 @@ class AppStatsBanner extends StatelessWidget {
           if (title != null || subtitle != null)
             const SizedBox(height: AppHeight.h16),
           Row(
-            children: stats
-                .map(
-                  (s) => Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          s.value,
-                          style: GoogleFonts.manrope(
-                            color: Colors.white,
-                            fontSize: FontSize.s28,
-                            fontWeight: FontWeightManager.extraBold,
-                          ),
+            children:
+                stats
+                    .map(
+                      (s) => Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              s.value,
+                              style: manrope(
+                                color: Colors.white,
+                                fontSize: FontSize.s28,
+                                fontWeight: FontWeightManager.extraBold,
+                              ),
+                            ),
+                            Text(
+                              s.label,
+                              style: manrope(
+                                color: Colors.white60,
+                                fontSize: FontSize.s11,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          s.label,
-                          style: GoogleFonts.manrope(
-                            color: Colors.white60,
-                            fontSize: FontSize.s11,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                .toList(),
+                      ),
+                    )
+                    .toList(),
           ),
         ],
       ),

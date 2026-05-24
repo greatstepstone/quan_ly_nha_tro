@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
@@ -32,12 +32,16 @@ class HomePage extends StatelessWidget {
               padding: const EdgeInsets.only(left: AppPadding.p16),
               child: CircleAvatar(
                 backgroundColor: AppColors.primaryLight,
-                child: Icon(Icons.person, color: AppColors.primary, size: AppSize.s20),
+                child: Icon(
+                  Icons.person,
+                  color: AppColors.primary,
+                  size: AppSize.s20,
+                ),
               ),
             ),
             title: Text(
               AppStrings.homeHome,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: FontSize.s18,
                 fontWeight: FontWeightManager.bold,
                 color: AppColors.textPrimary,
@@ -56,11 +60,14 @@ class HomePage extends StatelessWidget {
                 children: [
                   Text(
                     AppStrings.homeGreeting,
-                    style: GoogleFonts.manrope(fontSize: FontSize.s14, color: AppColors.textSecondary),
+                    style: manrope(
+                      fontSize: FontSize.s14,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   Text(
                     AppStrings.homeRole,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s24,
                       fontWeight: FontWeightManager.extraBold,
                       color: AppColors.textPrimary,
@@ -80,9 +87,10 @@ class HomePage extends StatelessWidget {
                           icon: Icons.bolt,
                           iconColor: AppColors.amber,
                           iconBg: AppColors.amberLight,
-                          title: 'Ghi điện nước',
-                          subtitle: 'Cập nhật chỉ số',
-                          onTap: () => context.pushNamed(AppRoutes.meterReadings),
+                          title: AppStrings.meterReadings,
+                          subtitle: AppStrings.updateReadings,
+                          onTap:
+                              () => context.pushNamed(AppRoutes.meterReadings),
                         ),
                       ),
                       const SizedBox(width: AppWidth.w12),
@@ -91,8 +99,8 @@ class HomePage extends StatelessWidget {
                           icon: Icons.receipt_long,
                           iconColor: AppColors.orange,
                           iconBg: AppColors.orangeLight,
-                          title: 'Lập hóa đơn',
-                          subtitle: 'Kỳ tháng hiện tại',
+                          title: AppStrings.createInvoices,
+                          subtitle: AppStrings.currentMonthPeriod,
                           onTap: () => context.pushNamed(AppRoutes.invoices),
                         ),
                       ),
@@ -106,8 +114,8 @@ class HomePage extends StatelessWidget {
                           icon: Icons.account_balance_wallet_outlined,
                           iconColor: AppColors.emerald,
                           iconBg: AppColors.emeraldLight,
-                          title: 'Thu chi',
-                          subtitle: 'Sổ quỹ tiền mặt',
+                          title: AppStrings.cashFlow,
+                          subtitle: AppStrings.cashLedger,
                           onTap: () {},
                         ),
                       ),
@@ -143,36 +151,57 @@ class HomePage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(AppStrings.homePerformance,
-                                  style: GoogleFonts.manrope(
-                                      color: Colors.white,
-                                      fontWeight: FontWeightManager.bold,
-                                      fontSize: FontSize.s16)),
+                              Text(
+                                AppStrings.homePerformance,
+                                style: manrope(
+                                  color: Colors.white,
+                                  fontWeight: FontWeightManager.bold,
+                                  fontSize: FontSize.s16,
+                                ),
+                              ),
                               const SizedBox(height: AppHeight.h4),
-                              Text(AppStrings.homeOccupancyRate,
-                                  style: GoogleFonts.manrope(
-                                      color: Colors.white70, fontSize: FontSize.s12)),
+                              Text(
+                                AppStrings.homeOccupancyRate,
+                                style: manrope(
+                                  color: Colors.white70,
+                                  fontSize: FontSize.s12,
+                                ),
+                              ),
                               const SizedBox(height: AppHeight.h12),
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text('8.2',
-                                      style: GoogleFonts.manrope(
-                                          color: Colors.white,
-                                          fontSize: FontSize.s32,
-                                          fontWeight: FontWeightManager.extraBold)),
+                                  Text(
+                                    '8.2',
+                                    style: manrope(
+                                      color: Colors.white,
+                                      fontSize: FontSize.s32,
+                                      fontWeight: FontWeightManager.extraBold,
+                                    ),
+                                  ),
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: 5, left: 4),
-                                    child: Text(AppStrings.homePoints,
-                                        style: GoogleFonts.manrope(
-                                            color: Colors.white70, fontSize: FontSize.s13)),
+                                    padding: const EdgeInsets.only(
+                                      bottom: 5,
+                                      left: 4,
+                                    ),
+                                    child: Text(
+                                      AppStrings.homePoints,
+                                      style: manrope(
+                                        color: Colors.white70,
+                                        fontSize: FontSize.s13,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
                             ],
                           ),
                         ),
-                        const Icon(Icons.trending_up, color: Colors.white38, size: 60),
+                        const Icon(
+                          Icons.trending_up,
+                          color: Colors.white38,
+                          size: 60,
+                        ),
                       ],
                     ),
                   ),

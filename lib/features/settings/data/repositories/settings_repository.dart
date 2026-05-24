@@ -5,7 +5,11 @@ abstract class SettingsRepository {
   Future<User?> getOwnerProfile(String userId);
 
   /// Updates the owner's profile name and phone.
-  Future<void> updateOwnerProfile({required String userId, required String name, String? phone});
+  Future<void> updateOwnerProfile({
+    required String userId,
+    required String name,
+    String? phone,
+  });
 
   /// Triggers a full data sync for properties and rooms.
   Future<void> syncAllData();

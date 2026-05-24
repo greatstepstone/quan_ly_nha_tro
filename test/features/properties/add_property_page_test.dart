@@ -4,14 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quan_ly_nha_tro/features/properties/presentation/pages/add_property_page.dart';
 
 void main() {
-  testWidgets('AddPropertyPage - should show error if fields are empty', (WidgetTester tester) async {
+  testWidgets('AddPropertyPage - should show error if fields are empty', (
+    WidgetTester tester,
+  ) async {
     // 1. Build the widget
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
-          home: AddPropertyPage(),
-        ),
-      ),
+      const ProviderScope(child: MaterialApp(home: AddPropertyPage())),
     );
 
     // 2. Click Save without entering anything
@@ -22,13 +20,11 @@ void main() {
     expect(find.text('Vui lòng nhập tên và địa chỉ nhà trọ'), findsOneWidget);
   });
 
-  testWidgets('AddPropertyPage - inputs should update controllers', (WidgetTester tester) async {
+  testWidgets('AddPropertyPage - inputs should update controllers', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
-          home: AddPropertyPage(),
-        ),
-      ),
+      const ProviderScope(child: MaterialApp(home: AddPropertyPage())),
     );
 
     // Điền tên nhà trọ

@@ -2,12 +2,6 @@
 
 This list contains the key files and features that require manual verification to ensure everything looks and functions as expected on your devices.
 
-## 🚀 Onboarding & Navigation
-- [ ] **Onboarding Screen UI:** Check `lib/features/onboarding/presentation/pages/onboarding_page.dart` to ensure the 3D images and text alignment look perfect on your screen.
-- [ ] **First-time Flow:** Delete the app or clear cache to verify that the onboarding shows up correctly on the first launch.
-- [ ] **Persistence:** Verify that after clicking "Get Started" or "Skip", the onboarding never appears again (check `onboarding_providers.dart`).
-- [ ] **Router Redirection:** In `lib/core/router/app_router.dart`, ensure that the transition from Onboarding to Login/Home is smooth and correctly follows your session status.
-
 ## 🍎 iOS Configuration
 - [ ] **App Icons:** Verify that the icons look correct on an iOS simulator or device (located in `ios/Runner/Assets.xcassets/AppIcon.appiconset`).
 - [ ] **Info.plist Permissions:** Check `ios/Runner/Info.plist` for the Camera and Photo Library descriptions. Ensure the Vietnamese text is phrased exactly how you want it to appear in the system dialog.

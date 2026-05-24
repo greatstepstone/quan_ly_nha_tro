@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
@@ -27,12 +27,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   final _confirmPasswordController = TextEditingController();
 
   Future<void> _handleSignUp() async {
-    if (_emailController.text.isEmpty || 
-        _passwordController.text.isEmpty || 
+    if (_emailController.text.isEmpty ||
+        _passwordController.text.isEmpty ||
         _fullNameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppStrings.emptyFieldsError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(AppStrings.emptyFieldsError)));
       return;
     }
 
@@ -45,14 +45,16 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
 
     setState(() => _isLoading = true);
     try {
-      final response = await ref.read(authRepositoryProvider).signUp(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-        fullName: _fullNameController.text.trim(),
-      );
-      
+      final response = await ref
+          .read(authRepositoryProvider)
+          .signUp(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+            fullName: _fullNameController.text.trim(),
+          );
+
       if (!mounted) return;
-      
+
       if (response.session != null) {
         context.goNamed(AppRoutes.home);
       } else {
@@ -68,15 +70,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${AppStrings.loginErrorPrefix}${e.message}'), 
+          content: Text('${AppStrings.loginErrorPrefix}${e.message}'),
           backgroundColor: AppColors.red,
         ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppStrings.signUpError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(AppStrings.signUpError)));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -103,7 +105,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
               ),
             ),
           ),
-          
+
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: AppPadding.p24),
@@ -120,10 +122,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     ),
                   ),
                   const SizedBox(height: AppHeight.h32),
-                  
+
                   Text(
                     AppStrings.signUpTitle,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s32,
                       fontWeight: FontWeightManager.extraBold,
                       color: AppColors.textPrimary,
@@ -133,15 +135,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   const SizedBox(height: AppHeight.h8),
                   Text(
                     AppStrings.signUpSubtitle,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s14,
                       color: AppColors.textSecondary,
                       height: 1.5,
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppHeight.h40),
-                  
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(AppPadding.p32),
@@ -190,15 +192,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppHeight.h32),
-                  
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         AppStrings.signUpAlreadyHaveAccount,
-                        style: GoogleFonts.manrope(
+                        style: manrope(
                           fontSize: FontSize.s14,
                           color: AppColors.textSecondary,
                         ),
@@ -207,7 +209,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                         onPressed: () => context.pop(),
                         child: Text(
                           AppStrings.signUpLoginNow,
-                          style: GoogleFonts.manrope(
+                          style: manrope(
                             fontSize: FontSize.s14,
                             fontWeight: FontWeightManager.bold,
                             color: AppColors.primary,
@@ -221,7 +223,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
               ),
             ),
           ),
-          
+
           if (_isLoading)
             Positioned.fill(
               child: Container(

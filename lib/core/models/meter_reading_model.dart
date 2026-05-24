@@ -10,6 +10,10 @@ class MeterReading {
   final int? electricNew;
   final int waterOld;
   final int? waterNew;
+  final String? electricOldImagePath;
+  final String? electricNewImagePath;
+  final String? waterOldImagePath;
+  final String? waterNewImagePath;
   final bool isRecorded;
   final bool isSynced;
   final bool isDeleted;
@@ -23,6 +27,10 @@ class MeterReading {
     this.electricNew,
     required this.waterOld,
     this.waterNew,
+    this.electricOldImagePath,
+    this.electricNewImagePath,
+    this.waterOldImagePath,
+    this.waterNewImagePath,
     this.isRecorded = false,
     this.isSynced = true,
     this.isDeleted = false,
@@ -37,6 +45,10 @@ class MeterReading {
     int? electricNew,
     int? waterOld,
     int? waterNew,
+    String? electricOldImagePath,
+    String? electricNewImagePath,
+    String? waterOldImagePath,
+    String? waterNewImagePath,
     bool? isRecorded,
     bool? isSynced,
     bool? isDeleted,
@@ -50,6 +62,10 @@ class MeterReading {
       electricNew: electricNew ?? this.electricNew,
       waterOld: waterOld ?? this.waterOld,
       waterNew: waterNew ?? this.waterNew,
+      electricOldImagePath: electricOldImagePath ?? this.electricOldImagePath,
+      electricNewImagePath: electricNewImagePath ?? this.electricNewImagePath,
+      waterOldImagePath: waterOldImagePath ?? this.waterOldImagePath,
+      waterNewImagePath: waterNewImagePath ?? this.waterNewImagePath,
       isRecorded: isRecorded ?? this.isRecorded,
       isSynced: isSynced ?? this.isSynced,
       isDeleted: isDeleted ?? this.isDeleted,

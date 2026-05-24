@@ -8,10 +8,8 @@ class PropertyRemoteDataSource {
 
   /// Lấy toàn bộ danh sách nhà trọ từ Supabase (Rls sẽ tự lọc theo owner_id)
   Future<List<Property>> getAllProperties() async {
-    final response = await _client
-        .from('properties')
-        .select();
-    
+    final response = await _client.from('properties').select();
+
     return (response as List).map((json) => _mapToProperty(json)).toList();
   }
 

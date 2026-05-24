@@ -14,6 +14,7 @@ import 'package:quan_ly_nha_tro/core/widgets/app_add_card.dart';
 import 'package:quan_ly_nha_tro/core/widgets/app_filter_chip.dart';
 import 'package:quan_ly_nha_tro/core/widgets/app_stats_banner.dart';
 import 'package:quan_ly_nha_tro/features/rooms/presentation/widgets/room_list_widgets.dart';
+import 'package:quan_ly_nha_tro/core/widgets/app_property_selector.dart';
 
 class RoomsListPage extends ConsumerStatefulWidget {
   final String? propertyId;
@@ -26,14 +27,22 @@ class RoomsListPage extends ConsumerStatefulWidget {
 class _RoomsListPageState extends ConsumerState<RoomsListPage> {
   RoomStatus? _filter;
   String _query = '';
+  String? _selectedPropertyId;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPropertyId = widget.propertyId;
+  }
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(localeProvider); 
+    ref.watch(localeProvider);
 
-    final roomsAsync = widget.propertyId != null 
-        ? ref.watch(roomsByPropertyProvider(widget.propertyId!)) 
-        : ref.watch(allRoomsProvider);
+    final roomsAsync =
+        _selectedPropertyId != null
+            ? ref.watch(roomsByPropertyProvider(_selectedPropertyId!))
+            : ref.watch(allRoomsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -46,17 +55,35 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
       ),
       body: roomsAsync.when(
         data: (List<Room> dbRooms) {
-          final filteredRooms = dbRooms.where((r) {
-            final matchesFilter = _filter == null || r.status == _filter;
-            final matchesQuery = _query.isEmpty || r.name.toLowerCase().contains(_query.toLowerCase());
-            return matchesFilter && matchesQuery;
-          }).toList();
+          final filteredRooms =
+              dbRooms.where((r) {
+                final matchesFilter = _filter == null || r.status == _filter;
+                final matchesQuery =
+                    _query.isEmpty ||
+                    r.name.toLowerCase().contains(_query.toLowerCase());
+                return matchesFilter && matchesQuery;
+              }).toList();
 
-          final occupied = dbRooms.where((r) => r.status == RoomStatus.rented).length;
+          final occupied =
+              dbRooms.where((r) => r.status == RoomStatus.rented).length;
           final total = dbRooms.length;
 
           return Column(
             children: [
+              if (widget.propertyId == null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppPadding.p16,
+                  ),
+                  child: AppPropertySelector(
+                    selectedPropertyId: _selectedPropertyId,
+                    onPropertySelected: (id) {
+                      setState(() {
+                        _selectedPropertyId = id;
+                      });
+                    },
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16),
                 child: AppSearchBar(
@@ -71,14 +98,23 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
               const SizedBox(height: AppHeight.h12),
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16),
+                  padding: const EdgeInsets.only(
+                    top: AppPadding.p8,
+                    bottom: AppPadding.p32,
+                    left: AppPadding.p16,
+                    right: AppPadding.p16,
+                  ),
                   itemCount: filteredRooms.length + 3,
                   itemBuilder: (context, index) {
                     if (index < filteredRooms.length) {
                       final room = filteredRooms[index];
                       return RoomListItemCard(
                         room: room,
-                        onTap: () => context.pushNamed(AppRoutes.roomDetail, pathParameters: {'id': room.id}),
+                        onTap:
+                            () => context.pushNamed(
+                              AppRoutes.roomDetail,
+                              pathParameters: {'id': room.id},
+                            ),
                       );
                     } else if (index == filteredRooms.length) {
                       return AppAddCard(
@@ -87,20 +123,31 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
                         buttonLabel: AppStrings.addNowBtn,
                         icon: Icons.home_outlined,
                         style: AppAddCardStyle.light,
-                        onTap: () => context.pushNamed(
-                          AppRoutes.roomAdd,
-                          queryParameters: widget.propertyId != null ? {'propertyId': widget.propertyId!} : const {}
-                        ),
+                        onTap:
+                            () => context.pushNamed(
+                              AppRoutes.roomAdd,
+                              queryParameters:
+                                  widget.propertyId != null
+                                      ? {'propertyId': widget.propertyId!}
+                                      : const {},
+                            ),
                       );
                     } else if (index == filteredRooms.length + 1) {
-                      final pct = total > 0 ? (occupied / total * 100).round() : 0;
+                      final pct =
+                          total > 0 ? (occupied / total * 100).round() : 0;
                       return Padding(
                         padding: const EdgeInsets.only(top: AppPadding.p16),
                         child: AppStatsBanner(
                           title: AppStrings.quickStats,
                           stats: [
-                            StatItem(value: '$occupied/$total', label: AppStrings.occupiedRoomsLabel),
-                            StatItem(value: '$pct%', label: AppStrings.occupancyRate),
+                            StatItem(
+                              value: '$occupied/$total',
+                              label: AppStrings.occupiedRoomsLabel,
+                            ),
+                            StatItem(
+                              value: '$pct%',
+                              label: AppStrings.occupancyRate,
+                            ),
                           ],
                         ),
                       );
@@ -114,16 +161,17 @@ class _RoomsListPageState extends ConsumerState<RoomsListPage> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => AppErrorView(
-          error: err,
-          onRetry: () {
-            if (widget.propertyId != null) {
-              ref.invalidate(roomsByPropertyProvider(widget.propertyId!));
-            } else {
-              ref.invalidate(allRoomsProvider);
-            }
-          },
-        ),
+        error:
+            (err, stack) => AppErrorView(
+              error: err,
+              onRetry: () {
+                if (widget.propertyId != null) {
+                  ref.invalidate(roomsByPropertyProvider(widget.propertyId!));
+                } else {
+                  ref.invalidate(allRoomsProvider);
+                }
+              },
+            ),
       ),
     );
   }
@@ -133,22 +181,44 @@ class _RoomFilterBar extends StatelessWidget {
   final RoomStatus? selectedFilter;
   final Function(RoomStatus?) onFilterChanged;
 
-  const _RoomFilterBar({required this.selectedFilter, required this.onFilterChanged});
+  const _RoomFilterBar({
+    required this.selectedFilter,
+    required this.onFilterChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16, vertical: AppPadding.p12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppPadding.p16,
+        vertical: AppPadding.p12,
+      ),
       child: Row(
         children: [
-          AppFilterChip(label: AppStrings.filterAll, isActive: selectedFilter == null, onTap: () => onFilterChanged(null)),
+          AppFilterChip(
+            label: AppStrings.filterAll,
+            isActive: selectedFilter == null,
+            onTap: () => onFilterChanged(null),
+          ),
           const SizedBox(width: AppWidth.w8),
-          AppFilterChip(label: AppStrings.filterEmpty, isActive: selectedFilter == RoomStatus.empty, onTap: () => onFilterChanged(RoomStatus.empty)),
+          AppFilterChip(
+            label: AppStrings.filterEmpty,
+            isActive: selectedFilter == RoomStatus.empty,
+            onTap: () => onFilterChanged(RoomStatus.empty),
+          ),
           const SizedBox(width: AppWidth.w8),
-          AppFilterChip(label: AppStrings.filterRented, isActive: selectedFilter == RoomStatus.rented, onTap: () => onFilterChanged(RoomStatus.rented)),
+          AppFilterChip(
+            label: AppStrings.filterRented,
+            isActive: selectedFilter == RoomStatus.rented,
+            onTap: () => onFilterChanged(RoomStatus.rented),
+          ),
           const SizedBox(width: AppWidth.w8),
-          AppFilterChip(label: AppStrings.filterMaintenance, isActive: selectedFilter == RoomStatus.maintenance, onTap: () => onFilterChanged(RoomStatus.maintenance)),
+          AppFilterChip(
+            label: AppStrings.filterMaintenance,
+            isActive: selectedFilter == RoomStatus.maintenance,
+            onTap: () => onFilterChanged(RoomStatus.maintenance),
+          ),
         ],
       ),
     );

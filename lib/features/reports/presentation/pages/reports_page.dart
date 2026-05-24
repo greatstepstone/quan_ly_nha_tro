@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -15,7 +15,8 @@ class ReportsPage extends ConsumerStatefulWidget {
   ConsumerState<ReportsPage> createState() => _ReportsPageState();
 }
 
-class _ReportsPageState extends ConsumerState<ReportsPage> with SingleTickerProviderStateMixin {
+class _ReportsPageState extends ConsumerState<ReportsPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tab;
 
   @override
@@ -46,7 +47,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> with SingleTickerProv
             ),
             title: Text(
               'Báo cáo Thống kê',
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: FontSize.s18,
                 fontWeight: FontWeightManager.bold,
               ),
@@ -57,7 +58,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> with SingleTickerProv
               unselectedLabelColor: AppColors.textSecondary,
               indicatorColor: AppColors.primary,
               indicatorSize: TabBarIndicatorSize.label,
-              labelStyle: GoogleFonts.manrope(
+              labelStyle: manrope(
                 fontWeight: FontWeightManager.bold,
                 fontSize: FontSize.s14,
               ),
@@ -71,11 +72,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> with SingleTickerProv
           SliverFillRemaining(
             child: TabBarView(
               controller: _tab,
-              children: const [
-                RevenueTab(),
-                CostsTab(),
-                VacancyTab(),
-              ],
+              children: const [RevenueTab(), CostsTab(), VacancyTab()],
             ),
           ),
         ],

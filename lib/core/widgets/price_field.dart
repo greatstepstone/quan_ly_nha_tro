@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
@@ -9,7 +9,8 @@ class PriceField extends StatelessWidget {
   final Color iconColor;
   final Color iconBg;
   final String label;
-  final String unit;
+  final String? unit;
+  final Widget? unitWidget;
   final TextEditingController controller;
   final TextEditingController? labelController;
 
@@ -19,10 +20,14 @@ class PriceField extends StatelessWidget {
     required this.iconColor,
     required this.iconBg,
     required this.label,
-    required this.unit,
+    this.unit,
+    this.unitWidget,
     required this.controller,
     this.labelController,
-  });
+  }) : assert(
+         unit != null || unitWidget != null,
+         'Either unit or unitWidget must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +56,7 @@ class PriceField extends StatelessWidget {
                 if (labelController != null)
                   TextField(
                     controller: labelController,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s13,
                       fontWeight: FontWeightManager.semiBold,
                     ),
@@ -67,7 +72,7 @@ class PriceField extends StatelessWidget {
                 else
                   Text(
                     label,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s13,
                       fontWeight: FontWeightManager.semiBold,
                     ),
@@ -76,7 +81,7 @@ class PriceField extends StatelessWidget {
                 TextField(
                   controller: controller,
                   keyboardType: TextInputType.number,
-                  style: GoogleFonts.manrope(
+                  style: manrope(
                     fontSize: FontSize.s16,
                     fontWeight: FontWeightManager.semiBold,
                   ),
@@ -93,14 +98,17 @@ class PriceField extends StatelessWidget {
               ],
             ),
           ),
-          Text(
-            unit,
-            style: GoogleFonts.manrope(
-              fontSize: 10.0,
-              fontWeight: FontWeightManager.bold,
-              color: AppColors.textTertiary,
+          if (unitWidget != null)
+            unitWidget!
+          else if (unit != null)
+            Text(
+              unit!,
+              style: manrope(
+                fontSize: 10.0,
+                fontWeight: FontWeightManager.bold,
+                color: AppColors.textTertiary,
+              ),
             ),
-          ),
         ],
       ),
     );

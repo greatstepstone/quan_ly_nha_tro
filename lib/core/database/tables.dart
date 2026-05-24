@@ -24,7 +24,8 @@ class Properties extends Table {
   RealColumn get electricityPrice => real()();
   RealColumn get waterPrice => real()();
   TextColumn get waterBillingType => textEnum<BillingType>()();
-  TextColumn get status => textEnum<PropertyStatus>().withDefault(const Constant('active'))();
+  TextColumn get status =>
+      textEnum<PropertyStatus>().withDefault(const Constant('active'))();
   BoolColumn get isSynced => boolean().withDefault(const Constant(true))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 
@@ -76,8 +77,10 @@ class Tenants extends Table {
   TextColumn get cccd => text()();
   TextColumn get dateOfBirth => text()();
   TextColumn get hometown => text()();
+
   /// Denormalized cache from contracts. Null when tenant is not renting.
   TextColumn get roomId => text().references(Rooms, #id).nullable()();
+
   /// Denormalized cache from contracts. Null when tenant is not renting.
   TextColumn get propertyId => text().references(Properties, #id).nullable()();
   // startDate and deposit removed — now live in Contracts table
@@ -100,6 +103,10 @@ class MeterReadings extends Table {
   IntColumn get electricNew => integer().nullable()();
   IntColumn get waterOld => integer()();
   IntColumn get waterNew => integer().nullable()();
+  TextColumn get electricOldImagePath => text().nullable()();
+  TextColumn get electricNewImagePath => text().nullable()();
+  TextColumn get waterOldImagePath => text().nullable()();
+  TextColumn get waterNewImagePath => text().nullable()();
   BoolColumn get isRecorded => boolean().withDefault(const Constant(false))();
   BoolColumn get isSynced => boolean().withDefault(const Constant(true))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
@@ -114,6 +121,7 @@ class Invoices extends Table {
   TextColumn get id => text()();
   TextColumn get ownerId => text().references(Users, #id)();
   TextColumn get roomId => text().references(Rooms, #id)();
+
   /// Links this invoice to the contract active at time of creation.
   TextColumn get contractId => text().references(Contracts, #id).nullable()();
   TextColumn get month => text()();
@@ -129,27 +137,6 @@ class Invoices extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@UseRowClass(OnboardingState)
-class OnboardingStates extends Table {
-  TextColumn get userId => text().references(Users, #id)();
-  BoolColumn get hasCompletedOnboarding => boolean().withDefault(const Constant(false))();
-
-  @override
-  Set<Column> get primaryKey => {userId};
-}
-
-/// Row class for the [OnboardingStates] Drift table.
-/// Lives here (not in models.dart) because it is a database infrastructure type,
-/// not a business domain model.
-class OnboardingState {
-  final String userId;
-  final bool hasCompletedOnboarding;
-
-  const OnboardingState({
-    required this.userId,
-    required this.hasCompletedOnboarding,
-  });
-}
 
 @UseRowClass(Contract)
 @TableIndex(name: 'contract_room', columns: {#roomId})
@@ -165,8 +152,46 @@ class Contracts extends Table {
   RealColumn get deposit => real()();
   TextColumn get startDate => text()();
   TextColumn get endDate => text().nullable()();
-  TextColumn get status => textEnum<ContractStatus>().withDefault(const Constant('active'))();
+  TextColumn get status =>
+      textEnum<ContractStatus>().withDefault(const Constant('active'))();
   TextColumn get notes => text().nullable()();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(true))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Stores custom / ad-hoc terms (điều khoản bổ sung) for a contract.
+/// One contract can have many custom terms (1-many relationship).
+@UseRowClass(ContractCustomTerm)
+@TableIndex(name: 'custom_term_contract', columns: {#contractId})
+class ContractCustomTerms extends Table {
+  TextColumn get id => text()();
+  TextColumn get contractId => text().references(Contracts, #id)();
+  TextColumn get termText => text()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Junction table linking a [Contract] to its members (occupants).
+/// One row per person living in the room under a given contract.
+///
+/// - role = 'primary': the representative tenant (mirrors [Contracts.tenantId])
+/// - role = 'member':  additional co-habitants added separately
+@UseRowClass(RoomMember)
+@TableIndex(name: 'room_member_contract', columns: {#contractId})
+@TableIndex(name: 'room_member_tenant', columns: {#tenantId})
+class RoomMembers extends Table {
+  TextColumn get id => text()();
+  TextColumn get ownerId => text().references(Users, #id)();
+  TextColumn get contractId => text().references(Contracts, #id)();
+  TextColumn get tenantId => text().references(Tenants, #id)();
+  TextColumn get role => textEnum<RoomMemberRole>()();
   BoolColumn get isSynced => boolean().withDefault(const Constant(true))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 

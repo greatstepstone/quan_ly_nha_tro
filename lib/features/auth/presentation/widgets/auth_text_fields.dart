@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 
@@ -22,7 +22,7 @@ class AuthTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
-      style: GoogleFonts.manrope(fontSize: FontSize.s14),
+      style: manrope(fontSize: FontSize.s14),
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, size: AppSize.s20),
@@ -62,13 +62,15 @@ class _AuthPasswordFieldState extends State<AuthPasswordField> {
     return TextField(
       controller: widget.controller,
       obscureText: _obscureText,
-      style: GoogleFonts.manrope(fontSize: FontSize.s14),
+      style: manrope(fontSize: FontSize.s14),
       decoration: InputDecoration(
         hintText: widget.hint,
         prefixIcon: const Icon(Icons.lock_outline_rounded, size: AppSize.s20),
         suffixIcon: IconButton(
           icon: Icon(
-            _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+            _obscureText
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
             size: AppSize.s20,
           ),
           onPressed: () => setState(() => _obscureText = !_obscureText),

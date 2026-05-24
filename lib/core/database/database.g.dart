@@ -2071,6 +2071,52 @@ class $MeterReadingsTable extends MeterReadings
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _electricOldImagePathMeta =
+      const VerificationMeta('electricOldImagePath');
+  @override
+  late final GeneratedColumn<String> electricOldImagePath =
+      GeneratedColumn<String>(
+        'electric_old_image_path',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _electricNewImagePathMeta =
+      const VerificationMeta('electricNewImagePath');
+  @override
+  late final GeneratedColumn<String> electricNewImagePath =
+      GeneratedColumn<String>(
+        'electric_new_image_path',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _waterOldImagePathMeta = const VerificationMeta(
+    'waterOldImagePath',
+  );
+  @override
+  late final GeneratedColumn<String> waterOldImagePath =
+      GeneratedColumn<String>(
+        'water_old_image_path',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _waterNewImagePathMeta = const VerificationMeta(
+    'waterNewImagePath',
+  );
+  @override
+  late final GeneratedColumn<String> waterNewImagePath =
+      GeneratedColumn<String>(
+        'water_new_image_path',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _isRecordedMeta = const VerificationMeta(
     'isRecorded',
   );
@@ -2126,6 +2172,10 @@ class $MeterReadingsTable extends MeterReadings
     electricNew,
     waterOld,
     waterNew,
+    electricOldImagePath,
+    electricNewImagePath,
+    waterOldImagePath,
+    waterNewImagePath,
     isRecorded,
     isSynced,
     isDeleted,
@@ -2205,6 +2255,42 @@ class $MeterReadingsTable extends MeterReadings
         waterNew.isAcceptableOrUnknown(data['water_new']!, _waterNewMeta),
       );
     }
+    if (data.containsKey('electric_old_image_path')) {
+      context.handle(
+        _electricOldImagePathMeta,
+        electricOldImagePath.isAcceptableOrUnknown(
+          data['electric_old_image_path']!,
+          _electricOldImagePathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('electric_new_image_path')) {
+      context.handle(
+        _electricNewImagePathMeta,
+        electricNewImagePath.isAcceptableOrUnknown(
+          data['electric_new_image_path']!,
+          _electricNewImagePathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('water_old_image_path')) {
+      context.handle(
+        _waterOldImagePathMeta,
+        waterOldImagePath.isAcceptableOrUnknown(
+          data['water_old_image_path']!,
+          _waterOldImagePathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('water_new_image_path')) {
+      context.handle(
+        _waterNewImagePathMeta,
+        waterNewImagePath.isAcceptableOrUnknown(
+          data['water_new_image_path']!,
+          _waterNewImagePathMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_recorded')) {
       context.handle(
         _isRecordedMeta,
@@ -2270,6 +2356,22 @@ class $MeterReadingsTable extends MeterReadings
         DriftSqlType.int,
         data['${effectivePrefix}water_new'],
       ),
+      electricOldImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}electric_old_image_path'],
+      ),
+      electricNewImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}electric_new_image_path'],
+      ),
+      waterOldImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}water_old_image_path'],
+      ),
+      waterNewImagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}water_new_image_path'],
+      ),
       isRecorded:
           attachedDatabase.typeMapping.read(
             DriftSqlType.bool,
@@ -2303,6 +2405,10 @@ class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
   final Value<int?> electricNew;
   final Value<int> waterOld;
   final Value<int?> waterNew;
+  final Value<String?> electricOldImagePath;
+  final Value<String?> electricNewImagePath;
+  final Value<String?> waterOldImagePath;
+  final Value<String?> waterNewImagePath;
   final Value<bool> isRecorded;
   final Value<bool> isSynced;
   final Value<bool> isDeleted;
@@ -2316,6 +2422,10 @@ class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
     this.electricNew = const Value.absent(),
     this.waterOld = const Value.absent(),
     this.waterNew = const Value.absent(),
+    this.electricOldImagePath = const Value.absent(),
+    this.electricNewImagePath = const Value.absent(),
+    this.waterOldImagePath = const Value.absent(),
+    this.waterNewImagePath = const Value.absent(),
     this.isRecorded = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
@@ -2330,6 +2440,10 @@ class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
     this.electricNew = const Value.absent(),
     required int waterOld,
     this.waterNew = const Value.absent(),
+    this.electricOldImagePath = const Value.absent(),
+    this.electricNewImagePath = const Value.absent(),
+    this.waterOldImagePath = const Value.absent(),
+    this.waterNewImagePath = const Value.absent(),
     this.isRecorded = const Value.absent(),
     this.isSynced = const Value.absent(),
     this.isDeleted = const Value.absent(),
@@ -2349,6 +2463,10 @@ class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
     Expression<int>? electricNew,
     Expression<int>? waterOld,
     Expression<int>? waterNew,
+    Expression<String>? electricOldImagePath,
+    Expression<String>? electricNewImagePath,
+    Expression<String>? waterOldImagePath,
+    Expression<String>? waterNewImagePath,
     Expression<bool>? isRecorded,
     Expression<bool>? isSynced,
     Expression<bool>? isDeleted,
@@ -2363,6 +2481,12 @@ class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
       if (electricNew != null) 'electric_new': electricNew,
       if (waterOld != null) 'water_old': waterOld,
       if (waterNew != null) 'water_new': waterNew,
+      if (electricOldImagePath != null)
+        'electric_old_image_path': electricOldImagePath,
+      if (electricNewImagePath != null)
+        'electric_new_image_path': electricNewImagePath,
+      if (waterOldImagePath != null) 'water_old_image_path': waterOldImagePath,
+      if (waterNewImagePath != null) 'water_new_image_path': waterNewImagePath,
       if (isRecorded != null) 'is_recorded': isRecorded,
       if (isSynced != null) 'is_synced': isSynced,
       if (isDeleted != null) 'is_deleted': isDeleted,
@@ -2379,6 +2503,10 @@ class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
     Value<int?>? electricNew,
     Value<int>? waterOld,
     Value<int?>? waterNew,
+    Value<String?>? electricOldImagePath,
+    Value<String?>? electricNewImagePath,
+    Value<String?>? waterOldImagePath,
+    Value<String?>? waterNewImagePath,
     Value<bool>? isRecorded,
     Value<bool>? isSynced,
     Value<bool>? isDeleted,
@@ -2393,6 +2521,10 @@ class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
       electricNew: electricNew ?? this.electricNew,
       waterOld: waterOld ?? this.waterOld,
       waterNew: waterNew ?? this.waterNew,
+      electricOldImagePath: electricOldImagePath ?? this.electricOldImagePath,
+      electricNewImagePath: electricNewImagePath ?? this.electricNewImagePath,
+      waterOldImagePath: waterOldImagePath ?? this.waterOldImagePath,
+      waterNewImagePath: waterNewImagePath ?? this.waterNewImagePath,
       isRecorded: isRecorded ?? this.isRecorded,
       isSynced: isSynced ?? this.isSynced,
       isDeleted: isDeleted ?? this.isDeleted,
@@ -2427,6 +2559,22 @@ class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
     if (waterNew.present) {
       map['water_new'] = Variable<int>(waterNew.value);
     }
+    if (electricOldImagePath.present) {
+      map['electric_old_image_path'] = Variable<String>(
+        electricOldImagePath.value,
+      );
+    }
+    if (electricNewImagePath.present) {
+      map['electric_new_image_path'] = Variable<String>(
+        electricNewImagePath.value,
+      );
+    }
+    if (waterOldImagePath.present) {
+      map['water_old_image_path'] = Variable<String>(waterOldImagePath.value);
+    }
+    if (waterNewImagePath.present) {
+      map['water_new_image_path'] = Variable<String>(waterNewImagePath.value);
+    }
     if (isRecorded.present) {
       map['is_recorded'] = Variable<bool>(isRecorded.value);
     }
@@ -2453,6 +2601,10 @@ class MeterReadingsCompanion extends UpdateCompanion<MeterReading> {
           ..write('electricNew: $electricNew, ')
           ..write('waterOld: $waterOld, ')
           ..write('waterNew: $waterNew, ')
+          ..write('electricOldImagePath: $electricOldImagePath, ')
+          ..write('electricNewImagePath: $electricNewImagePath, ')
+          ..write('waterOldImagePath: $waterOldImagePath, ')
+          ..write('waterNewImagePath: $waterNewImagePath, ')
           ..write('isRecorded: $isRecorded, ')
           ..write('isSynced: $isSynced, ')
           ..write('isDeleted: $isDeleted, ')
@@ -3524,16 +3676,27 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
   }
 }
 
-class $OnboardingStatesTable extends OnboardingStates
-    with TableInfo<$OnboardingStatesTable, OnboardingState> {
+class $RoomMembersTable extends RoomMembers
+    with TableInfo<$RoomMembersTable, RoomMember> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $OnboardingStatesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  $RoomMembersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
-    'user_id',
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -3542,116 +3705,266 @@ class $OnboardingStatesTable extends OnboardingStates
       'REFERENCES users (id)',
     ),
   );
-  static const VerificationMeta _hasCompletedOnboardingMeta =
-      const VerificationMeta('hasCompletedOnboarding');
+  static const VerificationMeta _contractIdMeta = const VerificationMeta(
+    'contractId',
+  );
   @override
-  late final GeneratedColumn<bool> hasCompletedOnboarding =
-      GeneratedColumn<bool>(
-        'has_completed_onboarding',
+  late final GeneratedColumn<String> contractId = GeneratedColumn<String>(
+    'contract_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contracts (id)',
+    ),
+  );
+  static const VerificationMeta _tenantIdMeta = const VerificationMeta(
+    'tenantId',
+  );
+  @override
+  late final GeneratedColumn<String> tenantId = GeneratedColumn<String>(
+    'tenant_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES tenants (id)',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<RoomMemberRole, String> role =
+      GeneratedColumn<String>(
+        'role',
         aliasedName,
         false,
-        type: DriftSqlType.bool,
-        requiredDuringInsert: false,
-        defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("has_completed_onboarding" IN (0, 1))',
-        ),
-        defaultValue: const Constant(false),
-      );
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<RoomMemberRole>($RoomMembersTable.$converterrole);
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
   @override
-  List<GeneratedColumn> get $columns => [userId, hasCompletedOnboarding];
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerId,
+    contractId,
+    tenantId,
+    role,
+    isSynced,
+    isDeleted,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'onboarding_states';
+  static const String $name = 'room_members';
   @override
   VerificationContext validateIntegrity(
-    Insertable<OnboardingState> instance, {
+    Insertable<RoomMember> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('user_id')) {
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_id')) {
       context.handle(
-        _userIdMeta,
-        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
       );
     } else if (isInserting) {
-      context.missing(_userIdMeta);
+      context.missing(_ownerIdMeta);
     }
-    if (data.containsKey('has_completed_onboarding')) {
+    if (data.containsKey('contract_id')) {
       context.handle(
-        _hasCompletedOnboardingMeta,
-        hasCompletedOnboarding.isAcceptableOrUnknown(
-          data['has_completed_onboarding']!,
-          _hasCompletedOnboardingMeta,
-        ),
+        _contractIdMeta,
+        contractId.isAcceptableOrUnknown(data['contract_id']!, _contractIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contractIdMeta);
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(
+        _tenantIdMeta,
+        tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tenantIdMeta);
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
       );
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {userId};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  OnboardingState map(Map<String, dynamic> data, {String? tablePrefix}) {
+  RoomMember map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return OnboardingState(
-      userId:
+    return RoomMember(
+      id:
           attachedDatabase.typeMapping.read(
             DriftSqlType.string,
-            data['${effectivePrefix}user_id'],
+            data['${effectivePrefix}id'],
           )!,
-      hasCompletedOnboarding:
+      ownerId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}owner_id'],
+          )!,
+      contractId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}contract_id'],
+          )!,
+      tenantId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}tenant_id'],
+          )!,
+      role: $RoomMembersTable.$converterrole.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}role'],
+        )!,
+      ),
+      isSynced:
           attachedDatabase.typeMapping.read(
             DriftSqlType.bool,
-            data['${effectivePrefix}has_completed_onboarding'],
+            data['${effectivePrefix}is_synced'],
+          )!,
+      isDeleted:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_deleted'],
           )!,
     );
   }
 
   @override
-  $OnboardingStatesTable createAlias(String alias) {
-    return $OnboardingStatesTable(attachedDatabase, alias);
+  $RoomMembersTable createAlias(String alias) {
+    return $RoomMembersTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<RoomMemberRole, String, String> $converterrole =
+      const EnumNameConverter<RoomMemberRole>(RoomMemberRole.values);
 }
 
-class OnboardingStatesCompanion extends UpdateCompanion<OnboardingState> {
-  final Value<String> userId;
-  final Value<bool> hasCompletedOnboarding;
+class RoomMembersCompanion extends UpdateCompanion<RoomMember> {
+  final Value<String> id;
+  final Value<String> ownerId;
+  final Value<String> contractId;
+  final Value<String> tenantId;
+  final Value<RoomMemberRole> role;
+  final Value<bool> isSynced;
+  final Value<bool> isDeleted;
   final Value<int> rowid;
-  const OnboardingStatesCompanion({
-    this.userId = const Value.absent(),
-    this.hasCompletedOnboarding = const Value.absent(),
+  const RoomMembersCompanion({
+    this.id = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.contractId = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.role = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  OnboardingStatesCompanion.insert({
-    required String userId,
-    this.hasCompletedOnboarding = const Value.absent(),
+  RoomMembersCompanion.insert({
+    required String id,
+    required String ownerId,
+    required String contractId,
+    required String tenantId,
+    required RoomMemberRole role,
+    this.isSynced = const Value.absent(),
+    this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : userId = Value(userId);
-  static Insertable<OnboardingState> custom({
-    Expression<String>? userId,
-    Expression<bool>? hasCompletedOnboarding,
+  }) : id = Value(id),
+       ownerId = Value(ownerId),
+       contractId = Value(contractId),
+       tenantId = Value(tenantId),
+       role = Value(role);
+  static Insertable<RoomMember> custom({
+    Expression<String>? id,
+    Expression<String>? ownerId,
+    Expression<String>? contractId,
+    Expression<String>? tenantId,
+    Expression<String>? role,
+    Expression<bool>? isSynced,
+    Expression<bool>? isDeleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (userId != null) 'user_id': userId,
-      if (hasCompletedOnboarding != null)
-        'has_completed_onboarding': hasCompletedOnboarding,
+      if (id != null) 'id': id,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (contractId != null) 'contract_id': contractId,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (role != null) 'role': role,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (isDeleted != null) 'is_deleted': isDeleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  OnboardingStatesCompanion copyWith({
-    Value<String>? userId,
-    Value<bool>? hasCompletedOnboarding,
+  RoomMembersCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerId,
+    Value<String>? contractId,
+    Value<String>? tenantId,
+    Value<RoomMemberRole>? role,
+    Value<bool>? isSynced,
+    Value<bool>? isDeleted,
     Value<int>? rowid,
   }) {
-    return OnboardingStatesCompanion(
-      userId: userId ?? this.userId,
-      hasCompletedOnboarding:
-          hasCompletedOnboarding ?? this.hasCompletedOnboarding,
+    return RoomMembersCompanion(
+      id: id ?? this.id,
+      ownerId: ownerId ?? this.ownerId,
+      contractId: contractId ?? this.contractId,
+      tenantId: tenantId ?? this.tenantId,
+      role: role ?? this.role,
+      isSynced: isSynced ?? this.isSynced,
+      isDeleted: isDeleted ?? this.isDeleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3659,13 +3972,28 @@ class OnboardingStatesCompanion extends UpdateCompanion<OnboardingState> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
     }
-    if (hasCompletedOnboarding.present) {
-      map['has_completed_onboarding'] = Variable<bool>(
-        hasCompletedOnboarding.value,
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (contractId.present) {
+      map['contract_id'] = Variable<String>(contractId.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<String>(tenantId.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(
+        $RoomMembersTable.$converterrole.toSql(role.value),
       );
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3675,9 +4003,314 @@ class OnboardingStatesCompanion extends UpdateCompanion<OnboardingState> {
 
   @override
   String toString() {
-    return (StringBuffer('OnboardingStatesCompanion(')
-          ..write('userId: $userId, ')
-          ..write('hasCompletedOnboarding: $hasCompletedOnboarding, ')
+    return (StringBuffer('RoomMembersCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('contractId: $contractId, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('role: $role, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ContractCustomTermsTable extends ContractCustomTerms
+    with TableInfo<$ContractCustomTermsTable, ContractCustomTerm> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ContractCustomTermsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contractIdMeta = const VerificationMeta(
+    'contractId',
+  );
+  @override
+  late final GeneratedColumn<String> contractId = GeneratedColumn<String>(
+    'contract_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contracts (id)',
+    ),
+  );
+  static const VerificationMeta _termTextMeta = const VerificationMeta(
+    'termText',
+  );
+  @override
+  late final GeneratedColumn<String> termText = GeneratedColumn<String>(
+    'term_text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    contractId,
+    termText,
+    sortOrder,
+    isSynced,
+    isDeleted,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'contract_custom_terms';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ContractCustomTerm> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('contract_id')) {
+      context.handle(
+        _contractIdMeta,
+        contractId.isAcceptableOrUnknown(data['contract_id']!, _contractIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contractIdMeta);
+    }
+    if (data.containsKey('term_text')) {
+      context.handle(
+        _termTextMeta,
+        termText.isAcceptableOrUnknown(data['term_text']!, _termTextMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_termTextMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ContractCustomTerm map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ContractCustomTerm(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
+      contractId:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}contract_id'],
+          )!,
+      termText:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}term_text'],
+          )!,
+      sortOrder:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}sort_order'],
+          )!,
+      isSynced:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_synced'],
+          )!,
+      isDeleted:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_deleted'],
+          )!,
+    );
+  }
+
+  @override
+  $ContractCustomTermsTable createAlias(String alias) {
+    return $ContractCustomTermsTable(attachedDatabase, alias);
+  }
+}
+
+class ContractCustomTermsCompanion extends UpdateCompanion<ContractCustomTerm> {
+  final Value<String> id;
+  final Value<String> contractId;
+  final Value<String> termText;
+  final Value<int> sortOrder;
+  final Value<bool> isSynced;
+  final Value<bool> isDeleted;
+  final Value<int> rowid;
+  const ContractCustomTermsCompanion({
+    this.id = const Value.absent(),
+    this.contractId = const Value.absent(),
+    this.termText = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ContractCustomTermsCompanion.insert({
+    required String id,
+    required String contractId,
+    required String termText,
+    this.sortOrder = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contractId = Value(contractId),
+       termText = Value(termText);
+  static Insertable<ContractCustomTerm> custom({
+    Expression<String>? id,
+    Expression<String>? contractId,
+    Expression<String>? termText,
+    Expression<int>? sortOrder,
+    Expression<bool>? isSynced,
+    Expression<bool>? isDeleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contractId != null) 'contract_id': contractId,
+      if (termText != null) 'term_text': termText,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ContractCustomTermsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? contractId,
+    Value<String>? termText,
+    Value<int>? sortOrder,
+    Value<bool>? isSynced,
+    Value<bool>? isDeleted,
+    Value<int>? rowid,
+  }) {
+    return ContractCustomTermsCompanion(
+      id: id ?? this.id,
+      contractId: contractId ?? this.contractId,
+      termText: termText ?? this.termText,
+      sortOrder: sortOrder ?? this.sortOrder,
+      isSynced: isSynced ?? this.isSynced,
+      isDeleted: isDeleted ?? this.isDeleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (contractId.present) {
+      map['contract_id'] = Variable<String>(contractId.value);
+    }
+    if (termText.present) {
+      map['term_text'] = Variable<String>(termText.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContractCustomTermsCompanion(')
+          ..write('id: $id, ')
+          ..write('contractId: $contractId, ')
+          ..write('termText: $termText, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('isDeleted: $isDeleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3695,9 +4328,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $MeterReadingsTable meterReadings = $MeterReadingsTable(this);
   late final $ContractsTable contracts = $ContractsTable(this);
   late final $InvoicesTable invoices = $InvoicesTable(this);
-  late final $OnboardingStatesTable onboardingStates = $OnboardingStatesTable(
-    this,
-  );
+  late final $RoomMembersTable roomMembers = $RoomMembersTable(this);
+  late final $ContractCustomTermsTable contractCustomTerms =
+      $ContractCustomTermsTable(this);
   late final Index propertyOwner = Index(
     'property_owner',
     'CREATE INDEX property_owner ON properties (owner_id)',
@@ -3742,6 +4375,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'contract_owner',
     'CREATE INDEX contract_owner ON contracts (owner_id)',
   );
+  late final Index roomMemberContract = Index(
+    'room_member_contract',
+    'CREATE INDEX room_member_contract ON room_members (contract_id)',
+  );
+  late final Index roomMemberTenant = Index(
+    'room_member_tenant',
+    'CREATE INDEX room_member_tenant ON room_members (tenant_id)',
+  );
+  late final Index customTermContract = Index(
+    'custom_term_contract',
+    'CREATE INDEX custom_term_contract ON contract_custom_terms (contract_id)',
+  );
   late final UserDao userDao = UserDao(this as AppDatabase);
   late final PropertyDao propertyDao = PropertyDao(this as AppDatabase);
   late final RoomDao roomDao = RoomDao(this as AppDatabase);
@@ -3752,6 +4397,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final InvoiceDao invoiceDao = InvoiceDao(this as AppDatabase);
   late final ServiceDao serviceDao = ServiceDao(this as AppDatabase);
   late final ContractDao contractDao = ContractDao(this as AppDatabase);
+  late final RoomMemberDao roomMemberDao = RoomMemberDao(this as AppDatabase);
+  late final ContractCustomTermDao contractCustomTermDao =
+      ContractCustomTermDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3765,7 +4413,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     meterReadings,
     contracts,
     invoices,
-    onboardingStates,
+    roomMembers,
+    contractCustomTerms,
     propertyOwner,
     serviceProperty,
     roomProperty,
@@ -3777,6 +4426,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     contractRoom,
     contractTenant,
     contractOwner,
+    roomMemberContract,
+    roomMemberTenant,
+    customTermContract,
   ];
 }
 
@@ -3914,21 +4566,19 @@ final class $$UsersTableReferences
     );
   }
 
-  static MultiTypedResultKey<$OnboardingStatesTable, List<OnboardingState>>
-  _onboardingStatesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.onboardingStates,
-    aliasName: $_aliasNameGenerator(db.users.id, db.onboardingStates.userId),
+  static MultiTypedResultKey<$RoomMembersTable, List<RoomMember>>
+  _roomMembersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.roomMembers,
+    aliasName: $_aliasNameGenerator(db.users.id, db.roomMembers.ownerId),
   );
 
-  $$OnboardingStatesTableProcessedTableManager get onboardingStatesRefs {
-    final manager = $$OnboardingStatesTableTableManager(
+  $$RoomMembersTableProcessedTableManager get roomMembersRefs {
+    final manager = $$RoomMembersTableTableManager(
       $_db,
-      $_db.onboardingStates,
-    ).filter((f) => f.userId.id.sqlEquals($_itemColumn<String>('id')!));
+      $_db.roomMembers,
+    ).filter((f) => f.ownerId.id.sqlEquals($_itemColumn<String>('id')!));
 
-    final cache = $_typedResult.readTableOrNull(
-      _onboardingStatesRefsTable($_db),
-    );
+    final cache = $_typedResult.readTableOrNull(_roomMembersRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -4118,22 +4768,22 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
     return f(composer);
   }
 
-  Expression<bool> onboardingStatesRefs(
-    Expression<bool> Function($$OnboardingStatesTableFilterComposer f) f,
+  Expression<bool> roomMembersRefs(
+    Expression<bool> Function($$RoomMembersTableFilterComposer f) f,
   ) {
-    final $$OnboardingStatesTableFilterComposer composer = $composerBuilder(
+    final $$RoomMembersTableFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: $db.onboardingStates,
-      getReferencedColumn: (t) => t.userId,
+      referencedTable: $db.roomMembers,
+      getReferencedColumn: (t) => t.ownerId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$OnboardingStatesTableFilterComposer(
+          }) => $$RoomMembersTableFilterComposer(
             $db: $db,
-            $table: $db.onboardingStates,
+            $table: $db.roomMembers,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4353,22 +5003,22 @@ class $$UsersTableAnnotationComposer
     return f(composer);
   }
 
-  Expression<T> onboardingStatesRefs<T extends Object>(
-    Expression<T> Function($$OnboardingStatesTableAnnotationComposer a) f,
+  Expression<T> roomMembersRefs<T extends Object>(
+    Expression<T> Function($$RoomMembersTableAnnotationComposer a) f,
   ) {
-    final $$OnboardingStatesTableAnnotationComposer composer = $composerBuilder(
+    final $$RoomMembersTableAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: $db.onboardingStates,
-      getReferencedColumn: (t) => t.userId,
+      referencedTable: $db.roomMembers,
+      getReferencedColumn: (t) => t.ownerId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$OnboardingStatesTableAnnotationComposer(
+          }) => $$RoomMembersTableAnnotationComposer(
             $db: $db,
-            $table: $db.onboardingStates,
+            $table: $db.roomMembers,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4399,7 +5049,7 @@ class $$UsersTableTableManager
             bool meterReadingsRefs,
             bool contractsRefs,
             bool invoicesRefs,
-            bool onboardingStatesRefs,
+            bool roomMembersRefs,
           })
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
@@ -4462,7 +5112,7 @@ class $$UsersTableTableManager
             meterReadingsRefs = false,
             contractsRefs = false,
             invoicesRefs = false,
-            onboardingStatesRefs = false,
+            roomMembersRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
@@ -4473,7 +5123,7 @@ class $$UsersTableTableManager
                 if (meterReadingsRefs) db.meterReadings,
                 if (contractsRefs) db.contracts,
                 if (invoicesRefs) db.invoices,
-                if (onboardingStatesRefs) db.onboardingStates,
+                if (roomMembersRefs) db.roomMembers,
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -4580,25 +5230,22 @@ class $$UsersTableTableManager
                           ),
                       typedResults: items,
                     ),
-                  if (onboardingStatesRefs)
-                    await $_getPrefetchedData<
-                      User,
-                      $UsersTable,
-                      OnboardingState
-                    >(
+                  if (roomMembersRefs)
+                    await $_getPrefetchedData<User, $UsersTable, RoomMember>(
                       currentTable: table,
                       referencedTable: $$UsersTableReferences
-                          ._onboardingStatesRefsTable(db),
+                          ._roomMembersRefsTable(db),
                       managerFromTypedResult:
                           (p0) =>
                               $$UsersTableReferences(
                                 db,
                                 table,
                                 p0,
-                              ).onboardingStatesRefs,
+                              ).roomMembersRefs,
                       referencedItemsForCurrentItem:
-                          (item, referencedItems) =>
-                              referencedItems.where((e) => e.userId == item.id),
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.ownerId == item.id,
+                          ),
                       typedResults: items,
                     ),
                 ];
@@ -4628,7 +5275,7 @@ typedef $$UsersTableProcessedTableManager =
         bool meterReadingsRefs,
         bool contractsRefs,
         bool invoicesRefs,
-        bool onboardingStatesRefs,
+        bool roomMembersRefs,
       })
     >;
 typedef $$PropertiesTableCreateCompanionBuilder =
@@ -6772,6 +7419,24 @@ final class $$TenantsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$RoomMembersTable, List<RoomMember>>
+  _roomMembersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.roomMembers,
+    aliasName: $_aliasNameGenerator(db.tenants.id, db.roomMembers.tenantId),
+  );
+
+  $$RoomMembersTableProcessedTableManager get roomMembersRefs {
+    final manager = $$RoomMembersTableTableManager(
+      $_db,
+      $_db.roomMembers,
+    ).filter((f) => f.tenantId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_roomMembersRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$TenantsTableFilterComposer
@@ -6913,6 +7578,31 @@ class $$TenantsTableFilterComposer
           }) => $$ContractsTableFilterComposer(
             $db: $db,
             $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> roomMembersRefs(
+    Expression<bool> Function($$RoomMembersTableFilterComposer f) f,
+  ) {
+    final $$RoomMembersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.roomMembers,
+      getReferencedColumn: (t) => t.tenantId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomMembersTableFilterComposer(
+            $db: $db,
+            $table: $db.roomMembers,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7180,6 +7870,31 @@ class $$TenantsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> roomMembersRefs<T extends Object>(
+    Expression<T> Function($$RoomMembersTableAnnotationComposer a) f,
+  ) {
+    final $$RoomMembersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.roomMembers,
+      getReferencedColumn: (t) => t.tenantId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomMembersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.roomMembers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TenantsTableTableManager
@@ -7200,6 +7915,7 @@ class $$TenantsTableTableManager
             bool roomId,
             bool propertyId,
             bool contractsRefs,
+            bool roomMembersRefs,
           })
         > {
   $$TenantsTableTableManager(_$AppDatabase db, $TenantsTable table)
@@ -7288,10 +8004,14 @@ class $$TenantsTableTableManager
             roomId = false,
             propertyId = false,
             contractsRefs = false,
+            roomMembersRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (contractsRefs) db.contracts],
+              explicitlyWatchedTables: [
+                if (contractsRefs) db.contracts,
+                if (roomMembersRefs) db.roomMembers,
+              ],
               addJoins: <
                 T extends TableManagerState<
                   dynamic,
@@ -7368,6 +8088,28 @@ class $$TenantsTableTableManager
                           ),
                       typedResults: items,
                     ),
+                  if (roomMembersRefs)
+                    await $_getPrefetchedData<
+                      Tenant,
+                      $TenantsTable,
+                      RoomMember
+                    >(
+                      currentTable: table,
+                      referencedTable: $$TenantsTableReferences
+                          ._roomMembersRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$TenantsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).roomMembersRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.tenantId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
@@ -7393,6 +8135,7 @@ typedef $$TenantsTableProcessedTableManager =
         bool roomId,
         bool propertyId,
         bool contractsRefs,
+        bool roomMembersRefs,
       })
     >;
 typedef $$MeterReadingsTableCreateCompanionBuilder =
@@ -7405,6 +8148,10 @@ typedef $$MeterReadingsTableCreateCompanionBuilder =
       Value<int?> electricNew,
       required int waterOld,
       Value<int?> waterNew,
+      Value<String?> electricOldImagePath,
+      Value<String?> electricNewImagePath,
+      Value<String?> waterOldImagePath,
+      Value<String?> waterNewImagePath,
       Value<bool> isRecorded,
       Value<bool> isSynced,
       Value<bool> isDeleted,
@@ -7420,6 +8167,10 @@ typedef $$MeterReadingsTableUpdateCompanionBuilder =
       Value<int?> electricNew,
       Value<int> waterOld,
       Value<int?> waterNew,
+      Value<String?> electricOldImagePath,
+      Value<String?> electricNewImagePath,
+      Value<String?> waterOldImagePath,
+      Value<String?> waterNewImagePath,
       Value<bool> isRecorded,
       Value<bool> isSynced,
       Value<bool> isDeleted,
@@ -7507,6 +8258,26 @@ class $$MeterReadingsTableFilterComposer
 
   ColumnFilters<int> get waterNew => $composableBuilder(
     column: $table.waterNew,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get electricOldImagePath => $composableBuilder(
+    column: $table.electricOldImagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get electricNewImagePath => $composableBuilder(
+    column: $table.electricNewImagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get waterOldImagePath => $composableBuilder(
+    column: $table.waterOldImagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get waterNewImagePath => $composableBuilder(
+    column: $table.waterNewImagePath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7611,6 +8382,26 @@ class $$MeterReadingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get electricOldImagePath => $composableBuilder(
+    column: $table.electricOldImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get electricNewImagePath => $composableBuilder(
+    column: $table.electricNewImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get waterOldImagePath => $composableBuilder(
+    column: $table.waterOldImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get waterNewImagePath => $composableBuilder(
+    column: $table.waterNewImagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isRecorded => $composableBuilder(
     column: $table.isRecorded,
     builder: (column) => ColumnOrderings(column),
@@ -7703,6 +8494,26 @@ class $$MeterReadingsTableAnnotationComposer
 
   GeneratedColumn<int> get waterNew =>
       $composableBuilder(column: $table.waterNew, builder: (column) => column);
+
+  GeneratedColumn<String> get electricOldImagePath => $composableBuilder(
+    column: $table.electricOldImagePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get electricNewImagePath => $composableBuilder(
+    column: $table.electricNewImagePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get waterOldImagePath => $composableBuilder(
+    column: $table.waterOldImagePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get waterNewImagePath => $composableBuilder(
+    column: $table.waterNewImagePath,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isRecorded => $composableBuilder(
     column: $table.isRecorded,
@@ -7802,6 +8613,10 @@ class $$MeterReadingsTableTableManager
                 Value<int?> electricNew = const Value.absent(),
                 Value<int> waterOld = const Value.absent(),
                 Value<int?> waterNew = const Value.absent(),
+                Value<String?> electricOldImagePath = const Value.absent(),
+                Value<String?> electricNewImagePath = const Value.absent(),
+                Value<String?> waterOldImagePath = const Value.absent(),
+                Value<String?> waterNewImagePath = const Value.absent(),
                 Value<bool> isRecorded = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
@@ -7815,6 +8630,10 @@ class $$MeterReadingsTableTableManager
                 electricNew: electricNew,
                 waterOld: waterOld,
                 waterNew: waterNew,
+                electricOldImagePath: electricOldImagePath,
+                electricNewImagePath: electricNewImagePath,
+                waterOldImagePath: waterOldImagePath,
+                waterNewImagePath: waterNewImagePath,
                 isRecorded: isRecorded,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
@@ -7830,6 +8649,10 @@ class $$MeterReadingsTableTableManager
                 Value<int?> electricNew = const Value.absent(),
                 required int waterOld,
                 Value<int?> waterNew = const Value.absent(),
+                Value<String?> electricOldImagePath = const Value.absent(),
+                Value<String?> electricNewImagePath = const Value.absent(),
+                Value<String?> waterOldImagePath = const Value.absent(),
+                Value<String?> waterNewImagePath = const Value.absent(),
                 Value<bool> isRecorded = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
                 Value<bool> isDeleted = const Value.absent(),
@@ -7843,6 +8666,10 @@ class $$MeterReadingsTableTableManager
                 electricNew: electricNew,
                 waterOld: waterOld,
                 waterNew: waterNew,
+                electricOldImagePath: electricOldImagePath,
+                electricNewImagePath: electricNewImagePath,
+                waterOldImagePath: waterOldImagePath,
+                waterNewImagePath: waterNewImagePath,
                 isRecorded: isRecorded,
                 isSynced: isSynced,
                 isDeleted: isDeleted,
@@ -8060,6 +8887,51 @@ final class $$ContractsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$RoomMembersTable, List<RoomMember>>
+  _roomMembersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.roomMembers,
+    aliasName: $_aliasNameGenerator(db.contracts.id, db.roomMembers.contractId),
+  );
+
+  $$RoomMembersTableProcessedTableManager get roomMembersRefs {
+    final manager = $$RoomMembersTableTableManager(
+      $_db,
+      $_db.roomMembers,
+    ).filter((f) => f.contractId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_roomMembersRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $ContractCustomTermsTable,
+    List<ContractCustomTerm>
+  >
+  _contractCustomTermsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.contractCustomTerms,
+        aliasName: $_aliasNameGenerator(
+          db.contracts.id,
+          db.contractCustomTerms.contractId,
+        ),
+      );
+
+  $$ContractCustomTermsTableProcessedTableManager get contractCustomTermsRefs {
+    final manager = $$ContractCustomTermsTableTableManager(
+      $_db,
+      $_db.contractCustomTerms,
+    ).filter((f) => f.contractId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _contractCustomTermsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ContractsTableFilterComposer
@@ -8225,6 +9097,56 @@ class $$ContractsTableFilterComposer
           }) => $$InvoicesTableFilterComposer(
             $db: $db,
             $table: $db.invoices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> roomMembersRefs(
+    Expression<bool> Function($$RoomMembersTableFilterComposer f) f,
+  ) {
+    final $$RoomMembersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.roomMembers,
+      getReferencedColumn: (t) => t.contractId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomMembersTableFilterComposer(
+            $db: $db,
+            $table: $db.roomMembers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> contractCustomTermsRefs(
+    Expression<bool> Function($$ContractCustomTermsTableFilterComposer f) f,
+  ) {
+    final $$ContractCustomTermsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contractCustomTerms,
+      getReferencedColumn: (t) => t.contractId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractCustomTermsTableFilterComposer(
+            $db: $db,
+            $table: $db.contractCustomTerms,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -8534,6 +9456,57 @@ class $$ContractsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> roomMembersRefs<T extends Object>(
+    Expression<T> Function($$RoomMembersTableAnnotationComposer a) f,
+  ) {
+    final $$RoomMembersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.roomMembers,
+      getReferencedColumn: (t) => t.contractId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomMembersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.roomMembers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> contractCustomTermsRefs<T extends Object>(
+    Expression<T> Function($$ContractCustomTermsTableAnnotationComposer a) f,
+  ) {
+    final $$ContractCustomTermsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.contractCustomTerms,
+          getReferencedColumn: (t) => t.contractId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ContractCustomTermsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.contractCustomTerms,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$ContractsTableTableManager
@@ -8555,6 +9528,8 @@ class $$ContractsTableTableManager
             bool tenantId,
             bool propertyId,
             bool invoicesRefs,
+            bool roomMembersRefs,
+            bool contractCustomTermsRefs,
           })
         > {
   $$ContractsTableTableManager(_$AppDatabase db, $ContractsTable table)
@@ -8648,10 +9623,16 @@ class $$ContractsTableTableManager
             tenantId = false,
             propertyId = false,
             invoicesRefs = false,
+            roomMembersRefs = false,
+            contractCustomTermsRefs = false,
           }) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (invoicesRefs) db.invoices],
+              explicitlyWatchedTables: [
+                if (invoicesRefs) db.invoices,
+                if (roomMembersRefs) db.roomMembers,
+                if (contractCustomTermsRefs) db.contractCustomTerms,
+              ],
               addJoins: <
                 T extends TableManagerState<
                   dynamic,
@@ -8746,6 +9727,50 @@ class $$ContractsTableTableManager
                           ),
                       typedResults: items,
                     ),
+                  if (roomMembersRefs)
+                    await $_getPrefetchedData<
+                      Contract,
+                      $ContractsTable,
+                      RoomMember
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ContractsTableReferences
+                          ._roomMembersRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$ContractsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).roomMembersRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.contractId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                  if (contractCustomTermsRefs)
+                    await $_getPrefetchedData<
+                      Contract,
+                      $ContractsTable,
+                      ContractCustomTerm
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ContractsTableReferences
+                          ._contractCustomTermsRefsTable(db),
+                      managerFromTypedResult:
+                          (p0) =>
+                              $$ContractsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).contractCustomTermsRefs,
+                      referencedItemsForCurrentItem:
+                          (item, referencedItems) => referencedItems.where(
+                            (e) => e.contractId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
                 ];
               },
             );
@@ -8772,6 +9797,8 @@ typedef $$ContractsTableProcessedTableManager =
         bool tenantId,
         bool propertyId,
         bool invoicesRefs,
+        bool roomMembersRefs,
+        bool contractCustomTermsRefs,
       })
     >;
 typedef $$InvoicesTableCreateCompanionBuilder =
@@ -9407,40 +10434,83 @@ typedef $$InvoicesTableProcessedTableManager =
       Invoice,
       PrefetchHooks Function({bool ownerId, bool roomId, bool contractId})
     >;
-typedef $$OnboardingStatesTableCreateCompanionBuilder =
-    OnboardingStatesCompanion Function({
-      required String userId,
-      Value<bool> hasCompletedOnboarding,
+typedef $$RoomMembersTableCreateCompanionBuilder =
+    RoomMembersCompanion Function({
+      required String id,
+      required String ownerId,
+      required String contractId,
+      required String tenantId,
+      required RoomMemberRole role,
+      Value<bool> isSynced,
+      Value<bool> isDeleted,
       Value<int> rowid,
     });
-typedef $$OnboardingStatesTableUpdateCompanionBuilder =
-    OnboardingStatesCompanion Function({
-      Value<String> userId,
-      Value<bool> hasCompletedOnboarding,
+typedef $$RoomMembersTableUpdateCompanionBuilder =
+    RoomMembersCompanion Function({
+      Value<String> id,
+      Value<String> ownerId,
+      Value<String> contractId,
+      Value<String> tenantId,
+      Value<RoomMemberRole> role,
+      Value<bool> isSynced,
+      Value<bool> isDeleted,
       Value<int> rowid,
     });
 
-final class $$OnboardingStatesTableReferences
-    extends
-        BaseReferences<_$AppDatabase, $OnboardingStatesTable, OnboardingState> {
-  $$OnboardingStatesTableReferences(
-    super.$_db,
-    super.$_table,
-    super.$_typedResult,
+final class $$RoomMembersTableReferences
+    extends BaseReferences<_$AppDatabase, $RoomMembersTable, RoomMember> {
+  $$RoomMembersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UsersTable _ownerIdTable(_$AppDatabase db) => db.users.createAlias(
+    $_aliasNameGenerator(db.roomMembers.ownerId, db.users.id),
   );
 
-  static $UsersTable _userIdTable(_$AppDatabase db) => db.users.createAlias(
-    $_aliasNameGenerator(db.onboardingStates.userId, db.users.id),
-  );
-
-  $$UsersTableProcessedTableManager get userId {
-    final $_column = $_itemColumn<String>('user_id')!;
+  $$UsersTableProcessedTableManager get ownerId {
+    final $_column = $_itemColumn<String>('owner_id')!;
 
     final manager = $$UsersTableTableManager(
       $_db,
       $_db.users,
     ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    final item = $_typedResult.readTableOrNull(_ownerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $ContractsTable _contractIdTable(_$AppDatabase db) =>
+      db.contracts.createAlias(
+        $_aliasNameGenerator(db.roomMembers.contractId, db.contracts.id),
+      );
+
+  $$ContractsTableProcessedTableManager get contractId {
+    final $_column = $_itemColumn<String>('contract_id')!;
+
+    final manager = $$ContractsTableTableManager(
+      $_db,
+      $_db.contracts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contractIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $TenantsTable _tenantIdTable(_$AppDatabase db) =>
+      db.tenants.createAlias(
+        $_aliasNameGenerator(db.roomMembers.tenantId, db.tenants.id),
+      );
+
+  $$TenantsTableProcessedTableManager get tenantId {
+    final $_column = $_itemColumn<String>('tenant_id')!;
+
+    final manager = $$TenantsTableTableManager(
+      $_db,
+      $_db.tenants,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_tenantIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -9448,24 +10518,40 @@ final class $$OnboardingStatesTableReferences
   }
 }
 
-class $$OnboardingStatesTableFilterComposer
-    extends Composer<_$AppDatabase, $OnboardingStatesTable> {
-  $$OnboardingStatesTableFilterComposer({
+class $$RoomMembersTableFilterComposer
+    extends Composer<_$AppDatabase, $RoomMembersTable> {
+  $$RoomMembersTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<bool> get hasCompletedOnboarding => $composableBuilder(
-    column: $table.hasCompletedOnboarding,
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
     builder: (column) => ColumnFilters(column),
   );
 
-  $$UsersTableFilterComposer get userId {
+  ColumnWithTypeConverterFilters<RoomMemberRole, RoomMemberRole, String>
+  get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UsersTableFilterComposer get ownerId {
     final $$UsersTableFilterComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.userId,
+      getCurrentColumn: (t) => t.ownerId,
       referencedTable: $db.users,
       getReferencedColumn: (t) => t.id,
       builder:
@@ -9484,26 +10570,87 @@ class $$OnboardingStatesTableFilterComposer
     );
     return composer;
   }
+
+  $$ContractsTableFilterComposer get contractId {
+    final $$ContractsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableFilterComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TenantsTableFilterComposer get tenantId {
+    final $$TenantsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantId,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableFilterComposer(
+            $db: $db,
+            $table: $db.tenants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
-class $$OnboardingStatesTableOrderingComposer
-    extends Composer<_$AppDatabase, $OnboardingStatesTable> {
-  $$OnboardingStatesTableOrderingComposer({
+class $$RoomMembersTableOrderingComposer
+    extends Composer<_$AppDatabase, $RoomMembersTable> {
+  $$RoomMembersTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<bool> get hasCompletedOnboarding => $composableBuilder(
-    column: $table.hasCompletedOnboarding,
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
     builder: (column) => ColumnOrderings(column),
   );
 
-  $$UsersTableOrderingComposer get userId {
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UsersTableOrderingComposer get ownerId {
     final $$UsersTableOrderingComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.userId,
+      getCurrentColumn: (t) => t.ownerId,
       referencedTable: $db.users,
       getReferencedColumn: (t) => t.id,
       builder:
@@ -9522,26 +10669,79 @@ class $$OnboardingStatesTableOrderingComposer
     );
     return composer;
   }
+
+  $$ContractsTableOrderingComposer get contractId {
+    final $$ContractsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TenantsTableOrderingComposer get tenantId {
+    final $$TenantsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantId,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableOrderingComposer(
+            $db: $db,
+            $table: $db.tenants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
-class $$OnboardingStatesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $OnboardingStatesTable> {
-  $$OnboardingStatesTableAnnotationComposer({
+class $$RoomMembersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RoomMembersTable> {
+  $$RoomMembersTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<bool> get hasCompletedOnboarding => $composableBuilder(
-    column: $table.hasCompletedOnboarding,
-    builder: (column) => column,
-  );
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
 
-  $$UsersTableAnnotationComposer get userId {
+  GeneratedColumnWithTypeConverter<RoomMemberRole, String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  $$UsersTableAnnotationComposer get ownerId {
     final $$UsersTableAnnotationComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.userId,
+      getCurrentColumn: (t) => t.ownerId,
       referencedTable: $db.users,
       getReferencedColumn: (t) => t.id,
       builder:
@@ -9560,61 +10760,119 @@ class $$OnboardingStatesTableAnnotationComposer
     );
     return composer;
   }
+
+  $$ContractsTableAnnotationComposer get contractId {
+    final $$ContractsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TenantsTableAnnotationComposer get tenantId {
+    final $$TenantsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantId,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.tenants,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
-class $$OnboardingStatesTableTableManager
+class $$RoomMembersTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $OnboardingStatesTable,
-          OnboardingState,
-          $$OnboardingStatesTableFilterComposer,
-          $$OnboardingStatesTableOrderingComposer,
-          $$OnboardingStatesTableAnnotationComposer,
-          $$OnboardingStatesTableCreateCompanionBuilder,
-          $$OnboardingStatesTableUpdateCompanionBuilder,
-          (OnboardingState, $$OnboardingStatesTableReferences),
-          OnboardingState,
-          PrefetchHooks Function({bool userId})
+          $RoomMembersTable,
+          RoomMember,
+          $$RoomMembersTableFilterComposer,
+          $$RoomMembersTableOrderingComposer,
+          $$RoomMembersTableAnnotationComposer,
+          $$RoomMembersTableCreateCompanionBuilder,
+          $$RoomMembersTableUpdateCompanionBuilder,
+          (RoomMember, $$RoomMembersTableReferences),
+          RoomMember,
+          PrefetchHooks Function({bool ownerId, bool contractId, bool tenantId})
         > {
-  $$OnboardingStatesTableTableManager(
-    _$AppDatabase db,
-    $OnboardingStatesTable table,
-  ) : super(
+  $$RoomMembersTableTableManager(_$AppDatabase db, $RoomMembersTable table)
+    : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer:
-              () =>
-                  $$OnboardingStatesTableFilterComposer($db: db, $table: table),
+              () => $$RoomMembersTableFilterComposer($db: db, $table: table),
           createOrderingComposer:
-              () => $$OnboardingStatesTableOrderingComposer(
-                $db: db,
-                $table: table,
-              ),
+              () => $$RoomMembersTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer:
-              () => $$OnboardingStatesTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
+              () =>
+                  $$RoomMembersTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<String> userId = const Value.absent(),
-                Value<bool> hasCompletedOnboarding = const Value.absent(),
+                Value<String> id = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> contractId = const Value.absent(),
+                Value<String> tenantId = const Value.absent(),
+                Value<RoomMemberRole> role = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => OnboardingStatesCompanion(
-                userId: userId,
-                hasCompletedOnboarding: hasCompletedOnboarding,
+              }) => RoomMembersCompanion(
+                id: id,
+                ownerId: ownerId,
+                contractId: contractId,
+                tenantId: tenantId,
+                role: role,
+                isSynced: isSynced,
+                isDeleted: isDeleted,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                required String userId,
-                Value<bool> hasCompletedOnboarding = const Value.absent(),
+                required String id,
+                required String ownerId,
+                required String contractId,
+                required String tenantId,
+                required RoomMemberRole role,
+                Value<bool> isSynced = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => OnboardingStatesCompanion.insert(
-                userId: userId,
-                hasCompletedOnboarding: hasCompletedOnboarding,
+              }) => RoomMembersCompanion.insert(
+                id: id,
+                ownerId: ownerId,
+                contractId: contractId,
+                tenantId: tenantId,
+                role: role,
+                isSynced: isSynced,
+                isDeleted: isDeleted,
                 rowid: rowid,
               ),
           withReferenceMapper:
@@ -9623,11 +10881,15 @@ class $$OnboardingStatesTableTableManager
                       .map(
                         (e) => (
                           e.readTable(table),
-                          $$OnboardingStatesTableReferences(db, table, e),
+                          $$RoomMembersTableReferences(db, table, e),
                         ),
                       )
                       .toList(),
-          prefetchHooksCallback: ({userId = false}) {
+          prefetchHooksCallback: ({
+            ownerId = false,
+            contractId = false,
+            tenantId = false,
+          }) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -9646,16 +10908,44 @@ class $$OnboardingStatesTableTableManager
                   dynamic
                 >
               >(state) {
-                if (userId) {
+                if (ownerId) {
                   state =
                       state.withJoin(
                             currentTable: table,
-                            currentColumn: table.userId,
-                            referencedTable: $$OnboardingStatesTableReferences
-                                ._userIdTable(db),
+                            currentColumn: table.ownerId,
+                            referencedTable: $$RoomMembersTableReferences
+                                ._ownerIdTable(db),
                             referencedColumn:
-                                $$OnboardingStatesTableReferences
-                                    ._userIdTable(db)
+                                $$RoomMembersTableReferences
+                                    ._ownerIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+                if (contractId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contractId,
+                            referencedTable: $$RoomMembersTableReferences
+                                ._contractIdTable(db),
+                            referencedColumn:
+                                $$RoomMembersTableReferences
+                                    ._contractIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+                if (tenantId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.tenantId,
+                            referencedTable: $$RoomMembersTableReferences
+                                ._tenantIdTable(db),
+                            referencedColumn:
+                                $$RoomMembersTableReferences
+                                    ._tenantIdTable(db)
                                     .id,
                           )
                           as T;
@@ -9672,19 +10962,383 @@ class $$OnboardingStatesTableTableManager
       );
 }
 
-typedef $$OnboardingStatesTableProcessedTableManager =
+typedef $$RoomMembersTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $OnboardingStatesTable,
-      OnboardingState,
-      $$OnboardingStatesTableFilterComposer,
-      $$OnboardingStatesTableOrderingComposer,
-      $$OnboardingStatesTableAnnotationComposer,
-      $$OnboardingStatesTableCreateCompanionBuilder,
-      $$OnboardingStatesTableUpdateCompanionBuilder,
-      (OnboardingState, $$OnboardingStatesTableReferences),
-      OnboardingState,
-      PrefetchHooks Function({bool userId})
+      $RoomMembersTable,
+      RoomMember,
+      $$RoomMembersTableFilterComposer,
+      $$RoomMembersTableOrderingComposer,
+      $$RoomMembersTableAnnotationComposer,
+      $$RoomMembersTableCreateCompanionBuilder,
+      $$RoomMembersTableUpdateCompanionBuilder,
+      (RoomMember, $$RoomMembersTableReferences),
+      RoomMember,
+      PrefetchHooks Function({bool ownerId, bool contractId, bool tenantId})
+    >;
+typedef $$ContractCustomTermsTableCreateCompanionBuilder =
+    ContractCustomTermsCompanion Function({
+      required String id,
+      required String contractId,
+      required String termText,
+      Value<int> sortOrder,
+      Value<bool> isSynced,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+typedef $$ContractCustomTermsTableUpdateCompanionBuilder =
+    ContractCustomTermsCompanion Function({
+      Value<String> id,
+      Value<String> contractId,
+      Value<String> termText,
+      Value<int> sortOrder,
+      Value<bool> isSynced,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+
+final class $$ContractCustomTermsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ContractCustomTermsTable,
+          ContractCustomTerm
+        > {
+  $$ContractCustomTermsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContractsTable _contractIdTable(_$AppDatabase db) =>
+      db.contracts.createAlias(
+        $_aliasNameGenerator(
+          db.contractCustomTerms.contractId,
+          db.contracts.id,
+        ),
+      );
+
+  $$ContractsTableProcessedTableManager get contractId {
+    final $_column = $_itemColumn<String>('contract_id')!;
+
+    final manager = $$ContractsTableTableManager(
+      $_db,
+      $_db.contracts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contractIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ContractCustomTermsTableFilterComposer
+    extends Composer<_$AppDatabase, $ContractCustomTermsTable> {
+  $$ContractCustomTermsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get termText => $composableBuilder(
+    column: $table.termText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContractsTableFilterComposer get contractId {
+    final $$ContractsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableFilterComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContractCustomTermsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContractCustomTermsTable> {
+  $$ContractCustomTermsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get termText => $composableBuilder(
+    column: $table.termText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContractsTableOrderingComposer get contractId {
+    final $$ContractsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContractCustomTermsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContractCustomTermsTable> {
+  $$ContractCustomTermsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get termText =>
+      $composableBuilder(column: $table.termText, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  $$ContractsTableAnnotationComposer get contractId {
+    final $$ContractsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContractCustomTermsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ContractCustomTermsTable,
+          ContractCustomTerm,
+          $$ContractCustomTermsTableFilterComposer,
+          $$ContractCustomTermsTableOrderingComposer,
+          $$ContractCustomTermsTableAnnotationComposer,
+          $$ContractCustomTermsTableCreateCompanionBuilder,
+          $$ContractCustomTermsTableUpdateCompanionBuilder,
+          (ContractCustomTerm, $$ContractCustomTermsTableReferences),
+          ContractCustomTerm,
+          PrefetchHooks Function({bool contractId})
+        > {
+  $$ContractCustomTermsTableTableManager(
+    _$AppDatabase db,
+    $ContractCustomTermsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$ContractCustomTermsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer:
+              () => $$ContractCustomTermsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer:
+              () => $$ContractCustomTermsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> contractId = const Value.absent(),
+                Value<String> termText = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContractCustomTermsCompanion(
+                id: id,
+                contractId: contractId,
+                termText: termText,
+                sortOrder: sortOrder,
+                isSynced: isSynced,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String contractId,
+                required String termText,
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContractCustomTermsCompanion.insert(
+                id: id,
+                contractId: contractId,
+                termText: termText,
+                sortOrder: sortOrder,
+                isSynced: isSynced,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          $$ContractCustomTermsTableReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: ({contractId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                T extends TableManagerState<
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic,
+                  dynamic
+                >
+              >(state) {
+                if (contractId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.contractId,
+                            referencedTable:
+                                $$ContractCustomTermsTableReferences
+                                    ._contractIdTable(db),
+                            referencedColumn:
+                                $$ContractCustomTermsTableReferences
+                                    ._contractIdTable(db)
+                                    .id,
+                          )
+                          as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ContractCustomTermsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ContractCustomTermsTable,
+      ContractCustomTerm,
+      $$ContractCustomTermsTableFilterComposer,
+      $$ContractCustomTermsTableOrderingComposer,
+      $$ContractCustomTermsTableAnnotationComposer,
+      $$ContractCustomTermsTableCreateCompanionBuilder,
+      $$ContractCustomTermsTableUpdateCompanionBuilder,
+      (ContractCustomTerm, $$ContractCustomTermsTableReferences),
+      ContractCustomTerm,
+      PrefetchHooks Function({bool contractId})
     >;
 
 class $AppDatabaseManager {
@@ -9706,6 +11360,8 @@ class $AppDatabaseManager {
       $$ContractsTableTableManager(_db, _db.contracts);
   $$InvoicesTableTableManager get invoices =>
       $$InvoicesTableTableManager(_db, _db.invoices);
-  $$OnboardingStatesTableTableManager get onboardingStates =>
-      $$OnboardingStatesTableTableManager(_db, _db.onboardingStates);
+  $$RoomMembersTableTableManager get roomMembers =>
+      $$RoomMembersTableTableManager(_db, _db.roomMembers);
+  $$ContractCustomTermsTableTableManager get contractCustomTerms =>
+      $$ContractCustomTermsTableTableManager(_db, _db.contractCustomTerms);
 }

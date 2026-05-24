@@ -1,7 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
@@ -12,8 +13,6 @@ import 'package:quan_ly_nha_tro/core/resources/string_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/feature_flags.dart';
-
-
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -37,56 +36,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(authRepositoryProvider).signIn(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      await ref
+          .read(authRepositoryProvider)
+          .signIn(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
       if (!mounted) return;
       context.goNamed(AppRoutes.home);
     } on AuthException catch (e) {
       if (!mounted) return;
-      
-      // Developer Mode: Nếu user chưa tồn tại (Invalid login credentials), thử đăng ký tự động
-      if (e.message.toLowerCase().contains('invalid login credentials') || 
-          e.message.toLowerCase().contains('user not found')) {
-           try {
-              final signUpResponse = await ref.read(authRepositoryProvider).signUp(
-                email: _emailController.text.trim(),
-                password: _passwordController.text.trim(),
-                fullName: AppStrings.loginDevUser,
-              );
-             
-             if (!mounted) return;
-             
-             // Nếu đăng ký thành công và có session, chuyển vào trang chủ
-             if (signUpResponse.session != null) {
-               context.goNamed(AppRoutes.home);
-               return;
-             } else {
-               // Nếu cần confirm email hoặc lỗi khác ẩn
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppStrings.loginDevAccountCreated),
-                    backgroundColor: AppColors.primary,
-                  ),
-                );
-             }
-           } on AuthException catch (signUpError) {
-              if (!mounted) return;
-              // Nếu signUp cũng lỗi (ví dụ user đã tồn tại nhưng sai password)
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${AppStrings.loginErrorPrefix}${signUpError.message}'), 
-                  backgroundColor: AppColors.red,
-                ),
-              );
-              return;
-           } catch (_) {}
-      }
-      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${AppStrings.loginFailPrefix}${e.message}'), 
+          content: Text('${AppStrings.loginFailPrefix}${e.message}'),
           backgroundColor: AppColors.red,
           action: SnackBarAction(
             label: AppStrings.loginTryGuestBtn,
@@ -100,13 +62,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppStrings.loginGeneralError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(AppStrings.loginGeneralError)));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-
   }
 
   Future<void> _handleSocialSignIn(OAuthProvider provider) async {
@@ -152,7 +113,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
             ),
           ),
-          
+
           Positioned(
             top: -AppHeight.h100,
             right: -AppWidth.w100,
@@ -173,7 +134,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: AppHeight.h60),
-                  
+
                   // App Icon / Logo
                   Hero(
                     tag: AppStrings.appName,
@@ -183,42 +144,45 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(AppRadius.r24),
                         boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.4),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.4),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
                         ],
                       ),
-                      child: const Icon(Icons.apartment_rounded, color: Colors.white, size: AppSize.s40),
+                      child: const Icon(
+                        Icons.apartment_rounded,
+                        color: Colors.white,
+                        size: AppSize.s40,
+                      ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppHeight.h32),
-                  
+
                   Text(
                     AppStrings.appName,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s32,
                       fontWeight: FontWeightManager.extraBold,
                       color: AppColors.textPrimary,
                       letterSpacing: -1,
                     ),
                   ),
-                  
+
                   Text(
                     AppStrings.loginManagementEcosystem,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s14,
                       fontWeight: FontWeightManager.semiBold,
                       color: AppColors.primary,
                       letterSpacing: 2,
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppHeight.h32),
 
-                  
                   // Welcome Card
                   Container(
                     width: double.infinity,
@@ -238,7 +202,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       children: [
                         Text(
                           AppStrings.loginReadyToManage,
-                          style: GoogleFonts.manrope(
+                          style: manrope(
                             fontSize: FontSize.s24,
                             fontWeight: FontWeightManager.extraBold,
                             color: AppColors.textPrimary,
@@ -248,7 +212,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         Text(
                           AppStrings.loginSignInToStart,
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.manrope(
+                          style: manrope(
                             fontSize: FontSize.s14,
                             color: AppColors.textSecondary,
                             height: 1.5,
@@ -256,8 +220,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                         const SizedBox(height: AppHeight.h16),
 
-
-                        
                         // Email/Password section
                         if (FeatureFlags.enablePasswordAuth) ...[
                           const Divider(),
@@ -286,16 +248,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             children: [
                               Text(
                                 AppStrings.signUpNoAccountYet,
-                                style: GoogleFonts.manrope(
+                                style: manrope(
                                   fontSize: FontSize.s13,
                                   color: AppColors.textSecondary,
                                 ),
                               ),
                               TextButton(
-                                onPressed: () => context.pushNamed(AppRoutes.signUp),
+                                onPressed:
+                                    () => context.pushNamed(AppRoutes.signUp),
                                 child: Text(
                                   AppStrings.signUpCreateOne,
-                                  style: GoogleFonts.manrope(
+                                  style: manrope(
                                     fontSize: FontSize.s13,
                                     fontWeight: FontWeightManager.bold,
                                     color: AppColors.primary,
@@ -306,29 +269,58 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                         ],
 
-                        const SizedBox(height: AppHeight.h16),
-                        
-                        // Dev Bypass
-                        if (FeatureFlags.enablePasswordAuth)
-                          InkWell(
-                            onTap: () {
-                              _emailController.text = 'dev_tester@example.com';
-                              _passwordController.text = 'developer123';
-                              _handleEmailSignIn();
-                            },
-                            child: Text(
-                              AppStrings.loginQuickDev,
-                              style: GoogleFonts.manrope(
-                                fontSize: FontSize.s12,
-                                color: AppColors.primary.withValues(alpha: 0.5),
-                                fontWeight: FontWeightManager.semiBold,
+                        //const SizedBox(height: AppHeight.h4),
+
+                        // Dev Bypass — hidden as requested
+                        if (false)
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  _emailController.text =
+                                      'dev_tester@example.com';
+                                  _passwordController.text = 'developer123';
+                                  _handleEmailSignIn();
+                                },
+                                child: Text(
+                                  AppStrings.loginQuickDev,
+                                  style: manrope(
+                                    fontSize: FontSize.s12,
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    fontWeight: FontWeightManager.semiBold,
+                                  ),
+                                ),
                               ),
-                            ),
+                              ...List.generate(5, (index) {
+                                final num = index + 1;
+                                return InkWell(
+                                  onTap: () {
+                                    _emailController.text =
+                                        'testuser$num@example.com';
+                                    _passwordController.text = 'password123';
+                                    _handleEmailSignIn();
+                                  },
+                                  child: Text(
+                                    'Test $num',
+                                    style: manrope(
+                                      fontSize: FontSize.s12,
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                      fontWeight: FontWeightManager.semiBold,
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ],
                           ),
 
-                        
-                        const SizedBox(height: AppHeight.h24),
-                        
+                        //const SizedBox(height: AppHeight.h24),
                         TextButton(
                           onPressed: () {
                             ref.read(isGuestProvider.notifier).state = true;
@@ -336,7 +328,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           },
                           child: Text(
                             AppStrings.loginGuestMode,
-                            style: GoogleFonts.manrope(
+                            style: manrope(
                               fontSize: FontSize.s13,
                               fontWeight: FontWeightManager.bold,
                               color: AppColors.textTertiary,
@@ -344,21 +336,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: AppHeight.h32),
-                        
+
                         Text(
                           AppStrings.loginOrContinueWith,
-                          style: GoogleFonts.manrope(
+                          style: manrope(
                             fontSize: FontSize.s11,
                             fontWeight: FontWeightManager.light,
                             color: AppColors.textTertiary,
                             letterSpacing: 1.2,
                           ),
                         ),
-                        
+
                         const SizedBox(height: AppHeight.h16),
-                        
+
                         // Social Auth Row
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -369,7 +361,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               color: Colors.white,
                               textColor: AppColors.textPrimary,
                               hasBorder: true,
-                              onPressed: () => _handleSocialSignIn(OAuthProvider.google),
+                              onPressed:
+                                  () =>
+                                      _handleSocialSignIn(OAuthProvider.google),
                             ),
                             const SizedBox(width: AppWidth.w16),
                             // Apple Auth
@@ -377,7 +371,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               icon: Icons.apple_rounded,
                               color: Colors.black,
                               textColor: Colors.white,
-                              onPressed: () => _handleSocialSignIn(OAuthProvider.apple),
+                              onPressed:
+                                  () =>
+                                      _handleSocialSignIn(OAuthProvider.apple),
                             ),
                             const SizedBox(width: AppWidth.w16),
                             // Facebook Auth
@@ -385,32 +381,33 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               icon: Icons.facebook_rounded,
                               color: const Color(0xFF1877F2),
                               textColor: Colors.white,
-                              onPressed: () => _handleSocialSignIn(OAuthProvider.facebook),
+                              onPressed:
+                                  () => _handleSocialSignIn(
+                                    OAuthProvider.facebook,
+                                  ),
                             ),
                           ],
                         ),
-
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppHeight.h40),
-                  
+
                   Text(
                     AppStrings.loginFooter,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s12,
                       color: AppColors.textTertiary,
                     ),
                   ),
-                  
+
                   const SizedBox(height: AppHeight.h40),
                 ],
               ),
             ),
           ),
 
-          
           if (_isLoading)
             Positioned.fill(
               child: Container(
@@ -425,4 +422,3 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 }
-

@@ -39,29 +39,28 @@ class RoomRepositoryImpl implements RoomRepository {
   @override
   Future<void> addRoom(Room room) async {
     // 1. Lưu local
-    await localDataSource.insertRoom(RoomsCompanion.insert(
-      id: room.id,
-      ownerId: room.ownerId,
-      propertyId: room.propertyId,
-      name: room.name,
-      status: room.status,
-      rentPrice: room.rentPrice,
-      tenantId: Value(room.tenantId),
-      isSynced: const Value(false),
-    ));
+    await localDataSource.insertRoom(
+      RoomsCompanion.insert(
+        id: room.id,
+        ownerId: room.ownerId,
+        propertyId: room.propertyId,
+        name: room.name,
+        status: room.status,
+        rentPrice: room.rentPrice,
+        tenantId: Value(room.tenantId),
+        isSynced: const Value(false),
+      ),
+    );
 
     // 2. Push remote
     try {
       await remoteDataSource.upsertRoom(room);
-      await localDataSource.updateRoom(RoomsCompanion(
-        id: Value(room.id),
-        isSynced: const Value(true),
-      ));
+      await localDataSource.updateRoom(
+        RoomsCompanion(id: Value(room.id), isSynced: const Value(true)),
+      );
       debugPrint('✅ Sync success (room): ${room.name}');
-
     } catch (e) {
       debugPrint('❌ Sync error (room) - ${room.name}: $e');
-
     }
   }
 
@@ -80,13 +79,11 @@ class RoomRepositoryImpl implements RoomRepository {
     await localDataSource.updateRoom(companion);
     try {
       await remoteDataSource.upsertRoom(room);
-      await localDataSource.updateRoom(RoomsCompanion(
-        id: Value(room.id),
-        isSynced: const Value(true),
-      ));
+      await localDataSource.updateRoom(
+        RoomsCompanion(id: Value(room.id), isSynced: const Value(true)),
+      );
     } catch (e) {
       debugPrint('Sync error (save room): $e');
-
     }
   }
 
@@ -100,7 +97,6 @@ class RoomRepositoryImpl implements RoomRepository {
       await localDataSource.hardDeleteRoom(id);
     } catch (e) {
       debugPrint('Sync error (delete room): $e');
-
     }
   }
 
@@ -108,7 +104,7 @@ class RoomRepositoryImpl implements RoomRepository {
   Future<void> syncRooms(String propertyId) async {
     // Lấy dữ liệu remote
     final remoteData = await remoteDataSource.getRoomsByProperty(propertyId);
-    
+
     await localDataSource.db.batch((batch) {
       for (var r in remoteData) {
         batch.insert(
@@ -129,7 +125,6 @@ class RoomRepositoryImpl implements RoomRepository {
     });
   }
 
-
   @override
   Future<void> syncAllRooms() async {
     // 1. PUSH DELETIONS
@@ -140,10 +135,9 @@ class RoomRepositoryImpl implements RoomRepository {
           await remoteDataSource.deleteRoom(r.id);
         } catch (e) {
           debugPrint('Error syncing deleted room ${r.id}: $e');
-
         }
       }
-      
+
       // Batch hard delete locally
       await localDataSource.db.batch((batch) {
         for (var r in deleted) {
@@ -151,7 +145,6 @@ class RoomRepositoryImpl implements RoomRepository {
         }
       });
     }
-
 
     // 2. PUSH UPDATES/INSERTS
     final unsynced = await localDataSource.getUnsyncedRooms();
@@ -161,21 +154,20 @@ class RoomRepositoryImpl implements RoomRepository {
           await remoteDataSource.upsertRoom(r);
         } catch (e) {
           debugPrint('Error syncing room ${r.id}: $e');
-
         }
       }
-      
+
       // Batch update sync status locally
       await localDataSource.db.batch((batch) {
         for (var r in unsynced) {
-          batch.update(localDataSource.rooms,
+          batch.update(
+            localDataSource.rooms,
             RoomsCompanion(id: Value(r.id), isSynced: const Value(true)),
             where: (t) => t.id.equals(r.id),
           );
         }
       });
     }
-
 
     // 3. PULL
     final remoteData = await remoteDataSource.getAllRooms();
@@ -190,7 +182,7 @@ class RoomRepositoryImpl implements RoomRepository {
           batch.deleteWhere(localDataSource.rooms, (t) => t.id.equals(lr.id));
         }
       }
-      
+
       // Insert/Update from remote
       for (var r in remoteData) {
         batch.insert(
@@ -209,6 +201,5 @@ class RoomRepositoryImpl implements RoomRepository {
         );
       }
     });
-
   }
 }

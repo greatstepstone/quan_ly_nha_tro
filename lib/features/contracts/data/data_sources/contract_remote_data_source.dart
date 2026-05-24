@@ -6,13 +6,26 @@ class ContractRemoteDataSource {
 
   ContractRemoteDataSource(this._client);
 
+  Future<List<Contract>> getContractsByOwner(String ownerId) async {
+    final response = await _client
+        .from('contracts')
+        .select()
+        .eq('owner_id', ownerId)
+        .eq('is_deleted', false);
+    return (response as List)
+        .map((e) => _mapToContract(e as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<List<Contract>> getContractsByProperty(String propertyId) async {
     final response = await _client
         .from('contracts')
         .select()
         .eq('property_id', propertyId)
         .eq('is_deleted', false);
-    return (response as List).map((e) => _mapToContract(e as Map<String, dynamic>)).toList();
+    return (response as List)
+        .map((e) => _mapToContract(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<Contract>> getContractsByRoom(String roomId) async {
@@ -21,7 +34,9 @@ class ContractRemoteDataSource {
         .select()
         .eq('room_id', roomId)
         .eq('is_deleted', false);
-    return (response as List).map((e) => _mapToContract(e as Map<String, dynamic>)).toList();
+    return (response as List)
+        .map((e) => _mapToContract(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> upsertContract(Contract contract) async {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -9,22 +9,23 @@ import 'package:quan_ly_nha_tro/features/reports/presentation/widgets/property_r
 
 class PropertyInvoiceTab extends StatelessWidget {
   final List<Invoice> invoices;
-  
+
   const PropertyInvoiceTab({super.key, required this.invoices});
 
   int _count(InvoiceStatus s) => invoices.where((i) => i.status == s).length;
 
-  double _sum(InvoiceStatus s) =>
-      invoices.where((i) => i.status == s).fold(0.0, (a, b) => a + b.totalAmount);
+  double _sum(InvoiceStatus s) => invoices
+      .where((i) => i.status == s)
+      .fold(0.0, (a, b) => a + b.totalAmount);
 
   @override
   Widget build(BuildContext context) {
     final total = invoices.length;
     final statusGroups = [
-      (InvoiceStatus.paid,       'Đã thu',           AppColors.emerald),
-      (InvoiceStatus.unpaid,      'Chờ thanh toán',   AppColors.orange),
-      (InvoiceStatus.overdue,     'Quá hạn',          AppColors.red),
-      (InvoiceStatus.notCreated,  'Chưa lập',         AppColors.textTertiary),
+      (InvoiceStatus.paid, 'Đã thu', AppColors.emerald),
+      (InvoiceStatus.unpaid, 'Chờ thanh toán', AppColors.orange),
+      (InvoiceStatus.overdue, 'Quá hạn', AppColors.red),
+      (InvoiceStatus.notCreated, 'Chưa lập', AppColors.textTertiary),
     ];
 
     return ListView(
@@ -42,11 +43,21 @@ class PropertyInvoiceTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Phân bổ trạng thái hóa đơn',
-                    style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
+                Text(
+                  'Phân bổ trạng thái hóa đơn',
+                  style: manrope(
+                    fontSize: FontSize.s15,
+                    fontWeight: FontWeightManager.bold,
+                  ),
+                ),
                 const SizedBox(height: AppHeight.h4),
-                Text('$total hóa đơn tổng cộng',
-                    style: GoogleFonts.manrope(fontSize: FontSize.s13, color: AppColors.textSecondary)),
+                Text(
+                  '$total hóa đơn tổng cộng',
+                  style: manrope(
+                    fontSize: FontSize.s13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 const SizedBox(height: AppHeight.h16),
                 ...statusGroups.where((g) => _count(g.$1) > 0).map((g) {
                   final count = _count(g.$1);
@@ -76,10 +87,17 @@ class PropertyInvoiceTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Hóa đơn gần đây',
-                    style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
+                Text(
+                  'Hóa đơn gần đây',
+                  style: manrope(
+                    fontSize: FontSize.s15,
+                    fontWeight: FontWeightManager.bold,
+                  ),
+                ),
                 const SizedBox(height: AppHeight.h12),
-                ...invoices.take(8).map((inv) => PropertyInvoiceRow(invoice: inv)),
+                ...invoices
+                    .take(8)
+                    .map((inv) => PropertyInvoiceRow(invoice: inv)),
               ],
             ),
           ),

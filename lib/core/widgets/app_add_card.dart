@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
@@ -70,7 +70,6 @@ _CardTheme _themeFor(AppAddCardStyle style) {
   }
 }
 
-
 class AppAddCard extends StatelessWidget {
   final String title;
   final String? description;
@@ -123,7 +122,7 @@ class AppAddCard extends StatelessWidget {
             const SizedBox(height: AppHeight.h12),
             Text(
               title,
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: FontSize.s16,
                 fontWeight: FontWeightManager.extraBold,
                 color: t.titleColor,
@@ -133,7 +132,7 @@ class AppAddCard extends StatelessWidget {
               const SizedBox(height: AppHeight.h4),
               Text(
                 description!,
-                style: GoogleFonts.manrope(
+                style: manrope(
                   fontSize: FontSize.s13,
                   color: t.descColor,
                   height: 1.4,
@@ -149,8 +148,7 @@ class AppAddCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: t.buttonBg,
                   foregroundColor: t.buttonFg,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: AppPadding.p14),
+                  padding: const EdgeInsets.symmetric(vertical: AppPadding.p14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadius.r12),
                   ),
@@ -158,7 +156,7 @@ class AppAddCard extends StatelessWidget {
                 ),
                 child: Text(
                   buttonLabel,
-                  style: GoogleFonts.manrope(
+                  style: manrope(
                     fontWeight: FontWeightManager.bold,
                     fontSize: FontSize.s14,
                   ),

@@ -7,11 +7,8 @@ class SettingsRemoteDataSource {
   SettingsRemoteDataSource(this._client);
 
   Future<User?> getOwnerProfile(String userId) async {
-    final response = await _client
-        .from('users')
-        .select()
-        .eq('id', userId)
-        .maybeSingle();
+    final response =
+        await _client.from('users').select().eq('id', userId).maybeSingle();
 
     if (response == null) return null;
     return User(
@@ -28,9 +25,9 @@ class SettingsRemoteDataSource {
     required String name,
     String? phone,
   }) async {
-    await _client.from('users').update({
-      'name': name,
-      if (phone != null) 'phone': phone,
-    }).eq('id', userId);
+    await _client
+        .from('users')
+        .update({'name': name, if (phone != null) 'phone': phone})
+        .eq('id', userId);
   }
 }

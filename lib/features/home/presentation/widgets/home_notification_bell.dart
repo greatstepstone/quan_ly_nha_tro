@@ -9,7 +9,10 @@ class HomeNotificationBell extends StatelessWidget {
     return Stack(
       children: [
         IconButton(
-          icon: Icon(Icons.notifications_outlined, color: AppColors.textSecondary),
+          icon: Icon(
+            Icons.notifications_outlined,
+            color: AppColors.textSecondary,
+          ),
           onPressed: () {},
         ),
         Positioned(

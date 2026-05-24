@@ -31,25 +31,31 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
 
   @override
   Future<void> addReading(MeterReading reading) async {
-    await localDataSource.insertMeterReading(MeterReadingsCompanion.insert(
-      id: reading.id,
-      ownerId: reading.ownerId,
-      roomId: reading.roomId,
-      month: reading.month,
-      electricOld: reading.electricOld,
-      electricNew: Value(reading.electricNew),
-      waterOld: reading.waterOld,
-      waterNew: Value(reading.waterNew),
-      isRecorded: Value(reading.isRecorded),
-      isSynced: const Value(false),
-    ));
+    await localDataSource.insertMeterReading(
+      MeterReadingsCompanion.insert(
+        id: reading.id,
+        ownerId: reading.ownerId,
+        roomId: reading.roomId,
+        month: reading.month,
+        electricOld: reading.electricOld,
+        electricNew: Value(reading.electricNew),
+        waterOld: reading.waterOld,
+        waterNew: Value(reading.waterNew),
+        electricOldImagePath: Value(reading.electricOldImagePath),
+        electricNewImagePath: Value(reading.electricNewImagePath),
+        waterOldImagePath: Value(reading.waterOldImagePath),
+        waterNewImagePath: Value(reading.waterNewImagePath),
+        isRecorded: Value(reading.isRecorded),
+        isSynced: const Value(false),
+      ),
+    );
 
     try {
       await remoteDataSource.upsertReading(reading);
-      await localDataSource.updateMeterReading(MeterReadingsCompanion(
-        id: Value(reading.id),
-        isSynced: const Value(true),
-      ));
+      await localDataSource.updateMeterReadingFields(
+        reading.id,
+        const MeterReadingsCompanion(isSynced: Value(true)),
+      );
       print('✅ Sync success (meter reading): ${reading.month}');
     } catch (e) {
       print('❌ Sync error (meter reading) - ${reading.month}: $e');
@@ -69,12 +75,19 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
       electricNew: Value(reading.electricNew),
       waterOld: Value(reading.waterOld),
       waterNew: Value(reading.waterNew),
+      electricOldImagePath: Value(reading.electricOldImagePath),
+      electricNewImagePath: Value(reading.electricNewImagePath),
+      waterOldImagePath: Value(reading.waterOldImagePath),
+      waterNewImagePath: Value(reading.waterNewImagePath),
       isRecorded: Value(reading.isRecorded),
       isSynced: const Value(false),
     );
 
     // Assuming we update or insert
-    final exist = await localDataSource.getMeterReadingByRoomAndMonth(reading.roomId, reading.month);
+    final exist = await localDataSource.getMeterReadingByRoomAndMonth(
+      reading.roomId,
+      reading.month,
+    );
     if (exist != null) {
       await localDataSource.updateMeterReading(companion);
     } else {
@@ -83,10 +96,10 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
 
     try {
       await remoteDataSource.upsertReading(reading);
-      await localDataSource.updateMeterReading(MeterReadingsCompanion(
-        id: Value(reading.id),
-        isSynced: const Value(true),
-      ));
+      await localDataSource.updateMeterReadingFields(
+        reading.id,
+        const MeterReadingsCompanion(isSynced: Value(true)),
+      );
     } catch (e) {
       print('Sync error (save meter reading): $e');
     }
@@ -95,10 +108,14 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
   }
 
   Future<void> _syncNextMonthReading(MeterReading reading) async {
-    if (reading.electricNew == null || reading.waterNew == null || !reading.isRecorded) return;
+    if (reading.electricNew == null ||
+        reading.waterNew == null ||
+        !reading.isRecorded)
+      return;
 
     final nextMonth = _getNextMonthStr(reading.month);
-    final existingNextMonth = await localDataSource.getMeterReadingByRoomAndMonth(reading.roomId, nextMonth);
+    final existingNextMonth = await localDataSource
+        .getMeterReadingByRoomAndMonth(reading.roomId, nextMonth);
 
     if (existingNextMonth == null) {
       final nextReading = MeterReading(
@@ -110,38 +127,41 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
         waterOld: reading.waterNew!,
         isRecorded: false,
       );
-      
-      await localDataSource.insertMeterReading(MeterReadingsCompanion.insert(
-        id: nextReading.id,
-        ownerId: nextReading.ownerId,
-        roomId: nextReading.roomId,
-        month: nextReading.month,
-        electricOld: nextReading.electricOld,
-        electricNew: const Value(null),
-        waterOld: nextReading.waterOld,
-        waterNew: const Value(null),
-        isRecorded: Value(false),
-        isSynced: const Value(false),
-      ));
-      
+
+      await localDataSource.insertMeterReading(
+        MeterReadingsCompanion.insert(
+          id: nextReading.id,
+          ownerId: nextReading.ownerId,
+          roomId: nextReading.roomId,
+          month: nextReading.month,
+          electricOld: nextReading.electricOld,
+          electricNew: const Value(null),
+          waterOld: nextReading.waterOld,
+          waterNew: const Value(null),
+          isRecorded: Value(false),
+          isSynced: const Value(false),
+        ),
+      );
+
       try {
         await remoteDataSource.upsertReading(nextReading);
-        await localDataSource.updateMeterReading(MeterReadingsCompanion(
-          id: Value(nextReading.id),
-          isSynced: const Value(true),
-        ));
+        await localDataSource.updateMeterReadingFields(
+          nextReading.id,
+          const MeterReadingsCompanion(isSynced: Value(true)),
+        );
       } catch (e) {
         print('Sync error next month: $e');
       }
     } else {
-      final companion = MeterReadingsCompanion(
-        id: Value(existingNextMonth.id),
-        electricOld: Value(reading.electricNew!),
-        waterOld: Value(reading.waterNew!),
-        isSynced: const Value(false),
+      await localDataSource.updateMeterReadingFields(
+        existingNextMonth.id,
+        MeterReadingsCompanion(
+          electricOld: Value(reading.electricNew!),
+          waterOld: Value(reading.waterNew!),
+          isSynced: const Value(false),
+        ),
       );
-      await localDataSource.updateMeterReading(companion);
-      
+
       try {
         final updatedRemote = MeterReading(
           id: existingNextMonth.id,
@@ -155,10 +175,10 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
           isRecorded: existingNextMonth.isRecorded,
         );
         await remoteDataSource.upsertReading(updatedRemote);
-        await localDataSource.updateMeterReading(MeterReadingsCompanion(
-          id: Value(existingNextMonth.id),
-          isSynced: const Value(true),
-        ));
+        await localDataSource.updateMeterReadingFields(
+          existingNextMonth.id,
+          const MeterReadingsCompanion(isSynced: Value(true)),
+        );
       } catch (e) {
         print('Sync error update next month: $e');
       }
@@ -214,10 +234,10 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
     for (var r in unsynced) {
       try {
         await remoteDataSource.upsertReading(r);
-        await localDataSource.updateMeterReading(MeterReadingsCompanion(
-          id: Value(r.id),
-          isSynced: const Value(true),
-        ));
+        await localDataSource.updateMeterReadingFields(
+          r.id,
+          const MeterReadingsCompanion(isSynced: Value(true)),
+        );
       } catch (e) {
         print('Error syncing meter reading ${r.id}: $e');
       }
@@ -237,18 +257,20 @@ class MeterReadingRepositoryImpl implements MeterReadingRepository {
 
     // Insert or update remote records
     for (var r in remoteData) {
-      await localDataSource.insertMeterReading(MeterReadingsCompanion.insert(
-        id: r.id,
-        ownerId: r.ownerId,
-        roomId: r.roomId,
-        month: r.month,
-        electricOld: r.electricOld,
-        electricNew: Value(r.electricNew),
-        waterOld: r.waterOld,
-        waterNew: Value(r.waterNew),
-        isRecorded: Value(r.isRecorded),
-        isSynced: const Value(true),
-      ));
+      await localDataSource.insertMeterReading(
+        MeterReadingsCompanion.insert(
+          id: r.id,
+          ownerId: r.ownerId,
+          roomId: r.roomId,
+          month: r.month,
+          electricOld: r.electricOld,
+          electricNew: Value(r.electricNew),
+          waterOld: r.waterOld,
+          waterNew: Value(r.waterNew),
+          isRecorded: Value(r.isRecorded),
+          isSynced: const Value(true),
+        ),
+      );
     }
   }
 }

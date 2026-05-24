@@ -11,7 +11,7 @@ class ServiceRemoteDataSource {
         .from('services')
         .select()
         .eq('property_id', propertyId);
-    
+
     return (response as List).map((json) => _mapToService(json)).toList();
   }
 
@@ -25,7 +25,9 @@ class ServiceRemoteDataSource {
       propertyId: json['property_id'],
       name: json['name'],
       price: (json['price'] as num).toDouble(),
-      type: BillingType.values.firstWhere((e) => e.toString() == 'BillingType.${json['type']}'),
+      type: BillingType.values.firstWhere(
+        (e) => e.toString() == 'BillingType.${json['type']}',
+      ),
     );
   }
 

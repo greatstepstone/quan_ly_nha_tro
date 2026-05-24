@@ -26,43 +26,30 @@ import 'package:quan_ly_nha_tro/features/auth/presentation/pages/sign_up_page.da
 import 'package:quan_ly_nha_tro/features/contracts/presentation/pages/contracts_list_page.dart';
 import 'package:quan_ly_nha_tro/features/contracts/presentation/pages/contract_detail_page.dart';
 import 'package:quan_ly_nha_tro/features/contracts/presentation/pages/add_contract_page.dart';
+import 'package:quan_ly_nha_tro/features/contracts/presentation/pages/edit_contract_page.dart';
 
 import 'package:quan_ly_nha_tro/features/auth/presentation/providers/auth_providers.dart';
-import 'package:quan_ly_nha_tro/features/onboarding/presentation/pages/onboarding_page.dart';
-import 'package:quan_ly_nha_tro/features/onboarding/presentation/providers/onboarding_providers.dart';
 import 'package:quan_ly_nha_tro/core/widgets/main_scaffold.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:quan_ly_nha_tro/core/resources/route_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/feature_flags.dart';
 
-
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final isGuest = ref.watch(isGuestProvider);
-  final hasSeenOnboarding = ref.watch(onboardingSeenProvider);
   // Watch auth state changes to trigger router refresh on login/logout
   ref.watch(authStateProvider);
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: AppRoutes.onboardingPath,
+    initialLocation: AppRoutes.homePath,
     redirect: (context, state) {
-      // 1. Check Onboarding first
-      if (!hasSeenOnboarding) {
-        if (state.matchedLocation == AppRoutes.onboardingPath) return null;
-        return AppRoutes.onboardingPath;
-      }
-
-      // 2. Auth logic
+      // 1. Auth logic
       final session = Supabase.instance.client.auth.currentSession;
       final isLoggingIn = state.matchedLocation == AppRoutes.loginPath;
-      final isOnboarding = state.matchedLocation == AppRoutes.onboardingPath;
-
-      // If already seen onboarding and trying to go there, go to login or home
-      if (isOnboarding) return AppRoutes.loginPath;
 
       final isSignUp = state.matchedLocation == AppRoutes.signUpPath;
       final hasAccess = session != null || isGuest;
@@ -81,11 +68,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(
-        name: AppRoutes.onboarding,
-        path: AppRoutes.onboardingPath,
-        builder: (c, s) => const OnboardingPage(),
-      ),
-      GoRoute(
         name: AppRoutes.login,
         path: AppRoutes.loginPath,
         builder: (c, s) => const LoginPage(),
@@ -100,9 +82,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => MainScaffold(child: child),
         routes: [
-          GoRoute(name: AppRoutes.home, path: AppRoutes.homePath, builder: (c, s) => const HomePage()),
-          GoRoute(name: AppRoutes.reports, path: AppRoutes.reportsPath, builder: (c, s) => const ReportsPage()),
-          GoRoute(name: AppRoutes.settings, path: AppRoutes.settingsPath, builder: (c, s) => const SettingsPage()),
+          GoRoute(
+            name: AppRoutes.home,
+            path: AppRoutes.homePath,
+            builder: (c, s) => const HomePage(),
+          ),
+          GoRoute(
+            name: AppRoutes.reports,
+            path: AppRoutes.reportsPath,
+            builder: (c, s) => const ReportsPage(),
+          ),
+          GoRoute(
+            name: AppRoutes.settings,
+            path: AppRoutes.settingsPath,
+            builder: (c, s) => const SettingsPage(),
+          ),
         ],
       ),
       GoRoute(
@@ -118,7 +112,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         name: AppRoutes.propertyEdit,
         path: AppRoutes.propertyEditPath,
-        builder: (c, s) => EditPropertyPage(propertyId: s.pathParameters['id']!),
+        builder:
+            (c, s) => EditPropertyPage(propertyId: s.pathParameters['id']!),
       ),
       GoRoute(
         name: AppRoutes.rooms,
@@ -175,7 +170,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         name: AppRoutes.meterReadingDetail,
         path: AppRoutes.meterReadingDetailPath,
-        builder: (c, s) => MeterReadingDetailPage(roomId: s.pathParameters['roomId']!),
+        builder:
+            (c, s) =>
+                MeterReadingDetailPage(roomId: s.pathParameters['roomId']!),
       ),
       GoRoute(
         name: AppRoutes.invoices,
@@ -187,7 +184,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.invoiceCreatePath,
         builder: (c, s) {
           final roomId = s.uri.queryParameters['roomId'] ?? '101';
-          return CreateInvoicePage(roomId: roomId);
+          final month = s.uri.queryParameters['month'];
+          return CreateInvoicePage(roomId: roomId, month: month);
         },
       ),
       GoRoute(
@@ -203,14 +201,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         name: AppRoutes.contractDetail,
         path: AppRoutes.contractDetailPath,
-        builder: (c, s) => ContractDetailPage(contractId: s.pathParameters['id']!),
+        builder:
+            (c, s) => ContractDetailPage(contractId: s.pathParameters['id']!),
       ),
       GoRoute(
         name: AppRoutes.contractAdd,
         path: AppRoutes.contractAddPath,
         builder: (c, s) => const AddContractPage(),
       ),
+      GoRoute(
+        name: AppRoutes.contractEdit,
+        path: AppRoutes.contractEditPath,
+        builder:
+            (c, s) => EditContractPage(contractId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        name: AppRoutes.profile,
+        path: AppRoutes.profilePath,
+        builder: (c, s) => const OwnerProfilePage(),
+      ),
     ],
   );
 });
-

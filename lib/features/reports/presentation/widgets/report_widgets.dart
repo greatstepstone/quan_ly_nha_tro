@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -42,7 +42,7 @@ class StatCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: GoogleFonts.manrope(
+                  style: manrope(
                     fontSize: FontSize.s12,
                     color: AppColors.textSecondary,
                   ),
@@ -54,7 +54,7 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: AppHeight.h8),
           Text(
             value,
-            style: GoogleFonts.manrope(
+            style: manrope(
               fontSize: FontSize.s20,
               fontWeight: FontWeightManager.extraBold,
             ),
@@ -63,12 +63,16 @@ class StatCard extends StatelessWidget {
             const SizedBox(height: AppHeight.h4),
             Row(
               children: [
-                Icon(Icons.trending_up, color: AppColors.emerald, size: AppSize.s14),
+                Icon(
+                  Icons.trending_up,
+                  color: AppColors.emerald,
+                  size: AppSize.s14,
+                ),
                 const SizedBox(width: AppWidth.w4),
                 Expanded(
                   child: Text(
                     trend,
-                    style: GoogleFonts.manrope(
+                    style: manrope(
                       fontSize: FontSize.s11,
                       color: AppColors.emerald,
                     ),
@@ -89,7 +93,20 @@ class SimpleBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final values = [0.3, 0.5, 0.4, 0.7, 1.0, 0.8, 0.6, 0.9, 0.7, 0.8, 0.5, 0.6];
-    final months = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+    final months = [
+      'T1',
+      'T2',
+      'T3',
+      'T4',
+      'T5',
+      'T6',
+      'T7',
+      'T8',
+      'T9',
+      'T10',
+      'T11',
+      'T12',
+    ];
 
     return SizedBox(
       height: 180,
@@ -111,10 +128,14 @@ class SimpleBarChart extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       months[i],
-                      style: GoogleFonts.manrope(
+                      style: manrope(
                         fontSize: 10,
-                        fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                        color: isActive ? AppColors.primary : AppColors.textTertiary,
+                        fontWeight:
+                            isActive ? FontWeight.w700 : FontWeight.w500,
+                        color:
+                            isActive
+                                ? AppColors.primary
+                                : AppColors.textTertiary,
                       ),
                     ),
                   );
@@ -122,9 +143,15 @@ class SimpleBarChart extends StatelessWidget {
                 reservedSize: 28,
               ),
             ),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
           ),
           gridData: const FlGridData(show: false),
           borderData: FlBorderData(show: false),
@@ -170,15 +197,10 @@ class PieLegendItem extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: AppWidth.w8),
-        Expanded(
-          child: Text(
-            label,
-            style: GoogleFonts.manrope(fontSize: FontSize.s13),
-          ),
-        ),
+        Expanded(child: Text(label, style: manrope(fontSize: FontSize.s13))),
         Text(
           percent,
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: FontSize.s13,
             fontWeight: FontWeightManager.bold,
           ),
@@ -192,25 +214,16 @@ class CostRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const CostRow({
-    super.key,
-    required this.label,
-    required this.value,
-  });
+  const CostRow({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: Text(
-            label,
-            style: GoogleFonts.manrope(fontSize: FontSize.s14),
-          ),
-        ),
+        Expanded(child: Text(label, style: manrope(fontSize: FontSize.s14))),
         Text(
           value,
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: FontSize.s14,
             fontWeight: FontWeightManager.bold,
             color: AppColors.red,
@@ -241,14 +254,11 @@ class VacancyProgressBar extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.manrope(fontSize: FontSize.s13),
-              ),
+              child: Text(label, style: manrope(fontSize: FontSize.s13)),
             ),
             Text(
               '${(percent * 100).toInt()}%',
-              style: GoogleFonts.manrope(
+              style: manrope(
                 fontSize: FontSize.s13,
                 fontWeight: FontWeightManager.bold,
               ),
@@ -306,20 +316,23 @@ class KpiCard extends StatelessWidget {
           Container(
             width: AppSize.s32,
             height: AppSize.s32,
-            decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(AppRadius.r8)),
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(AppRadius.r8),
+            ),
             child: Icon(icon, color: iconColor, size: AppSize.s16),
           ),
           const SizedBox(height: AppHeight.h8),
           Text(
             value,
-            style: GoogleFonts.manrope(
+            style: manrope(
               fontSize: FontSize.s18,
               fontWeight: FontWeightManager.extraBold,
             ),
           ),
           Text(
             label,
-            style: GoogleFonts.manrope(
+            style: manrope(
               fontSize: FontSize.s10,
               color: AppColors.textSecondary,
             ),
@@ -359,7 +372,10 @@ class RevenueRow extends StatelessWidget {
         Container(
           width: AppSize.s36,
           height: AppSize.s36,
-          decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(AppRadius.r8)),
+          decoration: BoxDecoration(
+            color: iconBg,
+            borderRadius: BorderRadius.circular(AppRadius.r8),
+          ),
           child: Icon(icon, color: iconColor, size: AppSize.s18),
         ),
         const SizedBox(width: AppWidth.w12),
@@ -369,18 +385,24 @@ class RevenueRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: GoogleFonts.manrope(fontSize: FontSize.s13, fontWeight: FontWeightManager.semiBold),
+                style: manrope(
+                  fontSize: FontSize.s13,
+                  fontWeight: FontWeightManager.semiBold,
+                ),
               ),
               Text(
                 subtitle,
-                style: GoogleFonts.manrope(fontSize: FontSize.s11, color: AppColors.textSecondary),
+                style: manrope(
+                  fontSize: FontSize.s11,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
         ),
         Text(
           value,
-          style: GoogleFonts.manrope(
+          style: manrope(
             fontSize: FontSize.s14,
             fontWeight: FontWeightManager.bold,
             color: valueColor,
@@ -411,7 +433,10 @@ class EmptyStateView extends StatelessWidget {
           const SizedBox(height: AppHeight.h16),
           Text(
             message,
-            style: GoogleFonts.manrope(fontSize: FontSize.s14, color: AppColors.textSecondary),
+            style: manrope(
+              fontSize: FontSize.s14,
+              color: AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
         ],

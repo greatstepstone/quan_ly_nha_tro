@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
 import 'package:quan_ly_nha_tro/core/resources/value_manager.dart';
@@ -25,7 +24,10 @@ class DetailInfoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16, vertical: AppPadding.p12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppPadding.p16,
+        vertical: AppPadding.p12,
+      ),
       child: Row(
         children: [
           Container(
@@ -44,7 +46,7 @@ class DetailInfoItem extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.manrope(
+                  style: manrope(
                     fontSize: FontSize.s11,
                     color: AppColors.textTertiary,
                     fontWeight: FontWeightManager.medium,
@@ -52,7 +54,7 @@ class DetailInfoItem extends StatelessWidget {
                 ),
                 Text(
                   value,
-                  style: GoogleFonts.manrope(
+                  style: manrope(
                     fontSize: FontSize.s14,
                     fontWeight: FontWeightManager.bold,
                     color: AppColors.textPrimary,

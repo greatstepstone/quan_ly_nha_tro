@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/theme/app_theme.dart';
 import 'package:quan_ly_nha_tro/core/models/models.dart';
 import 'package:quan_ly_nha_tro/core/resources/font_manager.dart';
@@ -12,7 +12,11 @@ class PropertyRevenueTab extends StatelessWidget {
   final List<Invoice> invoices;
   final List<Room> rooms;
 
-  const PropertyRevenueTab({super.key, required this.invoices, required this.rooms});
+  const PropertyRevenueTab({
+    super.key,
+    required this.invoices,
+    required this.rooms,
+  });
 
   Map<String, double> get _monthlyRevenue {
     final map = <String, double>{};
@@ -97,21 +101,40 @@ class PropertyRevenueTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AppStrings.revenueByMonth,
-                  style: GoogleFonts.manrope(fontSize: FontSize.s14, color: AppColors.textSecondary)),
+              Text(
+                AppStrings.revenueByMonth,
+                style: manrope(
+                  fontSize: FontSize.s14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
               const SizedBox(height: AppHeight.h4),
               Text(
-                monthlyRev.isEmpty ? '0${AppStrings.currencySymbol}' : _fmt(_totalPaid),
-                style: GoogleFonts.manrope(fontSize: FontSize.s24, fontWeight: FontWeightManager.extraBold),
+                monthlyRev.isEmpty
+                    ? '0${AppStrings.currencySymbol}'
+                    : _fmt(_totalPaid),
+                style: manrope(
+                  fontSize: FontSize.s24,
+                  fontWeight: FontWeightManager.extraBold,
+                ),
               ),
               const SizedBox(height: AppHeight.h4),
               if (monthlyRev.isNotEmpty)
                 Row(
                   children: [
-                    Icon(Icons.trending_up, color: AppColors.emerald, size: AppSize.s14),
+                    Icon(
+                      Icons.trending_up,
+                      color: AppColors.emerald,
+                      size: AppSize.s14,
+                    ),
                     const SizedBox(width: AppWidth.w4),
-                    Text(AppStrings.totalAllTime,
-                        style: GoogleFonts.manrope(fontSize: FontSize.s12, color: AppColors.emerald)),
+                    Text(
+                      AppStrings.totalAllTime,
+                      style: manrope(
+                        fontSize: FontSize.s12,
+                        color: AppColors.emerald,
+                      ),
+                    ),
                   ],
                 ),
               const SizedBox(height: AppHeight.h20),
@@ -130,15 +153,21 @@ class PropertyRevenueTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AppStrings.invoiceSummary,
-                  style: GoogleFonts.manrope(fontSize: FontSize.s15, fontWeight: FontWeightManager.bold)),
+              Text(
+                AppStrings.invoiceSummary,
+                style: manrope(
+                  fontSize: FontSize.s15,
+                  fontWeight: FontWeightManager.bold,
+                ),
+              ),
               const SizedBox(height: AppHeight.h16),
               RevenueRow(
                 icon: Icons.check_circle_outline,
                 iconBg: AppColors.emeraldLight,
                 iconColor: AppColors.emerald,
                 label: AppStrings.invoiceFilterPaid,
-                subtitle: '${invoices.where((i) => i.status == InvoiceStatus.paid).length} ${AppStrings.invoiceCountSuffix}',
+                subtitle:
+                    '${invoices.where((i) => i.status == InvoiceStatus.paid).length} ${AppStrings.invoiceCountSuffix}',
                 value: _fmt(_totalPaid),
                 valueColor: AppColors.emerald,
               ),
@@ -148,18 +177,20 @@ class PropertyRevenueTab extends StatelessWidget {
                 iconBg: AppColors.orangeLight,
                 iconColor: AppColors.orange,
                 label: AppStrings.invoiceFilterWaitingPayment,
-                subtitle: '${invoices.where((i) => i.status == InvoiceStatus.unpaid).length} ${AppStrings.invoiceCountSuffix}',
+                subtitle:
+                    '${invoices.where((i) => i.status == InvoiceStatus.unpaid).length} ${AppStrings.invoiceCountSuffix}',
                 value: _fmt(_pendingTotal),
                 valueColor: AppColors.orange,
               ),
               if (_overdueTotal > 0) ...[
-              Divider(height: AppHeight.h20, color: AppColors.surface),
+                Divider(height: AppHeight.h20, color: AppColors.surface),
                 RevenueRow(
                   icon: Icons.warning_amber_rounded,
                   iconBg: AppColors.redLight,
                   iconColor: AppColors.red,
                   label: AppStrings.invoiceFilterOverdue,
-                  subtitle: '${invoices.where((i) => i.status == InvoiceStatus.overdue).length} ${AppStrings.invoiceCountSuffix}',
+                  subtitle:
+                      '${invoices.where((i) => i.status == InvoiceStatus.overdue).length} ${AppStrings.invoiceCountSuffix}',
                   value: _fmt(_overdueTotal),
                   valueColor: AppColors.red,
                 ),
